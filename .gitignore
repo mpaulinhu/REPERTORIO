@@ -1,0 +1,28 @@
+# Mídia pesada — guarde em HD/drive e registre o link no README do trabalho
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.prproj
+*.drp
+*.psd
+*.ai
+*.indd
+*.aep
+*.wav
+*.aiff
+*.CR2
+*.CR3
+*.NEF
+*.ARW
+*.dng
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Rascunhos e temporários
+*.tmp
+~$*
+/_rascunhos/
