@@ -1136,6 +1136,12 @@
         <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
       </div>
 
+      <div class="all-videos-toggle">
+        <button type="button" id="allVideosToggle" class="btn secondary">Ver todos os vídeos</button>
+      </div>
+
+      <div class="all-videos-gallery" id="allVideosGallery" hidden></div>
+
       <div class="cards-grid">
 
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Edição com Libras e audiodescrição" data-modal-desc="Na ELO Editora: edição de vídeos infantis com inserção de intérprete de Libras (gravação via vMix) e criação de audiodescrição com IA, tornando o conteúdo acessível a pessoas com deficiência visual." data-modal-meta="fev/2025 — atual · ELO Editora">
@@ -1467,12 +1473,6 @@
 
       </div>
 
-      <div class="all-videos-toggle">
-        <button type="button" id="allVideosToggle" class="btn secondary">Ver todos os vídeos</button>
-      </div>
-
-      <div class="all-videos-gallery" id="allVideosGallery" hidden></div>
-
       <div class="note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
         <div>
@@ -1790,8 +1790,6 @@
           items.push({ title: title, index: i, total: urls.length, cover: coverSrc, url: url });
         });
       });
-
-      allVideosCount.textContent = items.length;
 
       items.forEach(function (item) {
         var thumb = document.createElement('button');
