@@ -1,0 +1,1479 @@
+<meta charset="UTF-8">
+<title>Marcos Paulo — Portfólio</title>
+<meta name="description" content="Áudio, imagem e código. Portfólio de Marcos Paulo Tavares Garcia dos Santos — audiovisual, acessibilidade e desenvolvimento.">
+<style>
+  @font-face {
+    font-family: 'Poppins';
+    font-weight: 500;
+    font-display: swap;
+    src: url(data:font/woff2;base64,POPPINS_500_B64) format('woff2');
+  }
+  @font-face {
+    font-family: 'Poppins';
+    font-weight: 600;
+    font-display: swap;
+    src: url(data:font/woff2;base64,POPPINS_600_B64) format('woff2');
+  }
+  @font-face {
+    font-family: 'Poppins';
+    font-weight: 700;
+    font-display: swap;
+    src: url(data:font/woff2;base64,POPPINS_700_B64) format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-weight: 400;
+    font-display: swap;
+    src: url(data:font/woff2;base64,DMSANS_400_B64) format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-weight: 500;
+    font-display: swap;
+    src: url(data:font/woff2;base64,DMSANS_500_B64) format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    font-weight: 700;
+    font-display: swap;
+    src: url(data:font/woff2;base64,DMSANS_700_B64) format('woff2');
+  }
+
+  :root {
+    --bg: #0A0D10;
+    --bg-raised: #10151A;
+    --card: #151B21;
+    --card-hover: #1B222A;
+    --text: #F5F7F8;
+    --text-dim: #8B96A0;
+    --text-faint: #545F68;
+    --accent: #2FE0C8;
+    --accent-2: #3B82F6;
+    --accent-grad: linear-gradient(115deg, #2FE0C8 0%, #3B82F6 100%);
+    --accent-wash: rgba(47,224,200,0.10);
+    --border: #212930;
+    --overlay: rgba(4,6,8,0.78);
+    --depth-1: #0D1114;
+    --depth-2: #06080A;
+    --sans: 'DM Sans', -apple-system, 'Segoe UI', sans-serif;
+    --display: 'Poppins', -apple-system, 'Segoe UI', sans-serif;
+    --persp: 1400px;
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #F3F5F4;
+      --bg-raised: #FFFFFF;
+      --card: #FFFFFF;
+      --card-hover: #EAEEEC;
+      --text: #0D1417;
+      --text-dim: #515A5F;
+      --text-faint: #8B939A;
+      --accent-wash: rgba(11,140,125,0.10);
+      --border: #DCE2DF;
+      --overlay: rgba(20,26,24,0.55);
+      --depth-1: #DDE2DF;
+      --depth-2: #C9D0CC;
+      color-scheme: light;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --bg: #F3F5F4;
+    --bg-raised: #FFFFFF;
+    --card: #FFFFFF;
+    --card-hover: #EAEEEC;
+    --text: #0D1417;
+    --text-dim: #515A5F;
+    --text-faint: #8B939A;
+    --accent-wash: rgba(11,140,125,0.10);
+    --border: #DCE2DF;
+    --overlay: rgba(20,26,24,0.55);
+    --depth-1: #DDE2DF;
+    --depth-2: #C9D0CC;
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0A0D10;
+    --bg-raised: #10151A;
+    --card: #151B21;
+    --card-hover: #1B222A;
+    --text: #F5F7F8;
+    --text-dim: #8B96A0;
+    --text-faint: #545F68;
+    --accent-wash: rgba(47,224,200,0.10);
+    --border: #212930;
+    --overlay: rgba(4,6,8,0.78);
+    --depth-1: #0D1114;
+    --depth-2: #06080A;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    body { cursor: auto; }
+    #cursorDot { display: none !important; }
+  }
+
+  ::selection { background: var(--accent); color: #041210; }
+  ::-webkit-scrollbar { width: 12px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 6px; }
+
+  a { color: inherit; text-decoration: none; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; position: relative; }
+
+  @media (max-width: 640px) { .wrap { padding: 0 20px; } }
+
+  .grad-text {
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- Custom cursor ---------- */
+
+  #cursorDot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    top: 0;
+    left: 0;
+    z-index: 999;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease;
+  }
+
+  /* ---------- Header ---------- */
+
+  header.site {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  header.site::after {
+    content: '';
+    display: block;
+    height: 2px;
+    background: var(--accent-grad);
+    opacity: 0.5;
+  }
+
+  .header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 0;
+  }
+
+  .brand {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: -0.01em;
+  }
+
+  .header-actions { display: flex; align-items: center; gap: 14px; }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    color: var(--accent);
+    cursor: none;
+    background: transparent;
+    border: none;
+  }
+
+  .icon-btn:hover { background: var(--accent-wash); }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  .theme-toggle {
+    width: 52px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--accent-2);
+    padding: 3px;
+    display: flex;
+    cursor: none;
+    border: none;
+    align-items: center;
+    transition: background 0.3s ease;
+  }
+
+  .theme-toggle .knob {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--bg);
+    transition: transform 0.3s ease;
+  }
+
+  :root[data-theme="light"] .theme-toggle .knob { transform: translateX(24px); }
+
+  /* ---------- Fullscreen menu ---------- */
+
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--overlay);
+    backdrop-filter: blur(14px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 44px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease;
+    perspective: var(--persp);
+  }
+
+  .menu-overlay.open { opacity: 1; visibility: visible; }
+
+  .menu-overlay h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  .menu-overlay nav { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+
+  .menu-overlay nav a {
+    font-family: var(--display);
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: color 0.25s ease, transform 0.25s ease;
+    display: inline-block;
+    transform-style: preserve-3d;
+  }
+
+  .menu-overlay nav a:hover { color: var(--accent); transform: translateZ(40px) scale(1.06); }
+
+  /* ---------- Scroll reveal (3D entrance) ---------- */
+
+  .reveal {
+    opacity: 0;
+    transform: perspective(var(--persp)) translateY(50px) rotateX(-8deg);
+    transform-origin: center bottom;
+    transition: opacity 0.8s cubic-bezier(.2,.7,.2,1), transform 0.8s cubic-bezier(.2,.7,.2,1);
+  }
+
+  .reveal.in { opacity: 1; transform: perspective(var(--persp)) translateY(0) rotateX(0deg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    * { scroll-behavior: auto !important; animation: none !important; }
+  }
+
+  /* ---------- Hero: stacked 3D headline ---------- */
+
+  .hero { padding: 80px 0 60px; perspective: var(--persp); }
+
+  .banner { display: flex; justify-content: space-between; align-items: center; gap: 48px; }
+
+  @media (max-width: 780px) { .banner { flex-direction: column-reverse; text-align: center; padding-top: 24px; } }
+
+  .intro { display: flex; flex-direction: column; gap: 30px; max-width: 640px; }
+
+  .hero-lines { display: flex; flex-direction: column; gap: 4px; }
+
+  .hero-line {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+  }
+
+  .hero-line .stack {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero-line h1, .hero-line .role-word {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    line-height: 1.08;
+    margin: 0;
+    letter-spacing: -0.01em;
+    display: inline-block;
+    transform-style: preserve-3d;
+    animation: layerIn 0.9s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .hero-line:nth-child(1) h1 { animation-delay: 0.05s; }
+  .hero-line:nth-child(2) .role-word { animation-delay: 0.22s; }
+  .hero-line:nth-child(2) .role-word.grad { animation-delay: 0.34s; }
+
+  .hero-line .role-word.grad {
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-left: 0.3ch;
+  }
+
+  @keyframes layerIn {
+    0% { opacity: 0; transform: translateY(60%) translateZ(-120px) rotateX(35deg); }
+    100% { opacity: 1; transform: translateY(0) translateZ(0) rotateX(0deg); }
+  }
+
+  .intro .lede {
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin: 0;
+    animation: fadeUp 0.8s ease 0.55s both;
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  .actions { display: flex; gap: 18px; flex-wrap: wrap; animation: fadeUp 0.8s ease 0.7s both; }
+
+  @media (max-width: 780px) { .actions { justify-content: center; } }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 13px 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.25s ease;
+    cursor: none;
+  }
+
+  .btn:hover { transform: scale(0.97) translateZ(10px); }
+  .btn.primary { background: var(--accent-grad); color: #06110F; font-weight: 700; }
+  .btn.secondary { border: 1.5px solid var(--accent-2); color: var(--text); }
+  .btn.secondary:hover { background: var(--accent-wash); }
+
+  /* ---------- Hero scene: tilting camera/monitor stack ---------- */
+
+  .hero-scene {
+    width: 300px;
+    height: 300px;
+    flex-shrink: 0;
+    perspective: 1000px;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+
+  @media (max-width: 480px) { .hero-scene { width: 210px; height: 210px; } }
+
+  .scene-stage {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(14deg) rotateY(-22deg);
+    transition: transform 0.15s ease-out;
+  }
+
+  .scene-plane {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+  }
+
+  .scene-plane.back {
+    transform: translateZ(-46px) scale(0.86);
+    background: var(--depth-1);
+    opacity: 0.9;
+  }
+
+  .scene-plane.mid {
+    transform: translateZ(-16px) scale(0.94);
+    background: var(--bg-raised);
+    opacity: 0.95;
+  }
+
+  .scene-plane.front {
+    transform: translateZ(20px);
+  }
+
+  .scene-plane svg { width: 44%; height: 44%; color: var(--accent); opacity: 0.9; }
+
+  .scene-plane .rec-dot {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #F04848;
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  .scene-plane .frame-lines {
+    position: absolute;
+    inset: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  /* ---------- Section scaffolding ---------- */
+
+  section.block { padding: 40px 0 96px; perspective: var(--persp); }
+
+  .section-head { text-align: center; margin-bottom: 64px; }
+
+  .section-head .eyebrow {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 12px;
+  }
+
+  .section-head h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+    margin: 0;
+  }
+
+  .section-head p { color: var(--text-dim); max-width: 46ch; margin: 14px auto 0; font-size: 0.95rem; }
+
+  h3.subhead {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 1.4rem;
+    position: relative;
+    display: inline-block;
+    margin: 0 0 40px;
+  }
+
+  h3.subhead::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    width: 70%;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--accent-grad);
+  }
+
+  /* ---------- About ---------- */
+
+  .about p {
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    line-height: 1.85;
+    text-align: center;
+    max-width: 62ch;
+    margin: 0 auto;
+  }
+
+  /* ---------- Skills ---------- */
+
+  .skills-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; perspective: 900px; }
+
+  .skill-box {
+    position: relative;
+    width: 128px;
+    aspect-ratio: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top-left-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: none;
+    transition: transform 0.3s cubic-bezier(.2,.8,.2,1), background 0.25s ease;
+    overflow: hidden;
+    transform-style: preserve-3d;
+  }
+
+  .skill-box::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: var(--accent-grad);
+  }
+
+  .skill-box:hover { transform: translateZ(24px) scale(1.06); background: var(--card-hover); }
+
+  .skill-box .mark { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--accent); }
+  .skill-box p { font-size: 0.82rem; font-weight: 500; color: var(--text); margin: 0; text-align: center; padding: 0 8px; }
+
+  /* ---------- Work cards: 3D "device" tilt ---------- */
+
+  .cards-grid { display: flex; flex-wrap: wrap; gap: 44px; justify-content: center; perspective: 1200px; }
+  .cards-grid.tight { margin-bottom: 76px; }
+  .cards-grid.tight:last-child { margin-bottom: 0; }
+
+  .work-card {
+    width: calc(33.333% - 30px);
+    min-width: 260px;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  @media (max-width: 900px) { .work-card { width: calc(50% - 22px); } }
+  @media (max-width: 620px) { .work-card { width: 100%; } }
+
+  .tilt-wrap {
+    transform-style: preserve-3d;
+    transition: transform 0.12s ease-out;
+    will-change: transform;
+  }
+
+  .work-cover {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: linear-gradient(150deg, var(--card), var(--bg-raised));
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    cursor: none;
+  }
+
+  .work-cover .depth-edge-r {
+    position: absolute;
+    top: 4px;
+    right: -7px;
+    width: 7px;
+    height: calc(100% - 8px);
+    background: linear-gradient(90deg, var(--depth-1), var(--depth-2));
+    border-radius: 0 4px 4px 0;
+    transform: rotateY(90deg);
+    transform-origin: left center;
+  }
+
+  .work-cover .depth-edge-b {
+    position: absolute;
+    bottom: -7px;
+    left: 4px;
+    width: calc(100% - 8px);
+    height: 7px;
+    background: linear-gradient(180deg, var(--depth-1), var(--depth-2));
+    border-radius: 0 0 4px 4px;
+    transform: rotateX(-90deg);
+    transform-origin: top center;
+  }
+
+  .work-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--overlay);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .work-card:hover .work-cover::before { opacity: 1; }
+
+  .work-cover .glyph { width: 30%; height: 30%; color: var(--text-faint); transition: opacity 0.2s ease; }
+  .work-card:hover .work-cover .glyph { opacity: 0; }
+
+  .work-cover .cover-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .work-cover.has-photo .glyph { display: none; }
+
+  .work-cover .reveal-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    text-align: center;
+    padding: 0 16px;
+  }
+
+  .work-card:hover .reveal-label { opacity: 1; }
+
+  .reveal-label .format { font-family: var(--display); font-weight: 600; font-size: 0.95rem; color: #fff; }
+
+  .reveal-label .play {
+    width: 46px; height: 46px; border-radius: 999px;
+    border: 1.5px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+
+  .reveal-label .play svg { width: 16px; height: 16px; margin-left: 2px; }
+
+  .work-cover .badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--bg);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    z-index: 1;
+  }
+
+  .placeholder-tag {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    border: 1px dashed var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .work-info {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 18px 20px 20px;
+    margin-top: -1px;
+  }
+
+  .work-info .period {
+    font-size: 0.72rem; font-weight: 600; color: var(--text-faint);
+    letter-spacing: 0.03em; font-variant-numeric: tabular-nums; margin: 0 0 6px;
+  }
+
+  .work-info h4 { font-family: var(--display); font-weight: 600; font-size: 1.05rem; margin: 0 0 8px; line-height: 1.3; }
+  .work-info p.desc { font-size: 0.85rem; color: var(--text-dim); margin: 0 0 12px; line-height: 1.55; }
+
+  .stack-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+
+  .chip {
+    font-size: 0.68rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    padding: 3px 8px; border-radius: 4px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .work-links { display: flex; gap: 14px; }
+  .work-links a { font-size: 0.78rem; font-weight: 600; color: var(--accent); display: inline-flex; align-items: center; gap: 4px; cursor: none; }
+  .work-links a:hover { text-decoration: underline; }
+
+  /* ---------- Note ---------- */
+
+  .note {
+    background: var(--accent-wash);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 26px 30px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    margin-top: 56px;
+  }
+
+  .note svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+  .note h4 { font-family: var(--display); font-weight: 600; font-size: 0.98rem; margin: 0 0 8px; }
+  .note p { font-size: 0.86rem; color: var(--text-dim); margin: 0; line-height: 1.6; max-width: 70ch; }
+  .note code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.82em; background: var(--bg-raised); padding: 1px 5px; border-radius: 3px; }
+
+  /* ---------- Timeline ---------- */
+
+  .timeline { position: relative; padding-left: 30px; max-width: 640px; margin: 0 auto; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px; top: 6px; bottom: 6px;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .tl-item { position: relative; padding-bottom: 40px; }
+  .tl-item:last-child { padding-bottom: 0; }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -30px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+  }
+
+  .tl-date { font-size: 0.78rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; margin: 0 0 4px; }
+  .tl-item h4 { font-family: var(--display); font-weight: 600; font-size: 1.05rem; margin: 0 0 6px; }
+  .tl-item p { font-size: 0.88rem; color: var(--text-dim); margin: 0; }
+
+  /* ---------- Contacts ---------- */
+
+  .contacts-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: 56px; perspective: 900px; }
+
+  .contact-icon {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    transition: transform 0.3s cubic-bezier(.2,.8,.2,1);
+    transform-style: preserve-3d;
+    cursor: none;
+  }
+
+  .contact-icon:hover { transform: translateZ(20px) scale(1.08); }
+
+  .contact-icon .box {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+
+  .contact-icon .box svg { width: 26px; height: 26px; }
+  .contact-icon .label { font-family: var(--display); font-weight: 600; font-size: 0.88rem; margin: 0; }
+  .contact-icon .value { font-size: 0.8rem; color: var(--text-dim); margin: 0; }
+
+  /* ---------- Video modal ---------- */
+
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: var(--overlay);
+    backdrop-filter: blur(6px);
+    z-index: 300;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    perspective: 1200px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal-box {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    max-width: 760px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: modalIn 0.35s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(30px) rotateX(-10deg) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
+  }
+
+  .modal-frame {
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .modal-head { display: flex; justify-content: space-between; align-items: center; }
+  .modal-head h3 { font-family: var(--display); font-weight: 600; font-size: 1.3rem; margin: 0; color: var(--accent); }
+  .modal-close { cursor: none; color: var(--text-dim); background: none; border: none; }
+  .modal-close svg { width: 22px; height: 22px; }
+  .modal-box p { font-size: 0.88rem; color: var(--text-dim); margin: 0; line-height: 1.6; }
+
+  /* ---------- Footer ---------- */
+
+  footer { padding: 48px 0 60px; border-top: 1px solid var(--border); }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .footer-inner p { font-size: 0.82rem; color: var(--text-faint); margin: 0; }
+</style>
+
+<div id="cursorDot"></div>
+
+<header class="site">
+  <div class="wrap header-inner">
+    <a href="#top" class="brand" data-cursor-label="Início">Marcos<span class="grad-text">.</span>Paulo</a>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema claro/escuro" type="button">
+        <span class="knob"></span>
+      </button>
+      <button class="icon-btn" id="menuToggle" aria-label="Abrir menu" type="button">
+        <svg id="iconMenu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <svg id="iconClose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menuOverlay">
+  <h2>Bem-vindo ao meu portfólio :)</h2>
+  <nav>
+    <a href="#sobre">Sobre</a>
+    <a href="#skills">Habilidades</a>
+    <a href="#desenvolvimento">Desenvolvimento</a>
+    <a href="#audiovisual">Audiovisual</a>
+    <a href="#ia">IA aplicada</a>
+    <a href="#contatos">Contatos</a>
+  </nav>
+</div>
+
+<main id="top">
+
+  <section class="hero" id="sobre">
+    <div class="wrap">
+      <div class="banner">
+        <div class="intro">
+          <div class="hero-lines">
+            <div class="hero-line"><h1>Olá, eu sou o Marcos<span class="grad-text">.</span></h1></div>
+            <div class="hero-line"><span class="role-word">Áudio, imagem e</span><span class="role-word grad">código.</span></div>
+          </div>
+          <p class="lede">Especialista audiovisual e de acessibilidade na ELO Editora, em transição para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e escrever código — as duas coisas com o mesmo cuidado técnico.</p>
+          <div class="actions">
+            <a href="#" class="btn primary" data-cursor-label="Baixar">Download CV</a>
+            <a href="mailto:mp030606@gmail.com" class="btn secondary" data-cursor-label="E-mail">Entrar em contato</a>
+          </div>
+        </div>
+        <div class="hero-scene" id="heroScene">
+          <div class="scene-stage" id="sceneStage">
+            <div class="scene-plane back">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5h16v11H4z"/><path d="M8 20h8M12 16v4M7 8l3 2-3 2M13 12h4"/></svg>
+            </div>
+            <div class="scene-plane mid">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
+            </div>
+            <div class="scene-plane front">
+              <span class="rec-dot"></span>
+              <span class="frame-lines"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="7" width="13" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block about reveal">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sobre mim</p>
+        <h2>De uma mesa de som para um editor de código</h2>
+      </div>
+      <p>
+        Comecei na área de Administração — onde desenvolvi base em organização, processos e gestão —
+        e encontrei no audiovisual e na tecnologia o lugar onde quero atuar. Trabalho com sonorização,
+        edição de vídeo, transmissão ao vivo e acessibilidade, especialmente em eventos, projetos para
+        a igreja e produções colaborativas — incluindo audiodescrição e conteúdo assistido por IA.
+        Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para desenvolvimento web,
+        levando comigo o mesmo cuidado técnico e a mesma exigência de qualidade que tinha operando
+        áudio e vídeo ao vivo.
+      </p>
+    </div>
+  </section>
+
+  <section class="block reveal" id="skills">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Inventário</p>
+        <h2>Ferramentas</h2>
+      </div>
+      <div class="skills-cards">
+        <div class="skill-box"><span class="mark">Pr</span><p>Premiere Pro</p></div>
+        <div class="skill-box"><span class="mark">Dv</span><p>DaVinci Resolve</p></div>
+        <div class="skill-box"><span class="mark">Ae</span><p>After Effects</p></div>
+        <div class="skill-box"><span class="mark">vM</span><p>vMix</p></div>
+        <div class="skill-box"><span class="mark">At</span><p>Blackmagic ATEM</p></div>
+        <div class="skill-box"><span class="mark">Ui</span><p>Soundcraft UI24R</p></div>
+        <div class="skill-box"><span class="mark">Sd</span><p>Stream Deck</p></div>
+        <div class="skill-box"><span class="mark">Ps</span><p>Photoshop</p></div>
+        <div class="skill-box"><span class="mark">Id</span><p>InDesign</p></div>
+        <div class="skill-box"><span class="mark">Py</span><p>Python / Flask</p></div>
+        <div class="skill-box"><span class="mark">11</span><p>ElevenLabs</p></div>
+        <div class="skill-box"><span class="mark">Cu</span><p>ClickUp / Trello</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block reveal" id="desenvolvimento">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Caderno 01</p>
+        <h2>Desenvolvimento</h2>
+        <p>Frente nova, em transição desde o audiovisual — cursando ADS, contrato como desenvolvedor web assinando agora.</p>
+      </div>
+
+      <div class="cards-grid tight">
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Automação de transmissão multi-PC" data-modal-desc="Sistema local que inicia uma transmissão ao vivo com um clique, abrindo Holyrics, Lumikit e vMix simultaneamente em 3 computadores pela rede local. Backend em Python/Flask com um painel web instalável como PWA — nasceu direto da experiência operando transmissões ao vivo." data-modal-meta="2026 · Projeto pessoal">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/automacao-transmissao.jpg" alt="Automação de transmissão multi-PC" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Automação</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="9" y="14" width="7" height="6" rx="1"/><rect x="15" y="4" width="6" height="6" rx="1"/><path d="M6 10v4h9M18 10v4"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">2026</p>
+            <h4>Automação de transmissão multi-PC</h4>
+            <p class="desc">Um clique inicia Holyrics, Lumikit e vMix em 3 PCs pela rede local. Nasceu direto da rotina de transmissão ao vivo.</p>
+            <div class="stack-row"><span class="chip">Python</span><span class="chip">Flask</span><span class="chip">PWA</span></div>
+            <div class="work-links">
+              <a href="https://github.com/mpaulinhu/automarizar-apps-em-PCs-diferentes" target="_blank" data-cursor-label="Abrir">Repositório →</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Mix de Fone — controle individual via Ui24R" data-modal-desc="Interface web que permite músicos controlarem seus próprios fones (aux) em uma mesa Soundcraft Ui24R, sem expor os controles completos da mesa. Servidor Node.js mantém conexão única com a mesa via WebSocket, com monitor em tempo real e chat integrado para o operador de House Mix." data-modal-meta="2026 · Projeto pessoal">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/mix-de-fone-ui24r.jpg" alt="Mix de Fone — controle via Ui24R" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Web app</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">2026</p>
+            <h4>Mix de Fone — controle via Ui24R</h4>
+            <p class="desc">Músicos ajustam seus próprios fones numa Soundcraft Ui24R pelo celular, sem acesso à mesa completa.</p>
+            <div class="stack-row"><span class="chip">Node.js</span><span class="chip">WebSocket</span></div>
+            <div class="work-links">
+              <a href="https://github.com/mpaulinhu/ui24-musicos" target="_blank" data-cursor-label="Abrir">Repositório →</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="ELO Ecosystem — plataforma editorial multi-marca" data-modal-desc="Monorepo (PNPM) que sustenta toda a operação digital da ELO Editora e da PeraBook: back-office administrativo, catálogo e leitor de livros digitais, sites institucionais/e-commerce e a infraestrutura de nuvem por trás de tudo isso. Estrutura em seis pilares — back-office, dados centralizados, apps de leitura (mobile + web), kits escolares, BI e infraestrutura GCP — com mais de uma dezena de Cloud Functions rodando o pipeline de processamento de EPUB, pagamentos e gestão de usuários. Atuo como desenvolvedor no time, contribuindo em features de back-office, correção de bugs e ajustes de infraestrutura, seguindo um fluxo de trabalho com controle de qualidade, revisão de UX/UI e gates antes de qualquer deploy." data-modal-meta="2026 — atual · ELO Editora">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/elo-ecosystem.jpg" alt="ELO Ecosystem — plataforma editorial multi-marca" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Monorepo</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4M17.5 11v4M6.5 11v4"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">2026 — atual</p>
+            <h4>ELO Ecosystem — plataforma editorial multi-marca</h4>
+            <p class="desc">Monorepo que sustenta back-office, catálogo digital, sites e infraestrutura de nuvem da ELO Editora e da PeraBook. Atuo como dev no time.</p>
+            <div class="stack-row"><span class="chip">Vue 3</span><span class="chip">React / Next.js</span><span class="chip">TypeScript</span><span class="chip">Firebase / GCP</span></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="block reveal" id="audiovisual">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Caderno 02</p>
+        <h2>Audiovisual &amp; acessibilidade</h2>
+        <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
+      </div>
+
+      <div class="cards-grid">
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Edição com Libras e audiodescrição" data-modal-desc="Na ELO Editora: edição de vídeos infantis com inserção de intérprete de Libras (gravação via vMix) e criação de audiodescrição com IA, tornando o conteúdo acessível a pessoas com deficiência visual." data-modal-meta="fev/2025 — atual · ELO Editora">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/libras-audiodescricao.jpg" alt="Edição com Libras e audiodescrição" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Acessibilidade</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="9"/><path d="M8 13c1.5 1.5 6.5 1.5 8 0M9 9h.01M15 9h.01"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">fev/2025 — atual</p>
+            <h4>Edição com Libras e audiodescrição</h4>
+            <p class="desc">Vídeos infantis com intérprete de Libras e audiodescrição gerada por IA, na ELO Editora.</p>
+            <div class="stack-row"><span class="chip">Premiere</span><span class="chip">vMix</span></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Radionovelas e sonorização de livros" data-modal-desc="Criação de radionovelas e sonorização de obras literárias, transformando livros em experiências imersivas em áudio. Já colaborei também na produção de som para um programa da TV Cultura." data-modal-meta="ELO Editora · Design sonoro">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/radionovelas-sonorizacao.jpg" alt="Radionovelas e sonorização de livros" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Design sonoro</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">ELO Editora</p>
+            <h4>Radionovelas e sonorização de livros</h4>
+            <p class="desc">Livros transformados em experiências imersivas em áudio. Colaboração pontual com a TV Cultura.</p>
+            <div class="stack-row"><span class="chip">Design sonoro</span></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-video="true" data-modal-title="Transmissão ao vivo de eventos" data-modal-desc="Operação de câmera e switching com mesa Blackmagic ATEM, produção ao vivo via vMix (incluindo podcasts), mixagem pela Soundcraft UI24R e automação com Stream Deck." data-modal-meta="ELO Editora + freelance · Ao vivo">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/transmissao-ao-vivo.jpg" alt="Transmissão ao vivo de eventos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Ao vivo</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/><circle cx="18.5" cy="5.5" r="0.6" fill="currentColor" stroke="none"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">2023 — atual</p>
+            <h4>Transmissão ao vivo de eventos</h4>
+            <p class="desc">Câmera, switching, mixagem e automação de produção — igrejas, podcasts e eventos da ELO.</p>
+            <div class="stack-row"><span class="chip">ATEM</span><span class="chip">vMix</span><span class="chip">UI24R</span></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver no Behance" data-modal-video="true" data-modal-title="Clipe — Conferência dos Jovens AVIVA" data-modal-desc="Clipe oficial de conferência, publicado no Behance. Captação e edição de conteúdo para evento religioso." data-modal-meta="Behance · Vídeo">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/clipe-aviva.jpg" alt="Clipe — Conferência dos Jovens AVIVA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Vídeo</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver no Behance</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">Behance</p>
+            <h4>Clipe — Conferência dos Jovens AVIVA</h4>
+            <p class="desc">Clipe oficial de evento religioso, captação e edição.</p>
+            <div class="work-links"><a href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver no Behance" data-modal-title="Sonorização do zero — Amazônia" data-modal-desc="Projeto de sonorização construído do zero, publicado no Behance." data-modal-meta="Behance · Design sonoro">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/sonorizacao-amazonia.jpg" alt="Sonorização do zero — Amazônia" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Design sonoro</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver no Behance</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">Behance</p>
+            <h4>Sonorização do zero — Amazônia</h4>
+            <p class="desc">Design sonoro construído do zero para o projeto.</p>
+            <div class="work-links"><a href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver no Behance" data-modal-video="true" data-modal-title="Registros: fotos e vídeo — Festa de 40 anos" data-modal-desc="Cobertura fotográfica e em vídeo de evento — festa de 40 anos, publicado no Behance." data-modal-meta="Behance · Cobertura">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/festa-40-anos.jpg" alt="Registros: fotos e vídeo — Festa de 40 anos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Cobertura</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver no Behance</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">Behance</p>
+            <h4>Registros: fotos e vídeo — Festa de 40 anos</h4>
+            <p class="desc">Cobertura fotográfica e em vídeo do evento.</p>
+            <div class="work-links"><a href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <div>
+          <h4>Mais projetos no Behance e Instagram</h4>
+          <p>
+            O acervo completo de mixagens, clipes e coberturas de eventos está no
+            <a href="https://www.behance.net/mpaulin" target="_blank" style="color: var(--accent); font-weight: 600;">Behance</a>
+            e no <a href="https://www.instagram.com/mpaulinhu" target="_blank" style="color: var(--accent); font-weight: 600;">Instagram</a>.
+            Os cards acima são uma seleção — o resto pode ser cadastrado aqui aos poucos.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block reveal" id="ia">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Diferencial</p>
+        <h2>IA aplicada ao audiovisual</h2>
+        <p>Onde as duas frentes se encontram: uso inteligência artificial como ferramenta de produção real, não como novidade.</p>
+      </div>
+
+      <div class="cards-grid">
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Audiodescrição com IA" data-modal-desc="Criação de audiodescrição utilizando Inteligência Artificial para tornar conteúdo infantil acessível a pessoas com deficiência visual, na ELO Editora." data-modal-meta="ELO Editora · Acessibilidade">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/audiodescricao-ia.jpg" alt="Audiodescrição com IA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Selo IA</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">ELO Editora</p>
+            <h4>Audiodescrição com IA</h4>
+            <p class="desc">Conteúdo infantil tornado acessível a pessoas com deficiência visual usando geração de voz por IA.</p>
+            <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">NaturalReader</span></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Narração e tratamento de voz" data-modal-desc="Geração e tratamento de voz com IA para narrações e conteúdo de vídeos, livros e projetos digitais — parte do fluxo de produção de radionovelas e sonorização de livros." data-modal-meta="ELO Editora · Voz sintética">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/narracao-voz-ia.jpg" alt="Narração e tratamento de voz" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Selo IA</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 11a7 7 0 01-14 0M12 18v4M9 22h6"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">ELO Editora</p>
+            <h4>Narração e tratamento de voz</h4>
+            <p class="desc">Geração e tratamento de voz por IA para narrações de vídeos, livros e projetos digitais.</p>
+            <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">ChatGPT</span></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Roteiro e tratamento visual assistidos" data-modal-desc="Correções de roteiro e tratamento visual no Photoshop com apoio de IA, além do uso de ChatGPT no fluxo de criação de conteúdo para livros e produções digitais." data-modal-meta="ELO Editora · Produção">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/roteiro-visual-ia.jpg" alt="Roteiro e tratamento visual assistidos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Selo IA</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 4h9l3 3v13H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">ELO Editora</p>
+            <h4>Roteiro e tratamento visual assistidos</h4>
+            <p class="desc">Correção de roteiro e tratamento visual apoiados por IA no fluxo de produção editorial.</p>
+            <div class="stack-row"><span class="chip">Photoshop</span><span class="chip">ChatGPT</span></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="block reveal">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Trajetória</p>
+        <h2>Linha do tempo</h2>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <p class="tl-date">2026 — jan</p>
+          <h4>Início do Tecnólogo em ADS</h4>
+          <p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p>
+        </div>
+        <div class="tl-item">
+          <p class="tl-date">2026 — ago</p>
+          <h4>Transição para desenvolvedor web</h4>
+          <p>Um mês de teste como desenvolvedor web e contrato sendo assinado — mantendo a atuação em audiovisual e acessibilidade.</p>
+        </div>
+        <div class="tl-item">
+          <p class="tl-date">2025 — fev</p>
+          <h4>Audiovisual &amp; Accessibility Specialist na ELO Editora</h4>
+          <p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p>
+        </div>
+        <div class="tl-item">
+          <p class="tl-date">2023 — jun</p>
+          <h4>Início como técnico e operador de som freelance</h4>
+          <p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p>
+        </div>
+        <div class="tl-item">
+          <p class="tl-date">2022 — 2024</p>
+          <h4>Técnico em Administração — Etec Itaquera II</h4>
+          <p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block reveal" id="contatos">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Vamos falar</p>
+        <h2>Contatos</h2>
+      </div>
+      <div class="contacts-icons">
+        <a class="contact-icon" href="mailto:mp030606@gmail.com" data-cursor-label="E-mail">
+          <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
+          <p class="label">E-mail</p>
+          <p class="value">mp030606@gmail.com</p>
+        </a>
+        <a class="contact-icon" href="https://www.linkedin.com/in/marcos-paulo-tavares-garcia-dos-santos-b22580221/" target="_blank" data-cursor-label="LinkedIn">
+          <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span>
+          <p class="label">LinkedIn</p>
+          <p class="value">Marcos Paulo T. G. dos Santos</p>
+        </a>
+        <a class="contact-icon" href="https://github.com/mpaulinhu" target="_blank" data-cursor-label="GitHub">
+          <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 00-6.2 0C6.6 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></span>
+          <p class="label">GitHub</p>
+          <p class="value">@mpaulinhu</p>
+        </a>
+        <a class="contact-icon" href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Behance">
+          <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h6a3 3 0 010 6H4zM4 12h6.5a3.2 3.2 0 010 6.4H4zM15 4h5M14.5 12a4 4 0 117.8 1.4h-6.2"/></svg></span>
+          <p class="label">Behance</p>
+          <p class="value">@mpaulin</p>
+        </a>
+        <a class="contact-icon" href="https://www.instagram.com/mpaulinhu" target="_blank" data-cursor-label="Instagram">
+          <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg></span>
+          <p class="label">Instagram</p>
+          <p class="value">@mpaulinhu</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">Título</h3>
+      <button class="modal-close" id="modalClose" aria-label="Fechar" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-frame" id="modalFrame">Espaço reservado para embed de vídeo (YouTube/Vimeo não-listado) quando o trabalho real for cadastrado.</div>
+    <p id="modalDesc">Descrição</p>
+    <p id="modalMeta" style="color: var(--accent); font-weight: 600;">Meta</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap footer-inner">
+    <a href="#top" class="brand">Marcos<span class="grad-text">.</span>Paulo</a>
+    <p>Portfólio pessoal — código, imagem e texto.</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    /* Theme */
+    var themeToggle = document.getElementById('themeToggle');
+    function isDark() {
+      var attr = root.getAttribute('data-theme');
+      if (attr) return attr === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    var stored = null;
+    try { stored = localStorage.getItem('portfolio-theme'); } catch (e) {}
+    if (stored) root.setAttribute('data-theme', stored);
+    themeToggle.addEventListener('click', function () {
+      var next = isDark() ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('portfolio-theme', next); } catch (e) {}
+    });
+
+    /* Fullscreen menu */
+    var menuToggle = document.getElementById('menuToggle');
+    var menuOverlay = document.getElementById('menuOverlay');
+    var iconMenu = document.getElementById('iconMenu');
+    var iconClose = document.getElementById('iconClose');
+    function setMenu(open) {
+      menuOverlay.classList.toggle('open', open);
+      iconMenu.style.display = open ? 'none' : 'block';
+      iconClose.style.display = open ? 'block' : 'none';
+    }
+    menuToggle.addEventListener('click', function () { setMenu(!menuOverlay.classList.contains('open')); });
+    menuOverlay.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { setMenu(false); });
+    });
+
+    /* Scroll reveal */
+    var revealEls = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+        });
+      }, { threshold: 0.12 });
+      revealEls.forEach(function (el) { io.observe(el); });
+    } else {
+      revealEls.forEach(function (el) { el.classList.add('in'); });
+    }
+
+    /* Video / detail modal */
+    var modalBackdrop = document.getElementById('modalBackdrop');
+    var modalTitle = document.getElementById('modalTitle');
+    var modalDesc = document.getElementById('modalDesc');
+    var modalMeta = document.getElementById('modalMeta');
+    var modalFrame = document.getElementById('modalFrame');
+    var modalClose = document.getElementById('modalClose');
+
+    document.querySelectorAll('.work-card').forEach(function (card) {
+      card.querySelector('.work-cover').addEventListener('click', function () {
+        modalTitle.textContent = card.getAttribute('data-modal-title') || '';
+        modalDesc.textContent = card.getAttribute('data-modal-desc') || '';
+        modalMeta.textContent = card.getAttribute('data-modal-meta') || '';
+        modalFrame.textContent = card.getAttribute('data-modal-video')
+          ? 'Espaço reservado para embed de vídeo (YouTube/Vimeo não-listado) quando o trabalho real for cadastrado.'
+          : 'Este trabalho não tem vídeo associado — veja os links abaixo.';
+        modalBackdrop.classList.add('open');
+      });
+    });
+    modalClose.addEventListener('click', function () { modalBackdrop.classList.remove('open'); });
+    modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) modalBackdrop.classList.remove('open'); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') modalBackdrop.classList.remove('open'); });
+
+    /* ---------- Custom cursor (small dot only) ---------- */
+
+    var isCoarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    if (!isCoarse) {
+      var dot = document.getElementById('cursorDot');
+      dot.style.opacity = '0';
+
+      window.addEventListener('mousemove', function (e) {
+        dot.style.left = e.clientX + 'px';
+        dot.style.top = e.clientY + 'px';
+        dot.style.opacity = '1';
+      });
+
+      window.addEventListener('mouseleave', function () {
+        dot.style.opacity = '0';
+      });
+    }
+
+    /* ---------- Card tilt on hover (3D device feel) ---------- */
+
+    document.querySelectorAll('.work-card').forEach(function (card) {
+      var wrap = card.querySelector('.tilt-wrap');
+      card.addEventListener('mousemove', function (e) {
+        var r = card.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5;
+        var py = (e.clientY - r.top) / r.height - 0.5;
+        wrap.style.transform = 'rotateY(' + (px * 14) + 'deg) rotateX(' + (-py * 14) + 'deg) translateZ(6px)';
+      });
+      card.addEventListener('mouseleave', function () {
+        wrap.style.transform = 'rotateY(0) rotateX(0) translateZ(0)';
+      });
+    });
+
+    /* ---------- Hero scene tilt follows mouse ---------- */
+
+    var heroScene = document.getElementById('heroScene');
+    var sceneStage = document.getElementById('sceneStage');
+    if (heroScene && !isCoarse) {
+      document.addEventListener('mousemove', function (e) {
+        var vw = window.innerWidth, vh = window.innerHeight;
+        var px = (e.clientX / vw) - 0.5;
+        var py = (e.clientY / vh) - 0.5;
+        sceneStage.style.transform = 'rotateX(' + (14 - py * 18) + 'deg) rotateY(' + (-22 + px * 26) + 'deg)';
+      });
+    }
+  })();
+</script>

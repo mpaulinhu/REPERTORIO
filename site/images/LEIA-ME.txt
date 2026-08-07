@@ -1,0 +1,32 @@
+Como adicionar fotos aos cards do portfólio
+=============================================
+
+Basta colocar o arquivo de imagem nesta pasta com o NOME EXATO abaixo
+(formato .jpg). A foto aparece automaticamente no card assim que o
+arquivo existir — não precisa mexer no HTML.
+
+Se o arquivo não existir, o card continua mostrando o ícone normal
+(nada quebra).
+
+Recomendo fotos na proporção 4:3 (ex: 1200x900px) para não cortar mal.
+
+Desenvolvimento
+----------------
+automacao-transmissao.jpg     -> Automação de transmissão multi-PC
+mix-de-fone-ui24r.jpg         -> Mix de Fone — controle via Ui24R
+elo-ecosystem.jpg             -> ELO Ecosystem — plataforma editorial multi-marca
+
+Audiovisual & acessibilidade
+------------------------------
+libras-audiodescricao.jpg     -> Edição com Libras e audiodescrição
+radionovelas-sonorizacao.jpg  -> Radionovelas e sonorização de livros
+transmissao-ao-vivo.jpg       -> Transmissão ao vivo de eventos
+clipe-aviva.jpg                -> Clipe — Conferência dos Jovens AVIVA
+sonorizacao-amazonia.jpg      -> Sonorização do zero — Amazônia
+festa-40-anos.jpg              -> Registros — Festa de 40 anos
+
+IA aplicada
+------------
+audiodescricao-ia.jpg          -> Audiodescrição com IA
+narracao-voz-ia.jpg            -> Narração e tratamento de voz
+roteiro-visual-ia.jpg          -> Roteiro e tratamento visual assistidos
