@@ -2337,6 +2337,7 @@
           e.stopPropagation();
           if (confirm('Excluir este card? Essa ação só é desfeita se você não salvar o arquivo depois.')) {
             card.remove();
+            if (window.refreshLoadMoreButton) window.refreshLoadMoreButton();
           }
         });
         card.appendChild(delBtn);
@@ -2484,6 +2485,7 @@
         var grid = document.getElementById('audiovisualGrid');
         var addBtnEl = document.getElementById('editAddCardBtn');
         grid.insertBefore(article, addBtnEl);
+        if (window.refreshLoadMoreButton) window.refreshLoadMoreButton();
 
         addVideoForm.reset();
         closeAddVideoModal();
@@ -2516,21 +2518,37 @@
       if (!grid || !loadMoreBtn) return;
 
       var VISIBLE_COUNT = 3;
-      var cards = Array.prototype.slice.call(grid.querySelectorAll('.work-card'));
-      var extraCards = cards.slice(VISIBLE_COUNT);
 
-      if (extraCards.length === 0) {
-        loadMoreBtn.style.display = 'none';
-        return;
+      function refreshExtraCards() {
+        var cards = Array.prototype.slice.call(grid.querySelectorAll('.work-card'));
+        return cards.slice(VISIBLE_COUNT);
       }
 
-      extraCards.forEach(function (card) { card.classList.add('extra-card'); });
-      loadMoreBtn.textContent = 'Ver mais vídeos (+' + extraCards.length + ')';
+      function updateLoadMoreButton() {
+        var extraCards = refreshExtraCards();
+        extraCards.forEach(function (card) { card.classList.add('extra-card'); });
+
+        if (extraCards.length === 0) {
+          loadMoreBtn.style.display = 'none';
+          return;
+        }
+
+        loadMoreBtn.style.display = '';
+        loadMoreBtn.textContent = grid.classList.contains('expanded')
+          ? 'Ver menos'
+          : 'Ver mais vídeos (+' + extraCards.length + ')';
+      }
 
       loadMoreBtn.addEventListener('click', function () {
-        grid.classList.add('expanded');
-        loadMoreBtn.style.display = 'none';
+        grid.classList.toggle('expanded');
+        updateLoadMoreButton();
+        if (!grid.classList.contains('expanded')) {
+          loadMoreBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
       });
+
+      updateLoadMoreButton();
+      window.refreshLoadMoreButton = updateLoadMoreButton;
     })();
 
     /* ---------- Custom cursor (small dot only) ---------- */
