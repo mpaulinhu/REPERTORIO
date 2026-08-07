@@ -834,7 +834,17 @@
     overflow: hidden;
   }
 
-  .modal-frame:has(iframe) { padding: 0; }
+  .modal-frame:has(.embed-box) { padding: 0; }
+
+  .modal-frame .embed-box { width: 100%; aspect-ratio: 16/9; flex-shrink: 0; }
+
+  .modal-frame.multi {
+    aspect-ratio: auto;
+    max-height: min(70vh, 640px);
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 2px;
+  }
 
   .modal-head { display: flex; justify-content: space-between; align-items: center; }
   .modal-head h3 { font-family: var(--display); font-weight: 600; font-size: 1.3rem; margin: 0; color: var(--accent); }
@@ -1113,7 +1123,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/NphFE33WGPj/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Clipe oficial — Conferência dos Jovens AVIVA" data-modal-desc="Clipe da Conferência de Jovens com o grupo ADJA Praise. Cuidei da sonorização inteira do zero — organização e mixagem no Reaper — além da edição do vídeo." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/clipe-aviva.jpg" alt="Clipe oficial — Conferência dos Jovens AVIVA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" src="images/clipe-aviva.jpg" alt="Clipe oficial — Conferência dos Jovens AVIVA" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/50be0f241360403.69568d489031c.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1135,7 +1145,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/R8P7_9Pq8e4/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Sonorização do zero — Amazônia" data-modal-desc="Paisagem sonora autoral inspirada na Amazônia: sons de natureza, ambientes imersivos e a relação entre som e cultura, construída do zero no Premiere e no Audition." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/sonorizacao-amazonia.jpg" alt="Sonorização do zero — Amazônia" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" src="images/sonorizacao-amazonia.jpg" alt="Sonorização do zero — Amazônia" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/d00dbd240494395.Y3JvcCw5MzAsNzI3LDQ4NiwxNTg.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Design sonoro</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1157,7 +1167,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BpEqbaEppLm/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Registros: fotos e vídeo — Festa de 40 anos" data-modal-desc="Cobertura fotográfica e em vídeo de uma festa de aniversário de 40 anos, com edição das imagens captadas no Premiere." data-modal-meta="nov/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/festa-40-anos.jpg" alt="Registros: fotos e vídeo — Festa de 40 anos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" src="images/festa-40-anos.jpg" alt="Registros: fotos e vídeo — Festa de 40 anos" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/deda0b239104039.692256541f629.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Cobertura</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1242,7 +1252,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/D53A-NdXwV7/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Aberturas — Conferência das Mulheres" data-modal-desc="Peças de abertura e apresentações em vídeo para uma conferência, combinando animação e captação de áudio." data-modal-meta="mai/2026 · Behance">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/D53A-NdXwV7/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/EoDWtbzhrjg/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/2YVoRSEPkcb/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/UgehC7JP_zZ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Aberturas — Conferência das Mulheres" data-modal-desc="Peças de abertura e apresentações em vídeo para uma conferência, combinando animação e captação de áudio." data-modal-meta="mai/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" src="images/conferencia-mulheres.jpg" alt="Aberturas — Conferência das Mulheres" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/ea2a09248687823.Y3JvcCwxNzQyMiwxMzYyNywwLDQzMQ.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
@@ -1330,7 +1340,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M7iStDQqR9G/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 2" data-modal-desc="Mixagem de áudio de louvores de igreja no Reaper, explorando plugins gratuitos de mixagem." data-modal-meta="set/2025 · Behance">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M7iStDQqR9G/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/TPWiNiVGbFL/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/LQSsKjHkpBZ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 2" data-modal-desc="Mixagem de áudio de louvores de igreja no Reaper, explorando plugins gratuitos de mixagem." data-modal-meta="set/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" src="images/mix-louvor-vol2.jpg" alt="Mixagens de louvor — vol. 2" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/8e4833234839499.68cb129ce4e67.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
@@ -1624,17 +1634,24 @@
         modalTitle.textContent = card.getAttribute('data-modal-title') || '';
         modalDesc.textContent = card.getAttribute('data-modal-desc') || '';
         modalMeta.textContent = card.getAttribute('data-modal-meta') || '';
-        var embedUrl = card.getAttribute('data-modal-embed');
-        if (embedUrl) {
+        var embedAttr = card.getAttribute('data-modal-embed');
+        if (embedAttr) {
+          var embedUrls = embedAttr.split('|');
           modalFrame.innerHTML = '';
-          var iframe = document.createElement('iframe');
-          iframe.src = embedUrl;
-          iframe.style.width = '100%';
-          iframe.style.height = '100%';
-          iframe.style.border = '0';
-          iframe.allow = 'autoplay; fullscreen';
-          iframe.allowFullscreen = true;
-          modalFrame.appendChild(iframe);
+          modalFrame.classList.toggle('multi', embedUrls.length > 1);
+          embedUrls.forEach(function (url, i) {
+            var frameBox = document.createElement('div');
+            frameBox.className = 'embed-box';
+            var iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = '0';
+            iframe.allow = 'autoplay; fullscreen';
+            iframe.allowFullscreen = true;
+            frameBox.appendChild(iframe);
+            modalFrame.appendChild(frameBox);
+          });
         } else {
           modalFrame.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
         }
