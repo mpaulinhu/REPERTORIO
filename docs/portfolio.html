@@ -133,6 +133,49 @@
 
   html { overflow-x: hidden; }
 
+  /* ---------- Smooth theme crossfade ----------
+     Applied only while switching (class added by JS), so normal hover
+     transitions stay snappy and the page load isn't animated. */
+
+  html.theme-anim,
+  html.theme-anim body,
+  html.theme-anim header.site,
+  html.theme-anim .work-cover,
+  html.theme-anim .work-info,
+  html.theme-anim .tool-card,
+  html.theme-anim .card,
+  html.theme-anim .chip,
+  html.theme-anim .btn,
+  html.theme-anim .marquee,
+  html.theme-anim .menu-overlay,
+  html.theme-anim .section-head h2,
+  html.theme-anim .section-head p,
+  html.theme-anim p,
+  html.theme-anim h1,
+  html.theme-anim h2,
+  html.theme-anim h3,
+  html.theme-anim h4,
+  html.theme-anim span,
+  html.theme-anim a {
+    transition: background-color 0.9s cubic-bezier(.4,0,.2,1),
+                border-color 0.9s cubic-bezier(.4,0,.2,1),
+                color 0.75s cubic-bezier(.4,0,.2,1),
+                fill 0.75s cubic-bezier(.4,0,.2,1),
+                stroke 0.75s cubic-bezier(.4,0,.2,1),
+                box-shadow 0.9s cubic-bezier(.4,0,.2,1) !important;
+  }
+
+  /* the glow blobs drift a little brighter mid-switch, so the change reads
+     as a deliberate transition rather than a hard cut */
+  html.theme-anim .bg-glow span {
+    transition: opacity 0.9s ease, background-color 0.9s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.theme-anim,
+    html.theme-anim * { transition: none !important; }
+  }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -657,6 +700,229 @@
     .work-cover::after { display: none; }
   }
 
+  /* ---------- Mini-game no card do hero ---------- */
+
+  .mix-game {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    cursor: pointer;
+  }
+
+  /* enquanto joga ou mostra o placar, tampa o icone da camera
+     pra o texto nunca ficar por cima do desenho */
+  .mix-game.playing,
+  .mix-game.over {
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    backdrop-filter: blur(3px);
+  }
+
+  /* botao inicial — discreto, so aparece de verdade no hover */
+  .mix-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    color: var(--text-dim);
+    font-family: var(--display);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    /* visível o tempo todo (senão ninguém descobre que existe),
+       só ganha destaque no hover */
+    opacity: 0.75;
+    align-self: flex-end;
+    margin: 0 auto;
+    width: auto;
+    max-width: max-content;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    line-height: 1;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(.2,.8,.2,1), color 0.2s ease, border-color 0.2s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  /* flex-shrink:0 + tamanho fixo: sem isso o SVG estica e vira um triangulo gigante */
+  .mix-start svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+    display: block;
+  }
+
+  .hero-scene:hover .mix-start,
+  .mix-start:focus-visible {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  .mix-start:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .mix-game.playing .mix-start,
+  .mix-game.over .mix-start { display: none; }
+
+  /* area de jogo */
+  .mix-play {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mix-game.playing .mix-play { display: flex; }
+
+  .mix-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--display);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .mix-head b { color: var(--text); font-size: 0.85rem; }
+  .mix-time { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+  .mix-faders {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    align-items: stretch;
+  }
+
+  /* cada canal é um fader vertical */
+  .mix-ch {
+    position: relative;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-raised) 70%, transparent);
+    overflow: hidden;
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.15s ease, transform 0.12s ease;
+  }
+
+  .mix-ch:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+  .mix-ch:active { transform: scale(0.97); }
+
+  /* o "sinal" subindo dentro do canal */
+  .mix-ch i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0%;
+    background: linear-gradient(to top, var(--accent), var(--accent-2));
+    opacity: 0.25;
+    transition: height 0.18s linear;
+  }
+
+  .mix-ch.live {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset, 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .mix-ch.live i { opacity: 0.95; }
+
+  .mix-ch.hit i { background: var(--accent); opacity: 1; }
+  .mix-ch.miss { border-color: #E5484D; }
+  .mix-ch.miss i { background: #E5484D; opacity: 0.8; }
+
+  .mix-hint {
+    margin: 0;
+    text-align: center;
+    font-size: 0.6rem;
+    color: var(--text-faint);
+    min-height: 1em;
+  }
+
+  /* tela final */
+  .mix-over {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .mix-game.over .mix-over { display: flex; }
+
+  .mix-over-score {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .mix-over-msg {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--text-dim);
+    max-width: 22ch;
+  }
+
+  .mix-over-label {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .mix-again {
+    margin-top: 4px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-family: var(--display);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .mix-again:hover { background: var(--accent); color: #041210; }
+
+  /* enquanto joga, a cena para de girar pra nao atrapalhar a mira */
+  .hero-scene.game-on .scene-stage {
+    transform: none !important;
+    transition: transform 0.5s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .hero-scene.game-on .scene-plane.back,
+  .hero-scene.game-on .scene-plane.mid { opacity: 0.15; }
+
+  .hero-scene.game-on .scene-plane.front > svg { opacity: 0.06; }
+
+  /* no touch o botao fica sempre visivel (nao existe hover) */
+  @media (hover: none), (pointer: coarse) {
+    .mix-start { opacity: 1; transform: none; }
+  }
+
   /* ---------- Easter egg: type "mix" to turn the glow up ---------- */
 
   body.party .bg-glow span {
@@ -736,7 +1002,8 @@
     height: 22px;
     border-radius: 999px;
     background: var(--bg);
-    transition: transform 0.3s ease;
+    /* slower, with a slight overshoot so the switch feels deliberate */
+    transition: transform 0.75s cubic-bezier(.5,1.6,.4,1);
   }
 
   :root[data-theme="light"] .theme-toggle .knob { transform: translateX(24px); }
@@ -872,6 +1139,9 @@
     display: inline-block;
     transform-style: preserve-3d;
     animation: layerIn 0.9s cubic-bezier(.2,.8,.2,1) both;
+    /* folga para descendentes (g, p, ç) sem alterar o espaçamento das linhas */
+    padding-bottom: 0.18em;
+    margin-bottom: -0.18em;
   }
 
   .hero-line:nth-child(1) h1 { animation-delay: 0.05s; }
@@ -884,6 +1154,10 @@
     background-clip: text;
     color: transparent;
     margin-left: 0.3ch;
+    /* background-clip:text corta a perna do "g" quando a caixa é justa.
+       O padding dá folga e a margem negativa devolve o espaço no layout. */
+    padding-bottom: 0.18em;
+    margin-bottom: -0.18em;
   }
 
   @keyframes layerIn {
@@ -972,7 +1246,8 @@
     transform: translateZ(20px);
   }
 
-  .scene-plane svg { width: 44%; height: 44%; color: var(--accent); opacity: 0.9; }
+  /* > svg: só o ícone direto do plano, para não afetar os SVGs do mini-game */
+  .scene-plane > svg { width: 44%; height: 44%; color: var(--accent); opacity: 0.9; }
 
   .scene-plane .rec-dot {
     position: absolute;
@@ -1662,6 +1937,30 @@
               <span class="rec-dot"></span>
               <span class="frame-lines"></span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="7" width="13" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>
+
+              <!-- mini-game: acerte o nivel dos canais -->
+              <div class="mix-game" id="mixGame">
+                <button type="button" class="mix-start" id="mixStart">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5v14l11-7z"/></svg>
+                  <span>Jogar</span>
+                </button>
+
+                <div class="mix-play" id="mixPlay">
+                  <div class="mix-head">
+                    <span class="mix-score">Pontos <b id="mixScore">0</b></span>
+                    <span class="mix-time" id="mixTime">20s</span>
+                  </div>
+                  <div class="mix-faders" id="mixFaders"></div>
+                  <p class="mix-hint" id="mixHint">Clique no canal aceso</p>
+                </div>
+
+                <div class="mix-over" id="mixOver">
+                  <p class="mix-over-label">pontos</p>
+                  <p class="mix-over-score"><b id="mixFinal">0</b></p>
+                  <p class="mix-over-msg" id="mixMsg"></p>
+                  <button type="button" class="mix-again" id="mixAgain">Jogar de novo</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2717,8 +3016,19 @@
     var stored = null;
     try { stored = localStorage.getItem('portfolio-theme'); } catch (e) {}
     if (stored) root.setAttribute('data-theme', stored);
+    var themeAnimTimer = null;
     themeToggle.addEventListener('click', function () {
       var next = isDark() ? 'light' : 'dark';
+
+      /* turn the crossfade on just for the duration of the switch */
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        root.classList.add('theme-anim');
+        clearTimeout(themeAnimTimer);
+        themeAnimTimer = setTimeout(function () {
+          root.classList.remove('theme-anim');
+        }, 1100);
+      }
+
       root.setAttribute('data-theme', next);
       try { localStorage.setItem('portfolio-theme', next); } catch (e) {}
     });
@@ -3269,6 +3579,7 @@
       var dotX = mouseX, dotY = mouseY;
       var ringX = mouseX, ringY = mouseY;
       var hasMoved = false;
+      var cursorScrollTick = false;
 
       window.addEventListener('mousemove', function (e) {
         mouseX = e.clientX;
@@ -3306,18 +3617,38 @@
 
       var cursorLabel = document.getElementById('cursorLabel');
 
-      /* delegated so cards added later in edit mode also work */
-      document.addEventListener('mouseover', function (e) {
-        var labelled = e.target.closest && e.target.closest('[data-cursor-label]');
-        var hoverable = e.target.closest && e.target.closest('a, button, .work-card, [data-cursor-label]');
+      /* Resolve the cursor state from whatever is actually under the pointer.
+         Driving it off elementFromPoint (instead of mouseover alone) means
+         scrolling without moving the mouse also updates the cursor — otherwise
+         the label stays stuck until the next mouse move. */
+      function refreshCursorState() {
+        if (!hasMoved) return;
+        var el = document.elementFromPoint(mouseX, mouseY);
+        var labelled = el && el.closest ? el.closest('[data-cursor-label]') : null;
+        var hoverable = el && el.closest ? el.closest('a, button, .work-card, [data-cursor-label]') : null;
+
         if (labelled && cursorLabel) {
-          cursorLabel.textContent = labelled.getAttribute('data-cursor-label') || '';
+          var text = labelled.getAttribute('data-cursor-label') || '';
+          if (cursorLabel.textContent !== text) cursorLabel.textContent = text;
           document.body.classList.add('cursor-label');
         } else {
           document.body.classList.remove('cursor-label');
         }
         document.body.classList.toggle('cursor-hover', !!hoverable && !labelled);
-      });
+      }
+
+      document.addEventListener('mousemove', refreshCursorState);
+
+      /* the fix: recheck while the page scrolls under a still cursor */
+      window.addEventListener('scroll', function () {
+        if (!cursorScrollTick) {
+          cursorScrollTick = true;
+          requestAnimationFrame(function () {
+            cursorScrollTick = false;
+            refreshCursorState();
+          });
+        }
+      }, { passive: true });
 
       document.addEventListener('mouseout', function (e) {
         if (!e.relatedTarget) {
@@ -3394,6 +3725,146 @@
         if (!pTicking) { pTicking = true; requestAnimationFrame(applyParallax); }
       }, { passive: true });
     }
+
+    /* ---------- Mini-game: acerte o canal que acender ---------- */
+
+    (function () {
+      var game = document.getElementById('mixGame');
+      if (!game) return;
+
+      var startBtn = document.getElementById('mixStart');
+      var againBtn = document.getElementById('mixAgain');
+      var fadersEl = document.getElementById('mixFaders');
+      var scoreEl = document.getElementById('mixScore');
+      var timeEl = document.getElementById('mixTime');
+      var hintEl = document.getElementById('mixHint');
+      var finalEl = document.getElementById('mixFinal');
+      var msgEl = document.getElementById('mixMsg');
+      var sceneEl = document.getElementById('heroScene');
+
+      var CHANNELS = 4;
+      var ROUND_MS = 20000;
+
+      var channels = [];
+      var score = 0;
+      var liveIdx = -1;
+      var liveTimer = null;
+      var endTimer = null;
+      var tickTimer = null;
+      var endsAt = 0;
+      var stepMs = 1100;
+      var running = false;
+
+      /* monta os 4 canais uma vez */
+      for (var i = 0; i < CHANNELS; i++) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'mix-ch';
+        b.setAttribute('aria-label', 'Canal ' + (i + 1));
+        b.innerHTML = '<i></i>';
+        (function (idx, btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (!running) return;
+            if (idx === liveIdx) {
+              score += 1;
+              scoreEl.textContent = score;
+              btn.classList.add('hit');
+              hintEl.textContent = pick(['boa!', 'no tempo', 'isso', 'limpo']);
+              setTimeout(function () { btn.classList.remove('hit'); }, 160);
+              nextLive();
+            } else {
+              score = Math.max(0, score - 1);
+              scoreEl.textContent = score;
+              btn.classList.add('miss');
+              hintEl.textContent = 'canal errado';
+              setTimeout(function () { btn.classList.remove('miss'); }, 260);
+            }
+          });
+        })(i, b);
+        fadersEl.appendChild(b);
+        channels.push(b);
+      }
+
+      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+      function clearLive() {
+        channels.forEach(function (c) {
+          c.classList.remove('live');
+          c.querySelector('i').style.height = '0%';
+        });
+      }
+
+      function nextLive() {
+        clearTimeout(liveTimer);
+        clearLive();
+
+        /* nunca repete o mesmo canal duas vezes seguidas */
+        var idx = Math.floor(Math.random() * CHANNELS);
+        if (idx === liveIdx) idx = (idx + 1) % CHANNELS;
+        liveIdx = idx;
+
+        var ch = channels[liveIdx];
+        ch.classList.add('live');
+        ch.querySelector('i').style.height = (55 + Math.random() * 45) + '%';
+
+        /* vai ficando mais rapido conforme o jogo anda */
+        stepMs = Math.max(480, stepMs - 28);
+        liveTimer = setTimeout(function () {
+          if (!running) return;
+          hintEl.textContent = 'passou...';
+          nextLive();
+        }, stepMs);
+      }
+
+      function tick() {
+        var left = Math.max(0, endsAt - Date.now());
+        timeEl.textContent = Math.ceil(left / 1000) + 's';
+        if (left <= 0) { finish(); return; }
+        tickTimer = setTimeout(tick, 200);
+      }
+
+      function start() {
+        running = true;
+        score = 0;
+        stepMs = 1100;
+        liveIdx = -1;
+        scoreEl.textContent = '0';
+        hintEl.textContent = 'clique no canal aceso';
+        game.classList.remove('over');
+        game.classList.add('playing');
+        if (sceneEl) sceneEl.classList.add('game-on');
+        endsAt = Date.now() + ROUND_MS;
+        tick();
+        nextLive();
+        endTimer = setTimeout(finish, ROUND_MS + 60);
+      }
+
+      function finish() {
+        running = false;
+        clearTimeout(liveTimer);
+        clearTimeout(endTimer);
+        clearTimeout(tickTimer);
+        clearLive();
+        game.classList.remove('playing');
+        game.classList.add('over');
+        if (sceneEl) sceneEl.classList.remove('game-on');
+        finalEl.textContent = score;
+        msgEl.textContent =
+          score >= 25 ? 'isso é ouvido de operador de mesa.' :
+          score >= 15 ? 'bom reflexo — dava pra rodar um ao vivo.' :
+          score >= 7  ? 'no ritmo. tenta de novo?' :
+                        'todo mundo começa passando o tempo.';
+      }
+
+      startBtn.addEventListener('click', function (e) { e.stopPropagation(); start(); });
+      againBtn.addEventListener('click', function (e) { e.stopPropagation(); start(); });
+
+      /* se sair da aba, encerra pra nao rodar timer escondido */
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden && running) finish();
+      });
+    })();
 
     /* ---------- Easter egg: type "mix" anywhere ---------- */
 
