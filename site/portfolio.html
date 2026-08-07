@@ -831,7 +831,10 @@
     font-size: 0.85rem;
     text-align: center;
     padding: 24px;
+    overflow: hidden;
   }
+
+  .modal-frame:has(iframe) { padding: 0; }
 
   .modal-head { display: flex; justify-content: space-between; align-items: center; }
   .modal-head h3 { font-family: var(--display); font-weight: 600; font-size: 1.3rem; margin: 0; color: var(--accent); }
@@ -1086,7 +1089,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-video="true" data-modal-title="Transmissão ao vivo de eventos" data-modal-desc="Operação de câmera e switching com mesa Blackmagic ATEM, produção ao vivo via vMix (incluindo podcasts), mixagem pela Soundcraft UI24R e automação com Stream Deck." data-modal-meta="ELO Editora + freelance · Ao vivo">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Transmissão ao vivo de eventos" data-modal-desc="Operação de câmera e switching com mesa Blackmagic ATEM, produção ao vivo via vMix (incluindo podcasts), mixagem pela Soundcraft UI24R e automação com Stream Deck." data-modal-meta="ELO Editora + freelance · Ao vivo">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" src="images/transmissao-ao-vivo.jpg" alt="Transmissão ao vivo de eventos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
@@ -1107,28 +1110,29 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver no Behance" data-modal-video="true" data-modal-title="Clipe — Conferência dos Jovens AVIVA" data-modal-desc="Clipe oficial de conferência, publicado no Behance. Captação e edição de conteúdo para evento religioso." data-modal-meta="Behance · Vídeo">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/NphFE33WGPj/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Clipe oficial — Conferência dos Jovens AVIVA" data-modal-desc="Clipe da Conferência de Jovens com o grupo ADJA Praise. Cuidei da sonorização inteira do zero — organização e mixagem no Reaper — além da edição do vídeo." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/clipe-aviva.jpg" alt="Clipe — Conferência dos Jovens AVIVA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" src="images/clipe-aviva.jpg" alt="Clipe oficial — Conferência dos Jovens AVIVA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
               <div class="reveal-label">
                 <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver no Behance</span>
+                <span class="format">Ver detalhes</span>
               </div>
             </div>
           </div>
           <div class="work-info">
-            <p class="period">Behance</p>
-            <h4>Clipe — Conferência dos Jovens AVIVA</h4>
-            <p class="desc">Clipe oficial de evento religioso, captação e edição.</p>
-            <div class="work-links"><a href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+            <p class="period">dez/2025</p>
+            <h4>Clipe oficial — Conferência dos Jovens AVIVA</h4>
+            <p class="desc">Sonorização do zero no Reaper e edição de vídeo do clipe oficial do evento.</p>
+            <div class="stack-row"><span class="chip">Reaper</span><span class="chip">DaVinci Resolve</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/241360403/Clipe-oficial-Conferencia-dos-jovens-AVIVA" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver no Behance" data-modal-title="Sonorização do zero — Amazônia" data-modal-desc="Projeto de sonorização construído do zero, publicado no Behance." data-modal-meta="Behance · Design sonoro">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/R8P7_9Pq8e4/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Sonorização do zero — Amazônia" data-modal-desc="Paisagem sonora autoral inspirada na Amazônia: sons de natureza, ambientes imersivos e a relação entre som e cultura, construída do zero no Premiere e no Audition." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" src="images/sonorizacao-amazonia.jpg" alt="Sonorização do zero — Amazônia" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
@@ -1137,19 +1141,20 @@
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
               <div class="reveal-label">
                 <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver no Behance</span>
+                <span class="format">Ver detalhes</span>
               </div>
             </div>
           </div>
           <div class="work-info">
-            <p class="period">Behance</p>
+            <p class="period">dez/2025</p>
             <h4>Sonorização do zero — Amazônia</h4>
-            <p class="desc">Design sonoro construído do zero para o projeto.</p>
-            <div class="work-links"><a href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+            <p class="desc">Paisagem sonora autoral com ambientes imersivos inspirados na Amazônia.</p>
+            <div class="stack-row"><span class="chip">Premiere</span><span class="chip">Audition</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/240494395/SONORIZACAO-DO-ZERO-AMAZONIA" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver no Behance" data-modal-video="true" data-modal-title="Registros: fotos e vídeo — Festa de 40 anos" data-modal-desc="Cobertura fotográfica e em vídeo de evento — festa de 40 anos, publicado no Behance." data-modal-meta="Behance · Cobertura">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BpEqbaEppLm/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Registros: fotos e vídeo — Festa de 40 anos" data-modal-desc="Cobertura fotográfica e em vídeo de uma festa de aniversário de 40 anos, com edição das imagens captadas no Premiere." data-modal-meta="nov/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" src="images/festa-40-anos.jpg" alt="Registros: fotos e vídeo — Festa de 40 anos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
@@ -1158,15 +1163,214 @@
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
               <div class="reveal-label">
                 <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver no Behance</span>
+                <span class="format">Ver detalhes</span>
               </div>
             </div>
           </div>
           <div class="work-info">
-            <p class="period">Behance</p>
+            <p class="period">nov/2025</p>
             <h4>Registros: fotos e vídeo — Festa de 40 anos</h4>
-            <p class="desc">Cobertura fotográfica e em vídeo do evento.</p>
-            <div class="work-links"><a href="https://www.behance.net/mpaulin" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+            <p class="desc">Cobertura fotográfica e em vídeo de festa de aniversário de 40 anos.</p>
+            <div class="stack-row"><span class="chip">Premiere</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/239104039/REGISTROS-FOTOS-E-VIDEO-Festa-de-40-anos" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://player.vimeo.com/video/1209331304?autoplay=1&amp;loop=1&amp;autopause=0&amp;controls=1&amp;muted=0" data-modal-title="Projeto Jeep" data-modal-desc="Peça em vídeo com animação e edição, unindo motion graphics ao corte de imagens captadas." data-modal-meta="jul/2026 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/projeto-jeep.jpg" alt="Projeto Jeep" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Animação</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">jul/2026</p>
+            <h4>Projeto Jeep</h4>
+            <p class="desc">Vídeo com motion graphics e edição de imagem, unindo animação e corte.</p>
+            <div class="stack-row"><span class="chip">After Effects</span><span class="chip">Premiere</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/252608945/PROJETO-JEEP" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BMQbZNS6iIP/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagem de hino — Salmos 91" data-modal-desc="Mixagem e masterização de um hino no Reaper, com edição de vídeo complementar no Premiere." data-modal-meta="mai/2026 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/mix-hino-salmos-91.jpg" alt="Mixagem de hino — Salmos 91" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Mixagem</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">mai/2026</p>
+            <h4>Mixagem de hino — Salmos 91</h4>
+            <p class="desc">Mixagem e masterização de áudio de um hino, com edição de vídeo complementar.</p>
+            <div class="stack-row"><span class="chip">Reaper</span><span class="chip">Premiere</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/250011667/Mix-hino-salmos-91" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KyIoZw2y5dp/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Freelas — parte 01" data-modal-desc="Compilado de trabalhos avulsos de edição de vídeo, feitos como prática e como freelancer." data-modal-meta="mai/2026 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/freelas-parte-01.jpg" alt="Freelas — parte 01" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Edição</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">mai/2026</p>
+            <h4>Freelas — parte 01</h4>
+            <p class="desc">Compilado de edições de vídeo feitas como freelancer.</p>
+            <div class="stack-row"><span class="chip">After Effects</span><span class="chip">Premiere</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/250011627/Freelas-parte-01" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/D53A-NdXwV7/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Aberturas — Conferência das Mulheres" data-modal-desc="Peças de abertura e apresentações em vídeo para uma conferência, combinando animação e captação de áudio." data-modal-meta="mai/2026 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/conferencia-mulheres.jpg" alt="Aberturas — Conferência das Mulheres" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Animação</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">mai/2026</p>
+            <h4>Aberturas — Conferência das Mulheres</h4>
+            <p class="desc">Peças de abertura em vídeo para conferência, com animação e áudio.</p>
+            <div class="stack-row"><span class="chip">After Effects</span><span class="chip">Premiere</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/248687823/Apresentacoes-simples-para-Conferencia-da-Mulheres" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BjqA7Xxjpfz/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagem e edição — Worship" data-modal-desc="Mixagem de áudio de culto no Reaper, com edição de vídeo e tratamento de imagem no Photoshop." data-modal-meta="fev/2026 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/mixagem-worship.jpg" alt="Mixagem e edição — Worship" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Mixagem</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">fev/2026</p>
+            <h4>Mixagem e edição — Worship</h4>
+            <p class="desc">Mixagem de áudio e edição de vídeo de culto, com tratamento de imagem.</p>
+            <div class="stack-row"><span class="chip">Reaper</span><span class="chip">Premiere</span><span class="chip">Photoshop</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/244558533/Mixagem-e-edicao-Worship" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M6pZRPfswYJ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Festa de aniversário — 15 anos" data-modal-desc="Edição de vídeo e decupagem de material captado numa festa de 15 anos." data-modal-meta="nov/2025 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/festa-15-anos.jpg" alt="Festa de aniversário — 15 anos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Cobertura</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">nov/2025</p>
+            <h4>Festa de aniversário — 15 anos</h4>
+            <p class="desc">Edição de vídeo e decupagem de material captado no evento.</p>
+            <div class="stack-row"><span class="chip">Premiere</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/239102825/FESTA-DE-ANIVERSARIO-15-ANOS" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/8UA8v8ff9Cy/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 1" data-modal-desc="Mixagem e masterização de áudio de dois louvores de igreja, feitas no Reaper com plugins gratuitos." data-modal-meta="out/2025 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/mix-louvor-vol1.jpg" alt="Mixagens de louvor — vol. 1" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Mixagem</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">out/2025</p>
+            <h4>Mixagens de louvor — vol. 1</h4>
+            <p class="desc">Mixagem e masterização de dois louvores de igreja no Reaper.</p>
+            <div class="stack-row"><span class="chip">Reaper</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/236140457/Projeto-mix-Lindo-momento-Uncao-de-Deus" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M7iStDQqR9G/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 2" data-modal-desc="Mixagem de áudio de louvores de igreja no Reaper, explorando plugins gratuitos de mixagem." data-modal-meta="set/2025 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/mix-louvor-vol2.jpg" alt="Mixagens de louvor — vol. 2" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Mixagem</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">set/2025</p>
+            <h4>Mixagens de louvor — vol. 2</h4>
+            <p class="desc">Mixagem de áudio de louvores de igreja, explorando plugins gratuitos.</p>
+            <div class="stack-row"><span class="chip">Reaper</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/234839499/Mix-church-Fogo-em-teus-olhos-e-O-fogo-ardera-" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
+          </div>
+        </article>
+
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KFzND2LDt3B/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Simplesmente Braseiro" data-modal-desc="Edição de vídeo com foco em roteiro e criatividade, produzido no DaVinci Resolve." data-modal-meta="ago/2025 · Behance">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" src="images/simplesmente-braseiro.jpg" alt="Simplesmente Braseiro" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Edição</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <p class="period">ago/2025</p>
+            <h4>Simplesmente Braseiro</h4>
+            <p class="desc">Edição de vídeo com foco em roteiro e narrativa visual.</p>
+            <div class="stack-row"><span class="chip">DaVinci Resolve</span></div>
+            <div class="work-links"><a href="https://www.behance.net/gallery/233376691/Simplesmente-BRASEIRO" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>
           </div>
         </article>
 
@@ -1175,12 +1379,12 @@
       <div class="note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
         <div>
-          <h4>Mais projetos no Behance e Instagram</h4>
+          <h4>Acervo completo no Behance e Instagram</h4>
           <p>
-            O acervo completo de mixagens, clipes e coberturas de eventos está no
-            <a href="https://www.behance.net/mpaulin" target="_blank" style="color: var(--accent); font-weight: 600;">Behance</a>
-            e no <a href="https://www.instagram.com/mpaulinhu" target="_blank" style="color: var(--accent); font-weight: 600;">Instagram</a>.
-            Os cards acima são uma seleção — o resto pode ser cadastrado aqui aos poucos.
+            Os cards acima reúnem os trabalhos publicados no
+            <a href="https://www.behance.net/mpaulin" target="_blank" style="color: var(--accent); font-weight: 600;">Behance</a>.
+            Mais registros de bastidor e cobertura de eventos no
+            <a href="https://www.instagram.com/mpaulinhu" target="_blank" style="color: var(--accent); font-weight: 600;">Instagram</a>.
           </p>
         </div>
       </div>
@@ -1420,15 +1624,26 @@
         modalTitle.textContent = card.getAttribute('data-modal-title') || '';
         modalDesc.textContent = card.getAttribute('data-modal-desc') || '';
         modalMeta.textContent = card.getAttribute('data-modal-meta') || '';
-        modalFrame.textContent = card.getAttribute('data-modal-video')
-          ? 'Espaço reservado para embed de vídeo (YouTube/Vimeo não-listado) quando o trabalho real for cadastrado.'
-          : 'Este trabalho não tem vídeo associado — veja os links abaixo.';
+        var embedUrl = card.getAttribute('data-modal-embed');
+        if (embedUrl) {
+          modalFrame.innerHTML = '';
+          var iframe = document.createElement('iframe');
+          iframe.src = embedUrl;
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = '0';
+          iframe.allow = 'autoplay; fullscreen';
+          iframe.allowFullscreen = true;
+          modalFrame.appendChild(iframe);
+        } else {
+          modalFrame.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
+        }
         modalBackdrop.classList.add('open');
       });
     });
-    modalClose.addEventListener('click', function () { modalBackdrop.classList.remove('open'); });
-    modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) modalBackdrop.classList.remove('open'); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') modalBackdrop.classList.remove('open'); });
+    modalClose.addEventListener('click', function () { modalFrame.innerHTML = ''; modalBackdrop.classList.remove('open'); });
+    modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) { modalFrame.innerHTML = ''; modalBackdrop.classList.remove('open'); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { modalFrame.innerHTML = ''; modalBackdrop.classList.remove('open'); } });
 
     /* ---------- Custom cursor (small dot only) ---------- */
 
