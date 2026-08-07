@@ -2104,7 +2104,9 @@
       <label for="avTools">Ferramentas usadas (separadas por vírgula)</label>
       <input type="text" id="avTools" placeholder="Ex: Premiere, After Effects">
 
-      <label for="avCover">Link da imagem de capa</label>
+      <label for="avCoverFile">Imagem de capa</label>
+      <input type="file" id="avCoverFile" accept="image/*">
+      <p style="font-size:0.72rem; color: var(--text-dim); margin: 4px 0 0;">Ou cole um link em vez de escolher um arquivo:</p>
       <input type="url" id="avCover" placeholder="https://...">
 
       <label for="avBehance">Link da página no Behance</label>
@@ -2246,11 +2248,35 @@
       var editPanel = document.getElementById('editPanel');
       var saveBtn = document.getElementById('saveEditsBtn');
       var statusMsg = document.getElementById('editStatusMsg');
-      var EDITABLE_SELECTOR = '.hero-line h1, .role-word, .intro .lede, .about p, .work-info h4, .work-info p.desc, .section-head h2, .section-head p';
+      var EDITABLE_SELECTOR = '.hero-line h1, .role-word, .intro .lede, .about p, .work-info h4, .work-info p.desc, .section-head h2, .section-head p, .work-info p.period';
+
+      function syncCardData(card) {
+        if (!card || !card.classList || !card.classList.contains('work-card')) return;
+        var h4 = card.querySelector('.work-info h4');
+        var desc = card.querySelector('.work-info p.desc');
+        var period = card.querySelector('.work-info p.period');
+        if (h4) card.setAttribute('data-modal-title', h4.textContent.trim());
+        if (desc) card.setAttribute('data-modal-desc', desc.textContent.trim());
+        if (period) {
+          var behanceLink = card.querySelector('.work-links a');
+          var suffix = behanceLink ? ' · Behance' : (card.getAttribute('data-modal-meta') || '').replace(/^[^·]*/, '');
+          var periodText = period.textContent.trim();
+          card.setAttribute('data-modal-meta', periodText ? periodText + suffix : suffix.replace(/^ · /, ''));
+        }
+      }
 
       function setEditableState(on) {
         document.querySelectorAll(EDITABLE_SELECTOR).forEach(function (el) {
           el.setAttribute('contenteditable', on ? 'true' : 'false');
+        });
+        document.querySelectorAll('.work-card').forEach(function (card) {
+          var editableEls = card.querySelectorAll('[contenteditable]');
+          editableEls.forEach(function (el) {
+            if (el.dataset.syncBound) return;
+            el.dataset.syncBound = '1';
+            el.addEventListener('input', function () { syncCardData(card); });
+            el.addEventListener('blur', function () { syncCardData(card); });
+          });
         });
       }
 
@@ -2322,22 +2348,58 @@
         coverBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 15l-4.5-4.5L9 18"/></svg>';
         coverBtn.addEventListener('click', function (e) {
           e.stopPropagation();
-          var newUrl = prompt('Cole o link da nova imagem de capa:');
-          if (!newUrl) return;
-          var img = card.querySelector('.cover-photo');
-          var coverBox = card.querySelector('.work-cover');
-          if (!img) {
-            img = document.createElement('img');
-            img.className = 'cover-photo';
-            img.loading = 'lazy';
-            img.alt = card.getAttribute('data-modal-title') || '';
-            coverBox.insertBefore(img, coverBox.firstChild);
-          }
-          img.removeAttribute('onerror');
-          img.src = newUrl;
-          if (coverBox) coverBox.classList.add('has-photo');
+          openCoverPicker(function (newUrl) {
+            if (newUrl) applyCoverToCard(card, newUrl);
+          });
         });
         card.appendChild(coverBtn);
+      }
+
+      function applyCoverToCard(card, newUrl) {
+        var img = card.querySelector('.cover-photo');
+        var coverBox = card.querySelector('.work-cover');
+        if (!img) {
+          img = document.createElement('img');
+          img.className = 'cover-photo';
+          img.loading = 'lazy';
+          img.alt = card.getAttribute('data-modal-title') || '';
+          coverBox.insertBefore(img, coverBox.firstChild);
+        }
+        img.removeAttribute('onerror');
+        img.src = newUrl;
+        if (coverBox) coverBox.classList.add('has-photo');
+      }
+
+      /* Cover picker: escolher arquivo do PC (vira base64 embutido) ou colar link */
+      var coverFileInput = document.createElement('input');
+      coverFileInput.type = 'file';
+      coverFileInput.accept = 'image/*';
+      coverFileInput.style.display = 'none';
+      document.body.appendChild(coverFileInput);
+      var coverFileCallback = null;
+
+      coverFileInput.addEventListener('change', function () {
+        var file = coverFileInput.files[0];
+        coverFileInput.value = '';
+        if (!file || !coverFileCallback) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          var cb = coverFileCallback;
+          coverFileCallback = null;
+          cb(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      function openCoverPicker(callback) {
+        var choice = confirm('Clique OK para escolher uma imagem do seu computador.\nClique Cancelar para colar um link de imagem em vez disso.');
+        if (choice) {
+          coverFileCallback = callback;
+          coverFileInput.click();
+        } else {
+          var url = prompt('Cole o link da imagem:');
+          callback(url);
+        }
       }
 
       document.querySelectorAll('.work-card').forEach(addCardControls);
@@ -2358,14 +2420,12 @@
       addVideoClose.addEventListener('click', closeAddVideoModal);
       addVideoBackdrop.addEventListener('click', function (e) { if (e.target === addVideoBackdrop) closeAddVideoModal(); });
 
-      addVideoForm.addEventListener('submit', function (e) {
-        e.preventDefault();
+      function submitAddVideoForm(coverUrl) {
         var title = document.getElementById('avTitle').value.trim();
         var period = document.getElementById('avPeriod').value.trim();
         var badge = document.getElementById('avBadge').value.trim() || 'Vídeo';
         var desc = document.getElementById('avDesc').value.trim();
         var toolsRaw = document.getElementById('avTools').value.trim();
-        var coverUrl = document.getElementById('avCover').value.trim();
         var behanceUrl = document.getElementById('avBehance').value.trim();
         var embedUrl = document.getElementById('avEmbed').value.trim();
 
@@ -2427,6 +2487,24 @@
 
         addVideoForm.reset();
         closeAddVideoModal();
+      }
+
+      addVideoForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var fileInput = document.getElementById('avCoverFile');
+        var file = fileInput.files[0];
+        var linkUrl = document.getElementById('avCover').value.trim();
+
+        if (file) {
+          var reader = new FileReader();
+          reader.onload = function () {
+            fileInput.value = '';
+            submitAddVideoForm(reader.result);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          submitAddVideoForm(linkUrl);
+        }
       });
     })();
 
