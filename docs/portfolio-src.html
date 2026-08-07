@@ -166,30 +166,43 @@
     max-width: 640px;
     max-height: 640px;
     border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.14;
-    animation: glowDrift 26s ease-in-out infinite;
+    filter: blur(80px);
+    opacity: 0.22;
+    animation: glowDrift 18s ease-in-out infinite;
   }
 
   .bg-glow span:nth-child(1) {
     top: -10%;
     left: -8%;
     background: var(--accent);
-    animation-duration: 24s;
+    animation-duration: 16s;
   }
 
   .bg-glow span:nth-child(2) {
     bottom: -14%;
     right: -10%;
     background: var(--accent-2);
-    animation-duration: 30s;
-    animation-delay: -8s;
+    animation-duration: 20s;
+    animation-delay: -6s;
+  }
+
+  .bg-glow span:nth-child(3) {
+    top: 38%;
+    left: 42%;
+    width: 30vw;
+    height: 30vw;
+    max-width: 420px;
+    max-height: 420px;
+    background: var(--accent);
+    opacity: 0.14;
+    animation-duration: 22s;
+    animation-delay: -12s;
   }
 
   @keyframes glowDrift {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(6vw, 4vh) scale(1.08); }
-    66% { transform: translate(-4vw, 6vh) scale(0.95); }
+    33% { transform: translate(9vw, 6vh) scale(1.15); }
+    66% { transform: translate(-6vw, 9vh) scale(0.9); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -288,6 +301,43 @@
     letter-spacing: -0.01em;
   }
 
+  /* ---------- Intro overlay ---------- */
+
+  #introOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.7s cubic-bezier(.76,0,.24,1), opacity 0.5s ease 0.15s;
+  }
+
+  #introOverlay.intro-hide {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .intro-mark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    letter-spacing: -0.01em;
+    opacity: 0;
+    transform: scale(0.92);
+    animation: introMarkIn 0.6s cubic-bezier(.2,.8,.2,1) 0.15s forwards;
+  }
+
+  @keyframes introMarkIn {
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #introOverlay { display: none; }
+  }
+
   .header-actions { display: flex; align-items: center; gap: 14px; }
 
   .icon-btn {
@@ -383,8 +433,32 @@
 
   .reveal.in { opacity: 1; transform: perspective(var(--persp)) translateY(0) rotateX(0deg); }
 
+  .section-head h2 {
+    overflow: hidden;
+  }
+
+  .section-head h2 .word {
+    display: inline-block;
+    transform: translateY(115%) rotate(4deg);
+    opacity: 0;
+    transition: transform 0.75s cubic-bezier(.16,.9,.2,1), opacity 0.6s ease;
+  }
+
+  .reveal.in .section-head h2 .word {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  .section-head h2 .word:nth-child(1) { transition-delay: 0.02s; }
+  .section-head h2 .word:nth-child(2) { transition-delay: 0.09s; }
+  .section-head h2 .word:nth-child(3) { transition-delay: 0.16s; }
+  .section-head h2 .word:nth-child(4) { transition-delay: 0.23s; }
+  .section-head h2 .word:nth-child(5) { transition-delay: 0.3s; }
+  .section-head h2 .word:nth-child(6) { transition-delay: 0.37s; }
+
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
+    .section-head h2 .word { opacity: 1; transform: none; transition: none; }
     * { scroll-behavior: auto !important; animation: none !important; }
   }
 
@@ -1118,7 +1192,11 @@
   }
 </style>
 
-<div class="bg-glow" aria-hidden="true"><span></span><span></span></div>
+<div class="bg-glow" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<div id="introOverlay" aria-hidden="true">
+  <span class="intro-mark">Marcos<span class="grad-text">.</span>Paulo</span>
+</div>
 
 <div id="cursorRing"></div>
 <div id="cursorDot"></div>
@@ -2256,6 +2334,27 @@
     menuToggle.addEventListener('click', function () { setMenu(!menuOverlay.classList.contains('open')); });
     menuOverlay.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function () { setMenu(false); });
+    });
+
+    /* Intro overlay */
+    var introOverlay = document.getElementById('introOverlay');
+    if (introOverlay) {
+      var hideIntro = function () {
+        introOverlay.classList.add('intro-hide');
+        setTimeout(function () { introOverlay.remove(); }, 800);
+      };
+      if (document.readyState === 'complete') {
+        setTimeout(hideIntro, 350);
+      } else {
+        window.addEventListener('load', function () { setTimeout(hideIntro, 350); });
+      }
+      setTimeout(hideIntro, 2200);
+    }
+
+    /* Split section headings into words for the reveal animation */
+    document.querySelectorAll('.section-head h2').forEach(function (h2) {
+      var words = h2.textContent.trim().split(/\s+/);
+      h2.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
     });
 
     /* Scroll reveal */
