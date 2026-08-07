@@ -882,9 +882,144 @@
   footer { padding: 48px 0 60px; border-top: 1px solid var(--border); }
   .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
   .footer-inner p { font-size: 0.82rem; color: var(--text-faint); margin: 0; }
+
+  /* ---------- Edit mode ---------- */
+
+  #editToggle {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 400;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  #editToggle svg { width: 20px; height: 20px; }
+  #editToggle.active { background: var(--accent); color: #06110F; }
+
+  body.edit-mode [contenteditable="true"] {
+    outline: 1.5px dashed var(--accent-2);
+    outline-offset: 3px;
+    border-radius: 3px;
+    cursor: text;
+  }
+  body.edit-mode [contenteditable="true"]:focus { outline-style: solid; }
+
+  .edit-delete-btn {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--danger, #F04848);
+    color: #fff;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+  body.edit-mode .work-card { position: relative; }
+  body.edit-mode .edit-delete-btn { display: flex; }
+
+  .edit-add-card {
+    display: none;
+    width: calc(33.333% - 30px);
+    min-width: 260px;
+    aspect-ratio: 4/3;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    background: none;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+  body.edit-mode .edit-add-card { display: flex; }
+  .edit-add-card:hover { border-color: var(--accent-2); color: var(--text); }
+
+  #editPanel {
+    position: fixed;
+    right: 20px;
+    bottom: 84px;
+    z-index: 400;
+    width: 300px;
+    max-width: calc(100vw - 40px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+  body.edit-mode #editPanel.open { display: flex; }
+  #editPanel h4 { margin: 0; font-size: 0.9rem; }
+  #editPanel .warn { font-size: 0.72rem; color: var(--text-dim); line-height: 1.5; margin: 0; }
+  #editPanel input[type=password] {
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+  #editPanel button {
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text);
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  #editPanel button.primary { background: var(--accent); color: #06110F; border-color: var(--accent); }
+  #editPanel .status-msg { font-size: 0.76rem; min-height: 1.2em; }
+  #editPanel .status-msg.ok { color: var(--accent); }
+  #editPanel .status-msg.err { color: var(--danger, #F04848); }
+
+  .modal-form label { display: block; font-size: 0.78rem; font-weight: 600; margin: 10px 0 4px; }
+  .modal-form input, .modal-form textarea {
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    font-family: inherit;
+  }
 </style>
 
 <div id="cursorDot"></div>
+
+<button type="button" id="editToggle" aria-label="Ativar modo de edição" title="Editar página">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+</button>
+
+<div id="editPanel">
+  <h4>Modo de edição</h4>
+  <p class="warn">Clique nos textos da página para editar. Só use isso no seu próprio computador — nunca em navegador compartilhado ou público.</p>
+  <button type="button" id="saveEditsBtn" class="primary">Salvar alterações (baixar arquivo)</button>
+  <p class="status-msg" id="editStatusMsg"></p>
+</div>
 
 <header class="site">
   <div class="wrap header-inner">
@@ -2042,6 +2177,54 @@
     modalClose.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+    /* ---------- Edit mode (etapa 1: textos + salvar arquivo) ---------- */
+
+    (function () {
+      var editToggle = document.getElementById('editToggle');
+      var editPanel = document.getElementById('editPanel');
+      var saveBtn = document.getElementById('saveEditsBtn');
+      var statusMsg = document.getElementById('editStatusMsg');
+      var EDITABLE_SELECTOR = '.hero-line h1, .role-word, .intro .lede, .about p, .work-info h4, .work-info p.desc, .section-head h2, .section-head p';
+
+      function setEditableState(on) {
+        document.querySelectorAll(EDITABLE_SELECTOR).forEach(function (el) {
+          el.setAttribute('contenteditable', on ? 'true' : 'false');
+        });
+      }
+
+      function setEditMode(on) {
+        document.body.classList.toggle('edit-mode', on);
+        editToggle.classList.toggle('active', on);
+        editPanel.classList.toggle('open', on);
+        setEditableState(on);
+      }
+
+      editToggle.addEventListener('click', function () {
+        var willEnable = !document.body.classList.contains('edit-mode');
+        setEditMode(willEnable);
+      });
+
+      saveBtn.addEventListener('click', function () {
+        try {
+          var htmlOut = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+          var blob = new Blob([htmlOut], { type: 'text/html' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'portfolio.html';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          statusMsg.textContent = 'Arquivo baixado. Substitua o portfolio.html antigo por este.';
+          statusMsg.className = 'status-msg ok';
+        } catch (err) {
+          statusMsg.textContent = 'Erro ao gerar o arquivo: ' + err.message;
+          statusMsg.className = 'status-msg err';
+        }
+      });
+    })();
 
     /* ---------- Load more (Audiovisual) ---------- */
 
