@@ -21,9 +21,21 @@ Audiovisual & acessibilidade
 libras-audiodescricao.jpg     -> Edição com Libras e audiodescrição
 radionovelas-sonorizacao.jpg  -> Radionovelas e sonorização de livros
 transmissao-ao-vivo.jpg       -> Transmissão ao vivo de eventos
-clipe-aviva.jpg                -> Clipe — Conferência dos Jovens AVIVA
+clipe-aviva.jpg                -> Clipe oficial — Conferência dos Jovens AVIVA
 sonorizacao-amazonia.jpg      -> Sonorização do zero — Amazônia
-festa-40-anos.jpg              -> Registros — Festa de 40 anos
+festa-40-anos.jpg              -> Registros: fotos e vídeo — Festa de 40 anos
+projeto-jeep.jpg               -> Projeto Jeep
+mix-hino-salmos-91.jpg         -> Mixagem de hino — Salmos 91
+freelas-parte-01.jpg           -> Freelas — parte 01
+conferencia-mulheres.jpg       -> Aberturas — Conferência das Mulheres
+mixagem-worship.jpg            -> Mixagem e edição — Worship
+festa-15-anos.jpg              -> Festa de aniversário — 15 anos
+mix-louvor-vol1.jpg            -> Mixagens de louvor — vol. 1
+mix-louvor-vol2.jpg            -> Mixagens de louvor — vol. 2
+simplesmente-braseiro.jpg      -> Simplesmente Braseiro
+
+Dica: no Behance, abra cada projeto, clique com o botão direito na
+imagem de capa e "Salvar imagem como" com o nome exato acima.
 
 IA aplicada
 ------------
