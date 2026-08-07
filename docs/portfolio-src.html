@@ -131,6 +131,8 @@
 
   html { scroll-behavior: smooth; }
 
+  html { overflow-x: hidden; }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -269,6 +271,50 @@
     opacity: 0.9;
   }
 
+  /* cursor grows into a labelled disc over cards ("Ver detalhes") */
+  #cursorLabel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--display);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #041210;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    padding: 0 8px;
+    line-height: 1.15;
+  }
+
+  body.cursor-label #cursorRing {
+    width: 92px;
+    height: 92px;
+    margin: -46px 0 0 -46px;
+    background: var(--accent);
+    border-color: transparent;
+    opacity: 1;
+  }
+
+  body.cursor-label #cursorLabel { opacity: 1; }
+  body.cursor-label #cursorDot { opacity: 0 !important; }
+
+  /* pressed state — cursor reacts to click */
+  body.cursor-down #cursorRing {
+    transform-origin: center;
+    opacity: 0.65;
+  }
+
+  /* magnetic buttons */
+  .magnetic {
+    will-change: transform;
+    transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+  }
+
   /* ---------- Header ---------- */
 
   header.site {
@@ -311,31 +357,347 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.7s cubic-bezier(.76,0,.24,1), opacity 0.5s ease 0.15s;
+    overflow: hidden;
+    transition: opacity 0.45s ease 0.5s;
   }
 
-  #introOverlay.intro-hide {
-    transform: translateY(-100%);
+  /* faint technical grid, like a timeline / mixer board */
+  .intro-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--accent) 12%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--accent) 8%, transparent) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(circle at 50% 50%, #000 10%, transparent 72%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 10%, transparent 72%);
+    animation: introGridIn 1.6s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+
+  @keyframes introGridIn {
+    from { transform: scale(1.25); opacity: 0; }
+    to { transform: scale(1); opacity: 0.5; }
+  }
+
+  .intro-inner {
+    position: relative;
+    z-index: 2;
+    width: min(560px, 82vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .intro-counter {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 11vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    opacity: 0;
+    animation: introFadeUp 0.5s ease 0.1s forwards;
+  }
+
+  .intro-counter i {
+    font-style: normal;
+    font-size: 0.32em;
+    color: var(--accent);
+    transform: translateY(-0.9em);
+  }
+
+  /* the three words cycle: áudio → imagem → código */
+  .intro-words {
+    position: relative;
+    height: 1.5em;
+    width: 100%;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(0.95rem, 3.4vw, 1.15rem);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .intro-word {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.32s ease, transform 0.32s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .intro-word.on {
+    opacity: 1;
+    transform: translateY(0);
+    color: var(--accent);
+  }
+
+  .intro-mark-wrap {
+    overflow: hidden;
+    padding: 0.12em 0;
+  }
+
+  .intro-mark {
+    display: block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 5.5vw, 2.4rem);
+    letter-spacing: -0.02em;
+    transform: translateY(115%);
+    animation: introMarkUp 0.75s cubic-bezier(.2,.85,.25,1) 0.55s forwards;
+  }
+
+  @keyframes introMarkUp {
+    to { transform: translateY(0); }
+  }
+
+  @keyframes introFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* little audio-meter bars — a nod to the mixing desk */
+  .intro-meters {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+    height: 30px;
+    opacity: 0;
+    animation: introFadeUp 0.5s ease 0.75s forwards;
+  }
+
+  .intro-meters span {
+    width: 3px;
+    height: 30%;
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: 0.75;
+    animation: introMeter 0.85s ease-in-out infinite alternate;
+  }
+
+  .intro-meters span:nth-child(1) { animation-delay: -0.05s; }
+  .intro-meters span:nth-child(2) { animation-delay: -0.35s; background: var(--accent-2); }
+  .intro-meters span:nth-child(3) { animation-delay: -0.6s; }
+  .intro-meters span:nth-child(4) { animation-delay: -0.2s; background: var(--accent-2); }
+  .intro-meters span:nth-child(5) { animation-delay: -0.75s; }
+  .intro-meters span:nth-child(6) { animation-delay: -0.4s; background: var(--accent-2); }
+  .intro-meters span:nth-child(7) { animation-delay: -0.15s; }
+  .intro-meters span:nth-child(8) { animation-delay: -0.65s; background: var(--accent-2); }
+  .intro-meters span:nth-child(9) { animation-delay: -0.3s; }
+  .intro-meters span:nth-child(10) { animation-delay: -0.55s; background: var(--accent-2); }
+
+  @keyframes introMeter {
+    from { height: 18%; }
+    to { height: 100%; }
+  }
+
+  .intro-bar {
+    width: 100%;
+    height: 2px;
+    background: color-mix(in srgb, var(--text) 12%, transparent);
+    border-radius: 2px;
+    overflow: hidden;
+    opacity: 0;
+    animation: introFadeUp 0.5s ease 0.3s forwards;
+  }
+
+  .intro-bar i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--accent-grad);
+  }
+
+  /* curtain that wipes up to reveal the site */
+  .intro-curtain {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--bg);
+    transform: translateY(100%);
+  }
+
+  #introOverlay.intro-hide .intro-curtain {
+    transform: translateY(0);
+    transition: transform 0.62s cubic-bezier(.76,0,.24,1);
+  }
+
+  #introOverlay.intro-hide .intro-inner {
+    opacity: 0;
+    transform: translateY(-18px);
+    transition: opacity 0.35s ease, transform 0.5s cubic-bezier(.76,0,.24,1);
+  }
+
+  #introOverlay.intro-gone {
     opacity: 0;
     pointer-events: none;
   }
 
-  .intro-mark {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: clamp(1.6rem, 5vw, 2.6rem);
-    letter-spacing: -0.01em;
-    opacity: 0;
-    transform: scale(0.92);
-    animation: introMarkIn 0.6s cubic-bezier(.2,.8,.2,1) 0.15s forwards;
+  @media (prefers-reduced-motion: reduce) {
+    #introOverlay { display: none; }
   }
 
-  @keyframes introMarkIn {
-    to { opacity: 1; transform: scale(1); }
+  /* ---------- Scroll progress bar ---------- */
+
+  #scrollProgress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 500;
+    pointer-events: none;
+    background: transparent;
+  }
+
+  #scrollProgress i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--accent-grad);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+
+  /* ---------- Marquee strip ---------- */
+
+  .marquee {
+    overflow: hidden;
+    max-width: 100vw;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    margin: 8px 0 12px;
+    background: color-mix(in srgb, var(--accent) 4%, transparent);
+    user-select: none;
+  }
+
+  .marquee-track {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    width: max-content;
+    animation: marqueeScroll 34s linear infinite;
+  }
+
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+
+  .marquee-track span {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(0.95rem, 2.6vw, 1.35rem);
+    letter-spacing: -0.01em;
+    color: var(--text);
+    white-space: nowrap;
+    opacity: 0.85;
+  }
+
+  .marquee-track i {
+    font-style: normal;
+    font-size: 0.6rem;
+    color: var(--accent);
+  }
+
+  @keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #introOverlay { display: none; }
+    .marquee-track { animation: none; }
+  }
+
+  /* ---------- Scroll-driven flourishes ---------- */
+
+  /* hero text drifts slightly as you scroll (parallax) */
+  .parallax { will-change: transform; }
+
+  /* letters of the hero title stagger in on load.
+     inline-block would break the gradient fill and the line wrapping,
+     so the letters stay inline and only opacity/filter animate. */
+  .hero-line h1 .char,
+  .hero-line .role-word .char {
+    opacity: 0;
+    animation: charIn 0.5s ease forwards;
+  }
+
+  @keyframes charIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-line h1 .char,
+    .hero-line .role-word .char { animation: none; opacity: 1; }
+  }
+
+  /* work cards get a soft accent sheen sweeping across on hover */
+  .work-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--accent) 24%, transparent) 50%, transparent 70%);
+    transform: translateX(-110%);
+    transition: transform 0.75s cubic-bezier(.2,.8,.2,1);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .work-card:hover .work-cover::after { transform: translateX(110%); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-cover::after { display: none; }
+  }
+
+  /* ---------- Easter egg: type "mix" to turn the glow up ---------- */
+
+  body.party .bg-glow span {
+    opacity: 0.5;
+    animation-duration: 5s !important;
+    filter: blur(60px);
+  }
+
+  body.party .marquee-track { animation-duration: 9s; }
+
+  body.party .grad-text,
+  body.party .brand {
+    animation: partyHue 3.5s linear infinite;
+  }
+
+  @keyframes partyHue {
+    from { filter: hue-rotate(0deg); }
+    to { filter: hue-rotate(360deg); }
+  }
+
+  body.party::after {
+    content: 'modo mix ligado — digite "mix" de novo pra desligar';
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 600;
+    background: var(--accent);
+    color: #041210;
+    font-family: var(--display);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 8px 16px;
+    border-radius: 999px;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body.party .grad-text, body.party .brand { animation: none; }
   }
 
   .header-actions { display: flex; align-items: center; gap: 14px; }
@@ -479,6 +841,20 @@
     overflow: visible;
     padding-bottom: 0.15em;
     transform-style: preserve-3d;
+    opacity: 0;
+    transform: translateY(0.45em);
+    animation: heroLineUp 0.8s cubic-bezier(.2,.85,.25,1) forwards;
+  }
+
+  .hero-line:nth-child(1) { animation-delay: 0.55s; }
+  .hero-line:nth-child(2) { animation-delay: 0.72s; }
+
+  @keyframes heroLineUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-line { animation: none; opacity: 1; transform: none; }
   }
 
   .hero-line .stack {
@@ -1195,10 +1571,29 @@
 <div class="bg-glow" aria-hidden="true"><span></span><span></span><span></span></div>
 
 <div id="introOverlay" aria-hidden="true">
-  <span class="intro-mark">Marcos<span class="grad-text">.</span>Paulo</span>
+  <div class="intro-grid"></div>
+  <div class="intro-inner">
+    <div class="intro-counter"><span id="introPercent">0</span><i>%</i></div>
+    <div class="intro-words">
+      <span class="intro-word" data-i="0">áudio</span>
+      <span class="intro-word" data-i="1">imagem</span>
+      <span class="intro-word" data-i="2">código</span>
+    </div>
+    <div class="intro-mark-wrap">
+      <span class="intro-mark">Marcos<span class="grad-text">.</span>Paulo</span>
+    </div>
+    <div class="intro-meters" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="intro-bar"><i id="introBarFill"></i></div>
+  </div>
+  <div class="intro-curtain"></div>
 </div>
 
-<div id="cursorRing"></div>
+<div id="scrollProgress" aria-hidden="true"><i></i></div>
+
+<div id="cursorRing"><span id="cursorLabel"></span></div>
 <div id="cursorDot"></div>
 
 <button type="button" id="editToggle" aria-label="Ativar modo de edição" title="Editar página" hidden>
@@ -1273,6 +1668,13 @@
       </div>
     </div>
   </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Sonorização</span><i>◆</i><span>Edição de vídeo</span><i>◆</i><span>Transmissão ao vivo</span><i>◆</i><span>Acessibilidade</span><i>◆</i><span>Audiodescrição</span><i>◆</i><span>Libras</span><i>◆</i><span>Mixagem</span><i>◆</i><span>Desenvolvimento web</span><i>◆</i>
+      <span>Sonorização</span><i>◆</i><span>Edição de vídeo</span><i>◆</i><span>Transmissão ao vivo</span><i>◆</i><span>Acessibilidade</span><i>◆</i><span>Audiodescrição</span><i>◆</i><span>Libras</span><i>◆</i><span>Mixagem</span><i>◆</i><span>Desenvolvimento web</span><i>◆</i>
+    </div>
+  </div>
 
   <section class="block about reveal">
     <div class="wrap">
@@ -2348,20 +2750,117 @@
       }
     })();
 
-    /* Intro overlay */
+    /* ---------- Intro sequence: counter + word cycle + curtain wipe ---------- */
+
     var introOverlay = document.getElementById('introOverlay');
     if (introOverlay) {
-      var hideIntro = function () {
+      var introPercent = document.getElementById('introPercent');
+      var introBarFill = document.getElementById('introBarFill');
+      var introWords = introOverlay.querySelectorAll('.intro-word');
+      var introDone = false;
+      var introTimers = [];
+
+      /* lock scroll while the intro is up */
+      document.documentElement.style.overflow = 'hidden';
+
+      var finishIntro = function () {
+        if (introDone) return;
+        introDone = true;
+        introTimers.forEach(clearTimeout);
+        document.documentElement.style.overflow = '';
         introOverlay.classList.add('intro-hide');
-        setTimeout(function () { introOverlay.remove(); }, 800);
+        document.body.classList.add('site-enter');
+        setTimeout(function () {
+          introOverlay.classList.add('intro-gone');
+          setTimeout(function () { introOverlay.remove(); }, 500);
+        }, 620);
       };
-      if (document.readyState === 'complete') {
-        setTimeout(hideIntro, 350);
-      } else {
-        window.addEventListener('load', function () { setTimeout(hideIntro, 350); });
-      }
-      setTimeout(hideIntro, 2200);
+
+      /* count 0 → 100 while cycling the three words */
+      var startedAt = Date.now();
+      var DURATION = 1750;
+
+      var stepCounter = function () {
+        if (introDone) return;
+        var t = Math.min(1, (Date.now() - startedAt) / DURATION);
+        /* ease-out so it races then settles */
+        var eased = 1 - Math.pow(1 - t, 2.2);
+        var value = Math.round(eased * 100);
+        if (introPercent) introPercent.textContent = value;
+        if (introBarFill) introBarFill.style.width = value + '%';
+
+        var wordIdx = value < 34 ? 0 : (value < 70 ? 1 : 2);
+        introWords.forEach(function (w, i) {
+          w.classList.toggle('on', i === wordIdx);
+        });
+
+        if (t < 1) {
+          requestAnimationFrame(stepCounter);
+        } else {
+          introTimers.push(setTimeout(finishIntro, 380));
+        }
+      };
+      requestAnimationFrame(stepCounter);
+
+      /* hard fallback so the site is never stuck behind the intro */
+      introTimers.push(setTimeout(finishIntro, 4200));
+
+      /* let people skip it */
+      introOverlay.addEventListener('click', finishIntro);
+      document.addEventListener('keydown', function (e) {
+        if (!introDone && (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ')) finishIntro();
+      });
+    } else {
+      document.body.classList.add('site-enter');
     }
+
+    /* ---------- Hero title: split into letters for a staggered entrance ---------- */
+
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var targets = document.querySelectorAll('.hero-line h1, .hero-line .role-word');
+      var delay = 0;
+      targets.forEach(function (el) {
+        var walk = function (node) {
+          Array.prototype.slice.call(node.childNodes).forEach(function (child) {
+            if (child.nodeType === 3) {
+              var frag = document.createDocumentFragment();
+              child.textContent.split('').forEach(function (ch) {
+                if (ch === ' ') { frag.appendChild(document.createTextNode(' ')); return; }
+                var s = document.createElement('span');
+                s.className = 'char';
+                s.textContent = ch;
+                s.style.animationDelay = (0.62 + delay).toFixed(3) + 's';
+                delay += 0.014;
+                frag.appendChild(s);
+              });
+              node.replaceChild(frag, child);
+            } else if (child.nodeType === 1) {
+              walk(child);
+            }
+          });
+        };
+        walk(el);
+      });
+    })();
+
+    /* ---------- Scroll progress bar ---------- */
+
+    (function () {
+      var bar = document.querySelector('#scrollProgress i');
+      if (!bar) return;
+      var ticking = false;
+      var update = function () {
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+        bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+        ticking = false;
+      };
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+      update();
+    })();
 
     /* Split section headings into words for the reveal animation */
     document.querySelectorAll('.section-head h2').forEach(function (h2) {
@@ -2805,15 +3304,46 @@
         })();
       }
 
-      var hoverTargets = document.querySelectorAll('a, button, .work-card, [data-cursor-label]');
-      hoverTargets.forEach(function (el) {
-        el.addEventListener('mouseenter', function () {
-          document.body.classList.add('cursor-hover');
-        });
-        el.addEventListener('mouseleave', function () {
-          document.body.classList.remove('cursor-hover');
-        });
+      var cursorLabel = document.getElementById('cursorLabel');
+
+      /* delegated so cards added later in edit mode also work */
+      document.addEventListener('mouseover', function (e) {
+        var labelled = e.target.closest && e.target.closest('[data-cursor-label]');
+        var hoverable = e.target.closest && e.target.closest('a, button, .work-card, [data-cursor-label]');
+        if (labelled && cursorLabel) {
+          cursorLabel.textContent = labelled.getAttribute('data-cursor-label') || '';
+          document.body.classList.add('cursor-label');
+        } else {
+          document.body.classList.remove('cursor-label');
+        }
+        document.body.classList.toggle('cursor-hover', !!hoverable && !labelled);
       });
+
+      document.addEventListener('mouseout', function (e) {
+        if (!e.relatedTarget) {
+          document.body.classList.remove('cursor-hover', 'cursor-label');
+        }
+      });
+
+      window.addEventListener('mousedown', function () { document.body.classList.add('cursor-down'); });
+      window.addEventListener('mouseup', function () { document.body.classList.remove('cursor-down'); });
+
+      /* ---------- Magnetic buttons: pull toward the cursor ---------- */
+
+      if (!prefersReducedMotion) {
+        document.querySelectorAll('.btn, .icon-btn, #loadMoreBtn').forEach(function (el) {
+          el.classList.add('magnetic');
+          el.addEventListener('mousemove', function (e) {
+            var r = el.getBoundingClientRect();
+            var mx = e.clientX - (r.left + r.width / 2);
+            var my = e.clientY - (r.top + r.height / 2);
+            el.style.transform = 'translate(' + (mx * 0.28) + 'px, ' + (my * 0.32) + 'px)';
+          });
+          el.addEventListener('mouseleave', function () {
+            el.style.transform = 'translate(0, 0)';
+          });
+        });
+      }
     }
 
     /* ---------- Card tilt on hover (3D device feel) ---------- */
@@ -2843,5 +3373,43 @@
         sceneStage.style.transform = 'rotateX(' + (14 - py * 18) + 'deg) rotateY(' + (-22 + px * 26) + 'deg)';
       });
     }
+
+    /* ---------- Hero parallax on scroll ---------- */
+
+    if (!prefersReducedMotion) {
+      var heroIntro = document.querySelector('.hero .intro');
+      var heroSceneEl = document.getElementById('heroScene');
+      if (heroIntro) heroIntro.classList.add('parallax');
+      if (heroSceneEl) heroSceneEl.classList.add('parallax');
+      var pTicking = false;
+      var applyParallax = function () {
+        var y = window.scrollY;
+        if (y < window.innerHeight * 1.2) {
+          if (heroIntro) heroIntro.style.transform = 'translateY(' + (y * 0.16) + 'px)';
+          if (heroSceneEl) heroSceneEl.style.transform = 'translateY(' + (y * 0.3) + 'px)';
+        }
+        pTicking = false;
+      };
+      window.addEventListener('scroll', function () {
+        if (!pTicking) { pTicking = true; requestAnimationFrame(applyParallax); }
+      }, { passive: true });
+    }
+
+    /* ---------- Easter egg: type "mix" anywhere ---------- */
+
+    (function () {
+      var buffer = '';
+      document.addEventListener('keydown', function (e) {
+        if (document.body.classList.contains('edit-mode')) return;
+        if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+        if (e.target && e.target.isContentEditable) return;
+        if (!/^[a-zA-Z]$/.test(e.key)) return;
+        buffer = (buffer + e.key.toLowerCase()).slice(-3);
+        if (buffer === 'mix') {
+          document.body.classList.toggle('party');
+          buffer = '';
+        }
+      });
+    })();
   })();
 </script>
