@@ -734,6 +734,12 @@
   .note p { font-size: 0.86rem; color: var(--text-dim); margin: 0; line-height: 1.6; max-width: 70ch; }
   .note code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.82em; background: var(--bg-raised); padding: 1px 5px; border-radius: 3px; }
 
+  /* ---------- Load more ---------- */
+
+  .load-more-row { display: flex; justify-content: center; margin-top: 40px; }
+  #audiovisualGrid .work-card.extra-card { display: none; }
+  #audiovisualGrid.expanded .work-card.extra-card { display: block; }
+
   /* ---------- Timeline ---------- */
 
   .timeline { position: relative; padding-left: 30px; max-width: 640px; margin: 0 auto; }
@@ -996,7 +1002,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Automação de transmissão multi-PC" data-modal-desc="Sistema local que inicia uma transmissão ao vivo com um clique, abrindo Holyrics, Lumikit e vMix simultaneamente em 3 computadores pela rede local. Backend em Python/Flask com um painel web instalável como PWA — nasceu direto da experiência operando transmissões ao vivo." data-modal-meta="2026 · Projeto pessoal">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/automacao-transmissao.jpg" alt="Automação de transmissão multi-PC" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/automacao-transmissao.jpg" alt="Automação de transmissão multi-PC" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Automação</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="9" y="14" width="7" height="6" rx="1"/><rect x="15" y="4" width="6" height="6" rx="1"/><path d="M6 10v4h9M18 10v4"/></svg>
@@ -1020,7 +1026,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Mix de Fone — controle individual via Ui24R" data-modal-desc="Interface web que permite músicos controlarem seus próprios fones (aux) em uma mesa Soundcraft Ui24R, sem expor os controles completos da mesa. Servidor Node.js mantém conexão única com a mesa via WebSocket, com monitor em tempo real e chat integrado para o operador de House Mix." data-modal-meta="2026 · Projeto pessoal">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/mix-de-fone-ui24r.jpg" alt="Mix de Fone — controle via Ui24R" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/mix-de-fone-ui24r.jpg" alt="Mix de Fone — controle via Ui24R" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Web app</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
@@ -1044,7 +1050,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Sistema ELO Ecosystem" data-modal-desc="O sistema que roda por trás de tudo na ELO Editora e na PeraBook: o painel que a equipe usa para cadastrar e gerenciar livros, o app onde os leitores compram e leem os livros digitais, e os sites das duas marcas. Faço parte do time que desenvolve e mantém esse sistema, corrigindo problemas e construindo novas telas e funcionalidades." data-modal-meta="2026 — atual · ELO Editora">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/elo-ecosystem.jpg" alt="Sistema ELO Ecosystem" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/elo-ecosystem.jpg" alt="Sistema ELO Ecosystem" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Sistema</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4M17.5 11v4M6.5 11v4"/></svg>
@@ -1074,12 +1080,12 @@
         <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
       </div>
 
-      <div class="cards-grid">
+      <div class="cards-grid" id="audiovisualGrid">
 
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Edição com Libras e audiodescrição" data-modal-desc="Na ELO Editora: edição de vídeos infantis com inserção de intérprete de Libras (gravação via vMix) e criação de audiodescrição com IA, tornando o conteúdo acessível a pessoas com deficiência visual." data-modal-meta="fev/2025 — atual · ELO Editora">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/libras-audiodescricao.jpg" alt="Edição com Libras e audiodescrição" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/libras-audiodescricao.jpg" alt="Edição com Libras e audiodescrição" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Acessibilidade</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="9"/><path d="M8 13c1.5 1.5 6.5 1.5 8 0M9 9h.01M15 9h.01"/></svg>
@@ -1100,7 +1106,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Radionovelas e sonorização de livros" data-modal-desc="Criação de radionovelas e sonorização de obras literárias, transformando livros em experiências imersivas em áudio. Já colaborei também na produção de som para um programa da TV Cultura." data-modal-meta="ELO Editora · Design sonoro">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/radionovelas-sonorizacao.jpg" alt="Radionovelas e sonorização de livros" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/radionovelas-sonorizacao.jpg" alt="Radionovelas e sonorização de livros" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Design sonoro</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1121,7 +1127,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Transmissão ao vivo de eventos" data-modal-desc="Operação de câmera e switching com mesa Blackmagic ATEM, produção ao vivo via vMix (incluindo podcasts), mixagem pela Soundcraft UI24R e automação com Stream Deck." data-modal-meta="ELO Editora + freelance · Ao vivo">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/transmissao-ao-vivo.jpg" alt="Transmissão ao vivo de eventos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/transmissao-ao-vivo.jpg" alt="Transmissão ao vivo de eventos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Ao vivo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/><circle cx="18.5" cy="5.5" r="0.6" fill="currentColor" stroke="none"/></svg>
@@ -1142,7 +1148,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/NphFE33WGPj/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Clipe oficial — Conferência dos Jovens AVIVA" data-modal-desc="Clipe da Conferência de Jovens com o grupo ADJA Praise. Cuidei da sonorização inteira do zero — organização e mixagem no Reaper — além da edição do vídeo." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/clipe-aviva.jpg" alt="Clipe oficial — Conferência dos Jovens AVIVA" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/50be0f241360403.69568d489031c.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/clipe-aviva.jpg" alt="Clipe oficial — Conferência dos Jovens AVIVA" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/50be0f241360403.69568d489031c.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1164,7 +1170,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/R8P7_9Pq8e4/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Sonorização do zero — Amazônia" data-modal-desc="Paisagem sonora autoral inspirada na Amazônia: sons de natureza, ambientes imersivos e a relação entre som e cultura, construída do zero no Premiere e no Audition." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/sonorizacao-amazonia.jpg" alt="Sonorização do zero — Amazônia" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/d00dbd240494395.Y3JvcCw5MzAsNzI3LDQ4NiwxNTg.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/sonorizacao-amazonia.jpg" alt="Sonorização do zero — Amazônia" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/d00dbd240494395.Y3JvcCw5MzAsNzI3LDQ4NiwxNTg.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Design sonoro</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1186,7 +1192,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BpEqbaEppLm/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Registros: fotos e vídeo — Festa de 40 anos" data-modal-desc="Cobertura fotográfica e em vídeo de uma festa de aniversário de 40 anos, com edição das imagens captadas no Premiere." data-modal-meta="nov/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/festa-40-anos.jpg" alt="Registros: fotos e vídeo — Festa de 40 anos" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/deda0b239104039.692256541f629.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/festa-40-anos.jpg" alt="Registros: fotos e vídeo — Festa de 40 anos" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/deda0b239104039.692256541f629.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Cobertura</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1208,7 +1214,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://player.vimeo.com/video/1209331304?autoplay=1&amp;loop=1&amp;autopause=0&amp;controls=1&amp;muted=0" data-modal-title="Projeto Jeep" data-modal-desc="Peça em vídeo com animação e edição, unindo motion graphics ao corte de imagens captadas." data-modal-meta="jul/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/projeto-jeep.jpg" alt="Projeto Jeep" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/b3205e252608945.Y3JvcCwxMzgwLDEwODAsMjM5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/projeto-jeep.jpg" alt="Projeto Jeep" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/b3205e252608945.Y3JvcCwxMzgwLDEwODAsMjM5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Animação</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1230,7 +1236,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BMQbZNS6iIP/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagem de hino — Salmos 91" data-modal-desc="Mixagem e masterização de um hino no Reaper, com edição de vídeo complementar no Premiere." data-modal-meta="mai/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/mix-hino-salmos-91.jpg" alt="Mixagem de hino — Salmos 91" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/2c1b91250011667.Y3JvcCwxMzgwLDEwODAsMjcwLDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/mix-hino-salmos-91.jpg" alt="Mixagem de hino — Salmos 91" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/2c1b91250011667.Y3JvcCwxMzgwLDEwODAsMjcwLDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Mixagem</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1252,7 +1258,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KyIoZw2y5dp/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Freelas — parte 01" data-modal-desc="Compilado de trabalhos avulsos de edição de vídeo, feitos como prática e como freelancer." data-modal-meta="mai/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/freelas-parte-01.jpg" alt="Freelas — parte 01" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/4b8a96250011627.Y3JvcCwxMzgwLDEwODAsMjcwLDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/freelas-parte-01.jpg" alt="Freelas — parte 01" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/4b8a96250011627.Y3JvcCwxMzgwLDEwODAsMjcwLDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Edição</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1274,7 +1280,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/D53A-NdXwV7/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/EoDWtbzhrjg/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/2YVoRSEPkcb/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/UgehC7JP_zZ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Aberturas — Conferência das Mulheres" data-modal-desc="Peças de abertura e apresentações em vídeo para uma conferência, combinando animação e captação de áudio." data-modal-meta="mai/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/conferencia-mulheres.jpg" alt="Aberturas — Conferência das Mulheres" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/ea2a09248687823.Y3JvcCwxNzQyMiwxMzYyNywwLDQzMQ.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/conferencia-mulheres.jpg" alt="Aberturas — Conferência das Mulheres" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/ea2a09248687823.Y3JvcCwxNzQyMiwxMzYyNywwLDQzMQ.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Animação</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1296,7 +1302,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/BjqA7Xxjpfz/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagem e edição — Worship" data-modal-desc="Mixagem de áudio de culto no Reaper, com edição de vídeo e tratamento de imagem no Photoshop." data-modal-meta="fev/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/mixagem-worship.jpg" alt="Mixagem e edição — Worship" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/e17aae244558533.699b2dda8bc75.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/mixagem-worship.jpg" alt="Mixagem e edição — Worship" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/e17aae244558533.699b2dda8bc75.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Mixagem</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1318,7 +1324,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M6pZRPfswYJ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Festa de aniversário — 15 anos" data-modal-desc="Edição de vídeo e decupagem de material captado numa festa de 15 anos." data-modal-meta="nov/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/festa-15-anos.jpg" alt="Festa de aniversário — 15 anos" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/86cd4c239102825.Y3JvcCwxMjIwLDk1NSwxMjAsMA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/festa-15-anos.jpg" alt="Festa de aniversário — 15 anos" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/86cd4c239102825.Y3JvcCwxMjIwLDk1NSwxMjAsMA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Cobertura</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1340,7 +1346,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/8UA8v8ff9Cy/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 1" data-modal-desc="Mixagem e masterização de áudio de dois louvores de igreja, feitas no Reaper com plugins gratuitos." data-modal-meta="out/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/mix-louvor-vol1.jpg" alt="Mixagens de louvor — vol. 1" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/5fd608236140457.68e656a19a90a.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/mix-louvor-vol1.jpg" alt="Mixagens de louvor — vol. 1" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/5fd608236140457.68e656a19a90a.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Mixagem</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1362,7 +1368,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M7iStDQqR9G/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/TPWiNiVGbFL/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/LQSsKjHkpBZ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 2" data-modal-desc="Mixagem de áudio de louvores de igreja no Reaper, explorando plugins gratuitos de mixagem." data-modal-meta="set/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/mix-louvor-vol2.jpg" alt="Mixagens de louvor — vol. 2" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/8e4833234839499.68cb129ce4e67.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/mix-louvor-vol2.jpg" alt="Mixagens de louvor — vol. 2" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/8e4833234839499.68cb129ce4e67.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Mixagem</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1384,7 +1390,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KFzND2LDt3B/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Simplesmente Braseiro" data-modal-desc="Edição de vídeo com foco em roteiro e criatividade, produzido no DaVinci Resolve." data-modal-meta="ago/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/simplesmente-braseiro.jpg" alt="Simplesmente Braseiro" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/d01898233376691.Y3JvcCwxMzc5LDEwNzksMjY5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/simplesmente-braseiro.jpg" alt="Simplesmente Braseiro" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/d01898233376691.Y3JvcCwxMzc5LDEwNzksMjY5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Edição</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1406,7 +1412,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/9v99pL_L7x4/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Chá de Revelação" data-modal-desc="Cobertura em vídeo de um chá de revelação, com edição e efeitos de animação." data-modal-meta="ago/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/cha-de-revelacao.jpg" alt="Chá de Revelação" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/6c9e84232188231.68974d95ccead.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/cha-de-revelacao.jpg" alt="Chá de Revelação" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/6c9e84232188231.68974d95ccead.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Cobertura</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="4" y="6" width="16" height="12" rx="1.5"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1428,7 +1434,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/SJEDEKLYLLW/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Anúncios em 3D" data-modal-desc="Peças de vídeo com elementos de animação 3D para anúncios." data-modal-meta="jul/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/anuncios-3d.jpg" alt="Anúncios em 3D" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/296d73229692119.Y3JvcCwxMzc5LDEwNzksMjQ5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/anuncios-3d.jpg" alt="Anúncios em 3D" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/296d73229692119.Y3JvcCwxMzc5LDEwNzksMjQ5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Animação</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1450,7 +1456,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/QaJ6GFC6oNz/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Anunciando gravidez (Cinematic)" data-modal-desc="Vídeo cinematográfico de anúncio de gravidez, com uso de alegorias visuais." data-modal-meta="jul/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/anunciando-gravidez.jpg" alt="Anunciando gravidez (Cinematic)" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/f5411b229691655.686946021074b.gif'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/anunciando-gravidez.jpg" alt="Anunciando gravidez (Cinematic)" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/f5411b229691655.686946021074b.gif'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1472,7 +1478,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/UK2RXwBvf_s/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Vídeo chamativo para batismo" data-modal-desc="Peça de vídeo para divulgação de um evento de batismo." data-modal-meta="jun/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/video-batismo.jpg" alt="Vídeo chamativo para batismo" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/ce3a9a227802721.68478f6564de3.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/video-batismo.jpg" alt="Vídeo chamativo para batismo" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/ce3a9a227802721.68478f6564de3.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1494,7 +1500,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/5HITAv_J_CG/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Vídeo Chamada — simples e rápido" data-modal-desc="Vídeo curto de chamada para evento, com edição ágil e direta." data-modal-meta="jun/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/video-chamada-rapido.jpg" alt="Vídeo Chamada — simples e rápido" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/bc69f6227703985.Y3JvcCwxMzc5LDEwNzksMjc5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/video-chamada-rapido.jpg" alt="Vídeo Chamada — simples e rápido" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/bc69f6227703985.Y3JvcCwxMzc5LDEwNzksMjc5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1516,7 +1522,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://cdn.behance.net/v1/ccvembed/MVAU-VsSsTV?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJjY3ZfaWQiOiJNVkFVLVZzU3NUViIsImV4cCI6MTc4NjExNjc5M30.BGnzTbxbDOUED1im7E-ksY7QKEynI-pe4TplO9KUslb1FxM1SnoQVglpoaR27fi9LoOapHeMHUmJIEdrn4-_AQ&amp;bgcolor=%23bebebe&amp;autohide=false&amp;maxframewidth=1280&amp;maxframeheight=75" data-modal-title="Radionovela + Voz IA — Brincadeira de Coco" data-modal-desc="Produção de áudio de radionovela infantil, com narração gerada por voz sintética." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/radionovela-brincadeira-coco.jpg" alt="Radionovela + Voz IA — Brincadeira de Coco" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/8aba1d226312955.Y3JvcCwxMzgwLDEwODAsNTM2LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/radionovela-brincadeira-coco.jpg" alt="Radionovela + Voz IA — Brincadeira de Coco" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/8aba1d226312955.Y3JvcCwxMzgwLDEwODAsNTM2LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Design sonoro</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1538,7 +1544,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://cdn.behance.net/v1/ccvembed/JzWP3s8ADDN?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJjY3ZfaWQiOiJKeldQM3M4QURETiIsImV4cCI6MTc4NjExNjgxNX0.6gQUV-QQyTmA-AiCp4RXyNghp1ZZa_jbNmgK7jiju6G_yiYD1XoAfdtc_PerHtZ6JnTCbYtv8mB3cpZpCldgDQ&amp;bgcolor=%23bebebe&amp;autohide=false&amp;maxframewidth=1280&amp;maxframeheight=75" data-modal-title="Radionovela — Sonorização de Livro (O homem, o rio)" data-modal-desc="Sonorização de uma obra literária infantil, transformando o livro em experiência de áudio." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/radionovela-homem-rio.jpg" alt="Radionovela — Sonorização de Livro (O homem, o rio)" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/9f1008226312161.Y3JvcCwxMzgwLDEwODAsNTM2LDA.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/radionovela-homem-rio.jpg" alt="Radionovela — Sonorização de Livro (O homem, o rio)" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/9f1008226312161.Y3JvcCwxMzgwLDEwODAsNTM2LDA.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Design sonoro</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1560,7 +1566,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://cdn.behance.net/v1/ccvembed/3bZHR3KFQ-u?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.eyJjY3ZfaWQiOiIzYlpIUjNLRlEtdSIsImV4cCI6MTc4NjExNjg0NH0.7cDe892CBLBQbhZFgqK_xVZILnJYChtECMVaGQ_0FQrRH9-SSJoPlaJ7oIJFJB_JXiTP-ji6qohWKPielYWiBA&amp;bgcolor=%23bebebe&amp;autohide=false&amp;maxframewidth=1280&amp;maxframeheight=75" data-modal-title="Radionovela — Sonorização de Livro (Bento Pássaro)" data-modal-desc="Sonorização de uma obra literária infantil, transformando o livro em experiência de áudio." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/radionovela-bento-passaro.jpg" alt="Radionovela — Sonorização de Livro (Bento Pássaro)" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/fe57d4226311721.Y3JvcCwxMzgwLDEwODAsNTM2LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/radionovela-bento-passaro.jpg" alt="Radionovela — Sonorização de Livro (Bento Pássaro)" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/fe57d4226311721.Y3JvcCwxMzgwLDEwODAsNTM2LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Design sonoro</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
@@ -1582,7 +1588,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/MyWx3yHdwyS/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Homenagem — Documentário" data-modal-desc="Vídeo documental de homenagem, com edição de imagens e depoimentos." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/homenagem-documentario.jpg" alt="Homenagem — Documentário" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/a2406f226271829.Y3JvcCwxMjI5LDk2MiwzNDQsMA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/homenagem-documentario.jpg" alt="Homenagem — Documentário" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/a2406f226271829.Y3JvcCwxMjI5LDk2MiwzNDQsMA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Documentário</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1604,7 +1610,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/8CJFdNV7kMh/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Pós Retiro — Pegada Emocionante" data-modal-desc="Vídeo de encerramento de retiro, com edição voltada para o impacto emocional." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/pos-retiro.jpg" alt="Pós Retiro — Pegada Emocionante" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/efa5d5226271183.Y3JvcCwxMjMwLDk2MiwzNjUsMzM.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/pos-retiro.jpg" alt="Pós Retiro — Pegada Emocionante" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/efa5d5226271183.Y3JvcCwxMjMwLDk2MiwzNjUsMzM.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1626,7 +1632,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/CnrftmfBu7P/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Abertura Acampadentro" data-modal-desc="Vídeo de abertura de evento, com efeito de letreiro em movimento." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/abertura-acampadentro.jpg" alt="Abertura Acampadentro" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/ab46d0226270943.Y3JvcCwxMjg2LDEwMDYsMjc3LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/abertura-acampadentro.jpg" alt="Abertura Acampadentro" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/ab46d0226270943.Y3JvcCwxMjg2LDEwMDYsMjc3LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1667,7 +1673,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KbUEuV7pjaw/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Vídeo Impactante — Missões" data-modal-desc="Vídeo de sensibilização sobre trabalho de missões, com edição de imagens." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/video-missoes.jpg" alt="Vídeo Impactante — Missões" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/b39a75226110635.Y3JvcCwxMzc5LDEwNzksMjY5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/video-missoes.jpg" alt="Vídeo Impactante — Missões" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/b39a75226110635.Y3JvcCwxMzc5LDEwNzksMjY5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1689,7 +1695,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Abertura Impactante de Evento dos Jovens" data-modal-desc="Vídeo de abertura para evento de jovens, com edição dinâmica." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover">
-              <img class="cover-photo" src="images/abertura-evento-jovens.jpg" alt="Abertura Impactante de Evento dos Jovens" style="display:none" onerror="this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/abertura-evento-jovens.jpg" alt="Abertura Impactante de Evento dos Jovens" style="display:none" onerror="this.remove();">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1710,7 +1716,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/SybvwvNbWUK/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Vinheta — Adja News" data-modal-desc="Vinheta de abertura para um telejornal comunitário." data-modal-meta="mai/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/vinheta-adja-news.jpg" alt="Vinheta — Adja News" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/439c72226110221.Y3JvcCwxMzc5LDEwNzksMjY5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
+              <img class="cover-photo" loading="lazy" src="images/vinheta-adja-news.jpg" alt="Vinheta — Adja News" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/439c72226110221.Y3JvcCwxMzc5LDEwNzksMjY5LDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
               <span class="badge">Vinheta</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -1731,6 +1737,10 @@
 
         <!-- FIM DOS CARDS AUDIOVISUAL -->
 
+      </div>
+
+      <div class="load-more-row">
+        <button type="button" id="loadMoreBtn" class="btn secondary">Ver mais vídeos</button>
       </div>
 
       <div class="note">
@@ -1761,7 +1771,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Audiodescrição com IA" data-modal-desc="Criação de audiodescrição utilizando Inteligência Artificial para tornar conteúdo infantil acessível a pessoas com deficiência visual, na ELO Editora." data-modal-meta="ELO Editora · Acessibilidade">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/audiodescricao-ia.jpg" alt="Audiodescrição com IA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/audiodescricao-ia.jpg" alt="Audiodescrição com IA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Selo IA</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
@@ -1782,7 +1792,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Narração e tratamento de voz" data-modal-desc="Geração e tratamento de voz com IA para narrações e conteúdo de vídeos, livros e projetos digitais — parte do fluxo de produção de radionovelas e sonorização de livros." data-modal-meta="ELO Editora · Voz sintética">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/narracao-voz-ia.jpg" alt="Narração e tratamento de voz" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/narracao-voz-ia.jpg" alt="Narração e tratamento de voz" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Selo IA</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 11a7 7 0 01-14 0M12 18v4M9 22h6"/></svg>
@@ -1803,7 +1813,7 @@
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Roteiro e tratamento visual assistidos" data-modal-desc="Correções de roteiro e tratamento visual no Photoshop com apoio de IA, além do uso de ChatGPT no fluxo de criação de conteúdo para livros e produções digitais." data-modal-meta="ELO Editora · Produção">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" src="images/roteiro-visual-ia.jpg" alt="Roteiro e tratamento visual assistidos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/roteiro-visual-ia.jpg" alt="Roteiro e tratamento visual assistidos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Selo IA</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 4h9l3 3v13H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>
@@ -2032,6 +2042,31 @@
     modalClose.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+    /* ---------- Load more (Audiovisual) ---------- */
+
+    (function () {
+      var grid = document.getElementById('audiovisualGrid');
+      var loadMoreBtn = document.getElementById('loadMoreBtn');
+      if (!grid || !loadMoreBtn) return;
+
+      var VISIBLE_COUNT = 3;
+      var cards = Array.prototype.slice.call(grid.querySelectorAll('.work-card'));
+      var extraCards = cards.slice(VISIBLE_COUNT);
+
+      if (extraCards.length === 0) {
+        loadMoreBtn.style.display = 'none';
+        return;
+      }
+
+      extraCards.forEach(function (card) { card.classList.add('extra-card'); });
+      loadMoreBtn.textContent = 'Ver mais vídeos (+' + extraCards.length + ')';
+
+      loadMoreBtn.addEventListener('click', function () {
+        grid.classList.add('expanded');
+        loadMoreBtn.style.display = 'none';
+      });
+    })();
 
     /* ---------- Custom cursor (small dot only) ---------- */
 
