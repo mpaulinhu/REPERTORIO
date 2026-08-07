@@ -1061,7 +1061,7 @@
     background: var(--card);
     border: 1px solid var(--border);
     color: var(--accent);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     cursor: none;
@@ -2341,7 +2341,10 @@
       var params = new URLSearchParams(window.location.search);
       if (params.get('editar') === '1') {
         var btn = document.getElementById('editToggle');
-        if (btn) btn.hidden = false;
+        if (btn) {
+          btn.hidden = false;
+          btn.style.display = 'flex';
+        }
       }
     })();
 
