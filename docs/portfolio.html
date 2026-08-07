@@ -934,6 +934,25 @@
   body.edit-mode .work-card { position: relative; }
   body.edit-mode .edit-delete-btn { display: flex; }
 
+  .edit-cover-btn {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 42px;
+    z-index: 2;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--accent-2);
+    color: #fff;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .edit-cover-btn svg { width: 14px; height: 14px; }
+  body.edit-mode .edit-cover-btn { display: flex; }
+
   .edit-add-card {
     display: none;
     width: calc(33.333% - 30px);
@@ -1872,6 +1891,8 @@
 
         <!-- FIM DOS CARDS AUDIOVISUAL -->
 
+        <button type="button" class="edit-add-card" id="editAddCardBtn">+ Adicionar vídeo</button>
+
       </div>
 
       <div class="load-more-row">
@@ -2059,6 +2080,46 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="addVideoBackdrop">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Adicionar vídeo</h3>
+      <button class="modal-close" id="addVideoClose" aria-label="Fechar" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <form class="modal-form" id="addVideoForm">
+      <label for="avTitle">Título do trabalho</label>
+      <input type="text" id="avTitle" required placeholder="Ex: Mooving Camp — Abertura">
+
+      <label for="avPeriod">Data (mês/ano curto)</label>
+      <input type="text" id="avPeriod" placeholder="Ex: jan/2026">
+
+      <label for="avBadge">Etiqueta do card</label>
+      <input type="text" id="avBadge" placeholder="Ex: Vídeo" value="Vídeo">
+
+      <label for="avDesc">Descrição curta</label>
+      <textarea id="avDesc" rows="3" placeholder="Ex: Edição e motion graphics para abertura de evento."></textarea>
+
+      <label for="avTools">Ferramentas usadas (separadas por vírgula)</label>
+      <input type="text" id="avTools" placeholder="Ex: Premiere, After Effects">
+
+      <label for="avCover">Link da imagem de capa</label>
+      <input type="url" id="avCover" placeholder="https://...">
+
+      <label for="avBehance">Link da página no Behance</label>
+      <input type="url" id="avBehance" placeholder="https://www.behance.net/gallery/...">
+
+      <label for="avEmbed">Link do vídeo embutido (opcional)</label>
+      <input type="url" id="avEmbed" placeholder="https://...">
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="submit" class="btn primary" style="flex:1;">Adicionar card</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <footer>
   <div class="wrap footer-inner">
     <a href="#top" class="brand">Marcos<span class="grad-text">.</span>Paulo</a>
@@ -2223,6 +2284,149 @@
           statusMsg.textContent = 'Erro ao gerar o arquivo: ' + err.message;
           statusMsg.className = 'status-msg err';
         }
+      });
+    })();
+
+    /* ---------- Edit mode (etapa 2: excluir / trocar capa / adicionar) ---------- */
+
+    (function () {
+      function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+      }
+      function escapeAttr(str) {
+        return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      }
+
+      function addCardControls(card) {
+        if (card.querySelector('.edit-delete-btn')) return;
+
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'edit-delete-btn';
+        delBtn.setAttribute('aria-label', 'Excluir este card');
+        delBtn.textContent = '×';
+        delBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (confirm('Excluir este card? Essa ação só é desfeita se você não salvar o arquivo depois.')) {
+            card.remove();
+          }
+        });
+        card.appendChild(delBtn);
+
+        var coverBtn = document.createElement('button');
+        coverBtn.type = 'button';
+        coverBtn.className = 'edit-cover-btn';
+        coverBtn.setAttribute('aria-label', 'Trocar capa deste card');
+        coverBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 15l-4.5-4.5L9 18"/></svg>';
+        coverBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var newUrl = prompt('Cole o link da nova imagem de capa:');
+          if (!newUrl) return;
+          var img = card.querySelector('.cover-photo');
+          var coverBox = card.querySelector('.work-cover');
+          if (!img) {
+            img = document.createElement('img');
+            img.className = 'cover-photo';
+            img.loading = 'lazy';
+            img.alt = card.getAttribute('data-modal-title') || '';
+            coverBox.insertBefore(img, coverBox.firstChild);
+          }
+          img.removeAttribute('onerror');
+          img.src = newUrl;
+          if (coverBox) coverBox.classList.add('has-photo');
+        });
+        card.appendChild(coverBtn);
+      }
+
+      document.querySelectorAll('.work-card').forEach(addCardControls);
+
+      /* Add-video modal */
+      var addVideoBackdrop = document.getElementById('addVideoBackdrop');
+      var addVideoClose = document.getElementById('addVideoClose');
+      var addVideoForm = document.getElementById('addVideoForm');
+      var addCardBtn = document.getElementById('editAddCardBtn');
+
+      function closeAddVideoModal() { addVideoBackdrop.classList.remove('open'); }
+
+      if (addCardBtn) {
+        addCardBtn.addEventListener('click', function () {
+          addVideoBackdrop.classList.add('open');
+        });
+      }
+      addVideoClose.addEventListener('click', closeAddVideoModal);
+      addVideoBackdrop.addEventListener('click', function (e) { if (e.target === addVideoBackdrop) closeAddVideoModal(); });
+
+      addVideoForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var title = document.getElementById('avTitle').value.trim();
+        var period = document.getElementById('avPeriod').value.trim();
+        var badge = document.getElementById('avBadge').value.trim() || 'Vídeo';
+        var desc = document.getElementById('avDesc').value.trim();
+        var toolsRaw = document.getElementById('avTools').value.trim();
+        var coverUrl = document.getElementById('avCover').value.trim();
+        var behanceUrl = document.getElementById('avBehance').value.trim();
+        var embedUrl = document.getElementById('avEmbed').value.trim();
+
+        if (!title) return;
+
+        var tools = toolsRaw ? toolsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
+        var metaText = period ? period + (behanceUrl ? ' · Behance' : '') : (behanceUrl ? 'Behance' : '');
+
+        var article = document.createElement('article');
+        article.className = 'work-card';
+        article.setAttribute('data-cursor-label', 'Ver detalhes');
+        if (embedUrl) article.setAttribute('data-modal-embed', embedUrl);
+        article.setAttribute('data-modal-title', title);
+        article.setAttribute('data-modal-desc', desc);
+        article.setAttribute('data-modal-meta', metaText);
+
+        var coverImgHtml = coverUrl
+          ? '<img class="cover-photo" loading="lazy" src="' + escapeAttr(coverUrl) + '" alt="' + escapeAttr(title) + '">'
+          : '';
+        var chipsHtml = tools.map(function (t) { return '<span class="chip">' + escapeHtml(t) + '</span>'; }).join('');
+        var stackRowHtml = tools.length ? '<div class="stack-row">' + chipsHtml + '</div>' : '';
+        var linksHtml = behanceUrl
+          ? '<div class="work-links"><a href="' + escapeAttr(behanceUrl) + '" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>'
+          : '';
+
+        article.innerHTML =
+          '<div class="tilt-wrap">' +
+          '<div class="work-cover' + (coverUrl ? ' has-photo' : '') + '">' + coverImgHtml +
+          '<span class="badge">' + escapeHtml(badge) + '</span>' +
+          '<span class="depth-edge-r"></span><span class="depth-edge-b"></span>' +
+          '<svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>' +
+          '<div class="reveal-label"><span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span><span class="format">Ver detalhes</span></div>' +
+          '</div></div>' +
+          '<div class="work-info">' +
+          '<p class="period">' + escapeHtml(period) + '</p>' +
+          '<h4 contenteditable="true">' + escapeHtml(title) + '</h4>' +
+          '<p class="desc" contenteditable="true">' + escapeHtml(desc) + '</p>' +
+          stackRowHtml + linksHtml +
+          '</div>';
+
+        article.querySelector('.work-cover').addEventListener('click', function () {
+          modalTitle.textContent = title;
+          modalDesc.textContent = desc;
+          modalMeta.textContent = metaText;
+          modalVideoList.innerHTML = '';
+          if (embedUrl) {
+            showEmbed(embedUrl);
+          } else {
+            modalFrame.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
+          }
+          modalBackdrop.classList.add('open');
+        });
+
+        addCardControls(article);
+
+        var grid = document.getElementById('audiovisualGrid');
+        var addBtnEl = document.getElementById('editAddCardBtn');
+        grid.insertBefore(article, addBtnEl);
+
+        addVideoForm.reset();
+        closeAddVideoModal();
       });
     })();
 
