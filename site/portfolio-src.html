@@ -836,14 +836,33 @@
 
   .modal-frame:has(.embed-box) { padding: 0; }
 
-  .modal-frame .embed-box { width: 100%; aspect-ratio: 16/9; flex-shrink: 0; }
+  .modal-frame .embed-box { width: 100%; height: 100%; }
 
-  .modal-frame.multi {
-    aspect-ratio: auto;
-    max-height: min(70vh, 640px);
-    flex-direction: column;
-    overflow-y: auto;
-    gap: 2px;
+  .modal-video-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-video-list button {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor: none;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .modal-video-list button:hover { color: var(--text); border-color: var(--accent-2); }
+
+  .modal-video-list button.active {
+    color: #06110F;
+    background: var(--accent-grad);
+    border-color: transparent;
   }
 
   .modal-head { display: flex; justify-content: space-between; align-items: center; }
@@ -1561,6 +1580,7 @@
       </button>
     </div>
     <div class="modal-frame" id="modalFrame">Espaço reservado para embed de vídeo (YouTube/Vimeo não-listado) quando o trabalho real for cadastrado.</div>
+    <div class="modal-video-list" id="modalVideoList"></div>
     <p id="modalDesc">Descrição</p>
     <p id="modalMeta" style="color: var(--accent); font-weight: 600;">Meta</p>
   </div>
@@ -1627,40 +1647,63 @@
     var modalDesc = document.getElementById('modalDesc');
     var modalMeta = document.getElementById('modalMeta');
     var modalFrame = document.getElementById('modalFrame');
+    var modalVideoList = document.getElementById('modalVideoList');
     var modalClose = document.getElementById('modalClose');
+
+    function showEmbed(url) {
+      modalFrame.innerHTML = '';
+      var frameBox = document.createElement('div');
+      frameBox.className = 'embed-box';
+      var iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = '0';
+      iframe.allow = 'autoplay; fullscreen';
+      iframe.allowFullscreen = true;
+      frameBox.appendChild(iframe);
+      modalFrame.appendChild(frameBox);
+    }
+
+    function closeModal() {
+      modalFrame.innerHTML = '';
+      modalVideoList.innerHTML = '';
+      modalBackdrop.classList.remove('open');
+    }
 
     document.querySelectorAll('.work-card').forEach(function (card) {
       card.querySelector('.work-cover').addEventListener('click', function () {
         modalTitle.textContent = card.getAttribute('data-modal-title') || '';
         modalDesc.textContent = card.getAttribute('data-modal-desc') || '';
         modalMeta.textContent = card.getAttribute('data-modal-meta') || '';
+        modalVideoList.innerHTML = '';
         var embedAttr = card.getAttribute('data-modal-embed');
         if (embedAttr) {
           var embedUrls = embedAttr.split('|');
-          modalFrame.innerHTML = '';
-          modalFrame.classList.toggle('multi', embedUrls.length > 1);
-          embedUrls.forEach(function (url, i) {
-            var frameBox = document.createElement('div');
-            frameBox.className = 'embed-box';
-            var iframe = document.createElement('iframe');
-            iframe.src = url;
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = '0';
-            iframe.allow = 'autoplay; fullscreen';
-            iframe.allowFullscreen = true;
-            frameBox.appendChild(iframe);
-            modalFrame.appendChild(frameBox);
-          });
+          showEmbed(embedUrls[0]);
+          if (embedUrls.length > 1) {
+            embedUrls.forEach(function (url, i) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.textContent = 'Vídeo ' + (i + 1);
+              if (i === 0) btn.classList.add('active');
+              btn.addEventListener('click', function () {
+                showEmbed(url);
+                modalVideoList.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+              });
+              modalVideoList.appendChild(btn);
+            });
+          }
         } else {
           modalFrame.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
         }
         modalBackdrop.classList.add('open');
       });
     });
-    modalClose.addEventListener('click', function () { modalFrame.innerHTML = ''; modalBackdrop.classList.remove('open'); });
-    modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) { modalFrame.innerHTML = ''; modalBackdrop.classList.remove('open'); } });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { modalFrame.innerHTML = ''; modalBackdrop.classList.remove('open'); } });
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
 
     /* ---------- Custom cursor (small dot only) ---------- */
 
