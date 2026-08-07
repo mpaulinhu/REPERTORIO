@@ -1201,7 +1201,7 @@
 <div id="cursorRing"></div>
 <div id="cursorDot"></div>
 
-<button type="button" id="editToggle" aria-label="Ativar modo de edição" title="Editar página">
+<button type="button" id="editToggle" aria-label="Ativar modo de edição" title="Editar página" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
 </button>
 
@@ -2335,6 +2335,15 @@
     menuOverlay.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function () { setMenu(false); });
     });
+
+    /* Show edit button only with ?editar=1 in the URL */
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('editar') === '1') {
+        var btn = document.getElementById('editToggle');
+        if (btn) btn.hidden = false;
+      }
+    })();
 
     /* Intro overlay */
     var introOverlay = document.getElementById('introOverlay');
