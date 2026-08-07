@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Editor de cards — Portfólio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0A0D10;
+    --bg-raised: #10151A;
+    --card: #151B21;
+    --text: #F5F7F8;
+    --text-dim: #8B96A0;
+    --accent: #2FE0C8;
+    --accent-2: #3B82F6;
+    --border: #212930;
+    --danger: #F04848;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    padding: 32px 20px 80px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  .lede { color: var(--text-dim); font-size: 0.92rem; margin: 0 0 32px; max-width: 65ch; }
+  .lede code { background: var(--bg-raised); padding: 1px 5px; border-radius: 3px; }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+  fieldset { border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 0 0 20px; }
+  legend { padding: 0 8px; font-weight: 600; font-size: 0.85rem; color: var(--accent); }
+
+  label { display: block; font-size: 0.82rem; font-weight: 600; margin: 14px 0 6px; }
+  label:first-of-type { margin-top: 0; }
+  label .hint { font-weight: 400; color: var(--text-dim); font-size: 0.78rem; display: block; margin-top: 2px; }
+
+  input[type=text], input[type=url], textarea, select {
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 9px 11px;
+    font-size: 0.88rem;
+    font-family: inherit;
+  }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent-2); outline-offset: 1px; }
+  textarea { resize: vertical; min-height: 60px; }
+
+  .video-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .video-row input { flex: 1; }
+  .video-row button { flex-shrink: 0; }
+
+  button {
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text);
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent-2); }
+  button.primary { background: var(--accent); color: #06110F; border-color: var(--accent); width: 100%; padding: 12px; font-size: 0.95rem; margin-top: 8px; }
+  button.primary:hover { opacity: 0.9; }
+  button.danger-mini { color: var(--danger); border-color: var(--danger); padding: 8px 10px; }
+  button.ghost { background: none; }
+
+  .preview-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+  }
+  .preview-box h2 { font-size: 1rem; margin: 0 0 12px; }
+  .card-preview {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card-preview .badge-prev { display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); background: var(--bg); padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); margin-bottom: 10px; }
+  .card-preview h3 { font-size: 1rem; margin: 0 0 6px; }
+  .card-preview .period-prev { font-size: 0.72rem; color: var(--text-dim); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+  .card-preview p.desc-prev { font-size: 0.85rem; color: var(--text-dim); margin: 0 0 10px; }
+  .card-preview .chips-prev { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .card-preview .chip-prev { font-size: 0.68rem; font-family: monospace; padding: 3px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--border); color: var(--text-dim); }
+  .card-preview a { color: var(--accent); font-size: 0.78rem; font-weight: 600; text-decoration: none; }
+
+  textarea#output {
+    width: 100%;
+    min-height: 260px;
+    background: #06090b;
+    color: #8ee9d8;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.76rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 14px;
+    white-space: pre;
+  }
+
+  .copy-row { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+  .copy-row button { flex-shrink: 0; }
+  .status { font-size: 0.8rem; color: var(--accent); }
+
+  .saved-note { font-size: 0.76rem; color: var(--text-dim); margin-top: 6px; }
+
+  .instructions {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-top: 32px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .instructions h2 { font-size: 0.95rem; color: var(--text); margin: 0 0 10px; }
+  .instructions ol { margin: 0; padding-left: 20px; }
+  .instructions li { margin-bottom: 6px; }
+  .instructions code { background: var(--bg-raised); padding: 1px 5px; border-radius: 3px; color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Editor de cards do portfólio</h1>
+  <p class="lede">
+    Preenche os campos abaixo, e o card em HTML aparece pronto pra colar no <code>portfolio.html</code>.
+    Não precisa mexer em código — só copiar e colar no lugar certo (instruções no final da página).
+    O que você digita fica salvo neste navegador enquanto não fecha a aba.
+  </p>
+
+  <div class="layout">
+    <div>
+      <fieldset>
+        <legend>Informações do trabalho</legend>
+
+        <label for="title">Título do trabalho</label>
+        <input type="text" id="title" placeholder="Ex: Mooving Camp — Abertura">
+
+        <label for="period">Data (mês/ano curto)
+          <span class="hint">Ex: jan/2026, fev/2026...</span>
+        </label>
+        <input type="text" id="period" placeholder="Ex: jan/2026">
+
+        <label for="badge">Etiqueta do card
+          <span class="hint">Palavra curta que aparece no canto do card. Ex: Vídeo, Mixagem, Animação, Cobertura</span>
+        </label>
+        <input type="text" id="badge" placeholder="Ex: Vídeo" value="Vídeo">
+
+        <label for="desc">Descrição curta
+          <span class="hint">1-2 frases descrevendo o que você fez (não copie texto do Behance, escreva com suas palavras)</span>
+        </label>
+        <textarea id="desc" placeholder="Ex: Edição de vídeo e motion graphics para abertura de evento."></textarea>
+
+        <label for="tools">Ferramentas usadas
+          <span class="hint">Separadas por vírgula. Ex: Premiere, After Effects</span>
+        </label>
+        <input type="text" id="tools" placeholder="Ex: Premiere, After Effects">
+      </fieldset>
+
+      <fieldset>
+        <legend>Imagem de capa</legend>
+        <label for="coverFile">Nome do arquivo local
+          <span class="hint">O arquivo precisa estar salvo em <code>site/images/</code>. Ex: mooving-camp.jpg</span>
+        </label>
+        <input type="text" id="coverFile" placeholder="Ex: mooving-camp.jpg">
+
+        <label for="coverFallback">Link de imagem de reserva (opcional)
+          <span class="hint">Se o arquivo local não existir, usa essa URL de capa em vez do ícone padrão. Ex: link direto de uma imagem do Behance.</span>
+        </label>
+        <input type="url" id="coverFallback" placeholder="https://...">
+      </fieldset>
+
+      <fieldset>
+        <legend>Vídeo(s) e link do Behance</legend>
+        <label for="behanceUrl">Link da página no Behance</label>
+        <input type="url" id="behanceUrl" placeholder="https://www.behance.net/gallery/.../...">
+
+        <label>Links de vídeo embutido (opcional, pode ter mais de um)
+          <span class="hint">Cole o link do player do vídeo. Se não tiver, deixa em branco — o card mostra só o link "Ver no Behance".</span>
+        </label>
+        <div id="videoRows"></div>
+        <button type="button" class="ghost" id="addVideoRow">+ Adicionar outro vídeo</button>
+      </fieldset>
+
+      <button type="button" class="primary" id="generateBtn">Gerar card</button>
+    </div>
+
+    <div class="preview-box">
+      <h2>Prévia</h2>
+      <div class="card-preview" id="cardPreview">
+        <span class="badge-prev" id="pvBadge">Vídeo</span>
+        <p class="period-prev" id="pvPeriod">—</p>
+        <h3 id="pvTitle">Título do trabalho</h3>
+        <p class="desc-prev" id="pvDesc">A descrição aparece aqui.</p>
+        <div class="chips-prev" id="pvChips"></div>
+        <a href="#" id="pvLink">Ver no Behance →</a>
+      </div>
+
+      <h2>Código HTML gerado</h2>
+      <textarea id="output" readonly placeholder="Preencha o formulário e clique em &quot;Gerar card&quot;..."></textarea>
+      <div class="copy-row">
+        <button type="button" id="copyBtn">Copiar código</button>
+        <span class="status" id="copyStatus"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h2>Como usar o código gerado</h2>
+    <ol>
+      <li>Preenche o formulário acima e clica em <strong>Gerar card</strong>.</li>
+      <li>Clica em <strong>Copiar código</strong>.</li>
+      <li>Abre o arquivo <code>site/portfolio.html</code> (e também <code>site/portfolio-src.html</code>, se quiser manter os dois iguais) num editor de texto.</li>
+      <li>Procura pela linha que tem <code>&lt;!-- FIM DOS CARDS AUDIOVISUAL --&gt;</code> dentro da seção Audiovisual.</li>
+      <li>Cola o código gerado logo <strong>antes</strong> dessa linha.</li>
+      <li>Salva o arquivo e abre no navegador pra conferir.</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'portfolio-editor-draft';
+
+  var fields = ['title', 'period', 'badge', 'desc', 'tools', 'coverFile', 'coverFallback', 'behanceUrl'];
+  var videoRows = document.getElementById('videoRows');
+  var addVideoRowBtn = document.getElementById('addVideoRow');
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+  function escapeAttr(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  }
+
+  function addVideoRow(value) {
+    var row = document.createElement('div');
+    row.className = 'video-row';
+    var input = document.createElement('input');
+    input.type = 'url';
+    input.placeholder = 'https://...';
+    input.value = value || '';
+    input.addEventListener('input', saveDraft);
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'danger-mini';
+    removeBtn.textContent = 'Remover';
+    removeBtn.addEventListener('click', function () {
+      row.remove();
+      saveDraft();
+    });
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    videoRows.appendChild(row);
+  }
+
+  addVideoRowBtn.addEventListener('click', function () { addVideoRow(''); });
+
+  function getVideoUrls() {
+    return Array.from(videoRows.querySelectorAll('input')).map(function (i) { return i.value.trim(); }).filter(Boolean);
+  }
+
+  function saveDraft() {
+    var data = {};
+    fields.forEach(function (f) { data[f] = document.getElementById(f).value; });
+    data.videos = getVideoUrls();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  function loadDraft() {
+    var raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { return; }
+    if (!raw) { addVideoRow(''); return; }
+    try {
+      var data = JSON.parse(raw);
+      fields.forEach(function (f) { if (data[f] !== undefined) document.getElementById(f).value = data[f]; });
+      if (data.videos && data.videos.length) {
+        data.videos.forEach(function (v) { addVideoRow(v); });
+      } else {
+        addVideoRow('');
+      }
+    } catch (e) { addVideoRow(''); }
+  }
+
+  fields.forEach(function (f) {
+    document.getElementById(f).addEventListener('input', function () { saveDraft(); updatePreview(); });
+  });
+
+  function updatePreview() {
+    var title = document.getElementById('title').value || 'Título do trabalho';
+    var period = document.getElementById('period').value || '—';
+    var badge = document.getElementById('badge').value || 'Vídeo';
+    var desc = document.getElementById('desc').value || 'A descrição aparece aqui.';
+    var tools = document.getElementById('tools').value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+    var behanceUrl = document.getElementById('behanceUrl').value || '#';
+
+    document.getElementById('pvTitle').textContent = title;
+    document.getElementById('pvPeriod').textContent = period;
+    document.getElementById('pvBadge').textContent = badge;
+    document.getElementById('pvDesc').textContent = desc;
+    document.getElementById('pvLink').href = behanceUrl;
+
+    var chipsEl = document.getElementById('pvChips');
+    chipsEl.innerHTML = '';
+    tools.forEach(function (t) {
+      var chip = document.createElement('span');
+      chip.className = 'chip-prev';
+      chip.textContent = t;
+      chipsEl.appendChild(chip);
+    });
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', function () {
+    var title = document.getElementById('title').value.trim();
+    var period = document.getElementById('period').value.trim();
+    var badge = document.getElementById('badge').value.trim() || 'Vídeo';
+    var desc = document.getElementById('desc').value.trim();
+    var toolsRaw = document.getElementById('tools').value.trim();
+    var coverFile = document.getElementById('coverFile').value.trim();
+    var coverFallback = document.getElementById('coverFallback').value.trim();
+    var behanceUrl = document.getElementById('behanceUrl').value.trim();
+    var videos = getVideoUrls();
+
+    if (!title) {
+      alert('Preenche pelo menos o título do trabalho.');
+      return;
+    }
+
+    var tools = toolsRaw ? toolsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [];
+    var chipsHtml = tools.map(function (t) { return '<span class="chip">' + escapeHtml(t) + '</span>'; }).join('');
+
+    var modalEmbedAttr = '';
+    if (videos.length) {
+      modalEmbedAttr = ' data-modal-embed="' + escapeAttr(videos.join('|')) + '"';
+    }
+
+    var metaText = period ? period + (behanceUrl ? ' · Behance' : '') : (behanceUrl ? 'Behance' : '');
+
+    var coverImgHtml;
+    if (coverFile) {
+      var onerror;
+      if (coverFallback) {
+        onerror = "if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = '" + coverFallback.replace(/'/g, "\\'") + "'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }";
+      } else {
+        onerror = "this.closest('.work-cover').classList.remove('has-photo'); this.remove();";
+      }
+      coverImgHtml = '\n              <img class="cover-photo" src="images/' + escapeAttr(coverFile) + '" alt="' + escapeAttr(title) + '" onerror="' + escapeAttr(onerror) + '">';
+    } else {
+      coverImgHtml = '';
+    }
+
+    var workCoverClass = coverFile ? 'work-cover has-photo' : 'work-cover';
+
+    var linksHtml = behanceUrl
+      ? '\n            <div class="work-links"><a href="' + escapeAttr(behanceUrl) + '" target="_blank" data-cursor-label="Abrir">Ver no Behance →</a></div>'
+      : '';
+
+    var stackRowHtml = tools.length ? '\n            <div class="stack-row">' + chipsHtml + '</div>' : '';
+
+    var html =
+'        <article class="work-card" data-cursor-label="Ver detalhes"' + modalEmbedAttr + ' data-modal-title="' + escapeAttr(title) + '" data-modal-desc="' + escapeAttr(desc) + '" data-modal-meta="' + escapeAttr(metaText) + '">\n' +
+'          <div class="tilt-wrap">\n' +
+'            <div class="' + workCoverClass + '">' + coverImgHtml + '\n' +
+'              <span class="badge">' + escapeHtml(badge) + '</span>\n' +
+'              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>\n' +
+'              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>\n' +
+'              <div class="reveal-label">\n' +
+'                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>\n' +
+'                <span class="format">Ver detalhes</span>\n' +
+'              </div>\n' +
+'            </div>\n' +
+'          </div>\n' +
+'          <div class="work-info">\n' +
+'            <p class="period">' + escapeHtml(period) + '</p>\n' +
+'            <h4>' + escapeHtml(title) + '</h4>\n' +
+'            <p class="desc">' + escapeHtml(desc) + '</p>' + stackRowHtml + linksHtml + '\n' +
+'          </div>\n' +
+'        </article>';
+
+    document.getElementById('output').value = html;
+    document.getElementById('copyStatus').textContent = '';
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var output = document.getElementById('output');
+    if (!output.value) {
+      document.getElementById('copyStatus').textContent = 'Gere o card primeiro.';
+      return;
+    }
+    output.select();
+    var status = document.getElementById('copyStatus');
+    navigator.clipboard.writeText(output.value).then(function () {
+      status.textContent = 'Copiado!';
+      setTimeout(function () { status.textContent = ''; }, 2000);
+    }).catch(function () {
+      document.execCommand('copy');
+      status.textContent = 'Copiado!';
+      setTimeout(function () { status.textContent = ''; }, 2000);
+    });
+  });
+
+  loadDraft();
+  updatePreview();
+})();
+</script>
+</body>
+</html>

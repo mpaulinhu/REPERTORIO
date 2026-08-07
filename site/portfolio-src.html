@@ -734,68 +734,6 @@
   .note p { font-size: 0.86rem; color: var(--text-dim); margin: 0; line-height: 1.6; max-width: 70ch; }
   .note code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.82em; background: var(--bg-raised); padding: 1px 5px; border-radius: 3px; }
 
-  /* ---------- All-videos gallery ---------- */
-
-  .all-videos-toggle { display: flex; justify-content: center; margin-top: 48px; }
-
-  .all-videos-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 32px;
-  }
-
-  .video-thumb {
-    position: relative;
-    aspect-ratio: 16/9;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--card);
-    cursor: none;
-    display: block;
-  }
-
-  .video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  .video-thumb::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--overlay);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .video-thumb:hover::after { opacity: 1; }
-
-  .video-thumb .play-mini {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 38px; height: 38px;
-    border-radius: 999px;
-    border: 1.5px solid #fff;
-    color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .video-thumb:hover .play-mini { opacity: 1; }
-  .video-thumb .play-mini svg { width: 14px; height: 14px; margin-left: 2px; }
-
-  .video-thumb .thumb-label {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    padding: 8px 10px;
-    background: linear-gradient(0deg, rgba(0,0,0,0.75), transparent);
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #fff;
-    line-height: 1.3;
-  }
-
   /* ---------- Timeline ---------- */
 
   .timeline { position: relative; padding-left: 30px; max-width: 640px; margin: 0 auto; }
@@ -1135,12 +1073,6 @@
         <h2>Audiovisual &amp; acessibilidade</h2>
         <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
       </div>
-
-      <div class="all-videos-toggle">
-        <button type="button" id="allVideosToggle" class="btn secondary">Ver todos os vídeos</button>
-      </div>
-
-      <div class="all-videos-gallery" id="allVideosGallery" hidden></div>
 
       <div class="cards-grid">
 
@@ -1797,6 +1729,8 @@
           </div>
         </article>
 
+        <!-- FIM DOS CARDS AUDIOVISUAL -->
+
       </div>
 
       <div class="note">
@@ -2098,79 +2032,6 @@
     modalClose.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
-
-    /* ---------- All-videos gallery ---------- */
-
-    var allVideosToggle = document.getElementById('allVideosToggle');
-    var allVideosGallery = document.getElementById('allVideosGallery');
-    var galleryBuilt = false;
-    var projectCards = document.querySelectorAll('#audiovisual .work-card[data-modal-embed]');
-
-    function buildAllVideosGallery() {
-      projectCards.forEach(function (card) {
-        var title = card.getAttribute('data-modal-title') || '';
-        var desc = card.getAttribute('data-modal-desc') || '';
-        var meta = card.getAttribute('data-modal-meta') || '';
-        var coverImg = card.querySelector('.cover-photo');
-        var coverSrc = coverImg ? coverImg.src : '';
-        var embedAttr = card.getAttribute('data-modal-embed');
-
-        var thumb = document.createElement('button');
-        thumb.type = 'button';
-        thumb.className = 'video-thumb';
-        thumb.setAttribute('data-cursor-label', 'Ver detalhes');
-        if (coverSrc) {
-          var img = document.createElement('img');
-          img.src = coverSrc;
-          img.alt = title;
-          thumb.appendChild(img);
-        }
-        var play = document.createElement('span');
-        play.className = 'play-mini';
-        play.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-        thumb.appendChild(play);
-        var label = document.createElement('span');
-        label.className = 'thumb-label';
-        label.textContent = title;
-        thumb.appendChild(label);
-        thumb.addEventListener('click', function () {
-          modalTitle.textContent = title;
-          modalDesc.textContent = desc;
-          modalMeta.textContent = meta;
-          modalVideoList.innerHTML = '';
-          var embedUrls = embedAttr.split('|');
-          showEmbed(embedUrls[0]);
-          if (embedUrls.length > 1) {
-            embedUrls.forEach(function (url, i) {
-              var btn = document.createElement('button');
-              btn.type = 'button';
-              btn.textContent = 'Vídeo ' + (i + 1);
-              if (i === 0) btn.classList.add('active');
-              btn.addEventListener('click', function () {
-                showEmbed(url);
-                modalVideoList.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-              });
-              modalVideoList.appendChild(btn);
-            });
-          }
-          modalBackdrop.classList.add('open');
-        });
-        allVideosGallery.appendChild(thumb);
-      });
-
-      galleryBuilt = true;
-    }
-
-    allVideosToggle.textContent = 'Ver todos os vídeos (' + projectCards.length + ')';
-
-    allVideosToggle.addEventListener('click', function () {
-      if (!galleryBuilt) buildAllVideosGallery();
-      allVideosGallery.hidden = !allVideosGallery.hidden;
-      allVideosToggle.textContent = allVideosGallery.hidden
-        ? 'Ver todos os vídeos (' + projectCards.length + ')'
-        : 'Ocultar vídeos';
-    });
 
     /* ---------- Custom cursor (small dot only) ---------- */
 
