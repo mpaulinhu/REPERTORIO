@@ -1778,28 +1778,25 @@
     var allVideosToggle = document.getElementById('allVideosToggle');
     var allVideosGallery = document.getElementById('allVideosGallery');
     var galleryBuilt = false;
+    var projectCards = document.querySelectorAll('#audiovisual .work-card[data-modal-embed]');
 
     function buildAllVideosGallery() {
-      var items = [];
-      document.querySelectorAll('#audiovisual .work-card[data-modal-embed]').forEach(function (card) {
+      projectCards.forEach(function (card) {
         var title = card.getAttribute('data-modal-title') || '';
+        var desc = card.getAttribute('data-modal-desc') || '';
+        var meta = card.getAttribute('data-modal-meta') || '';
         var coverImg = card.querySelector('.cover-photo');
         var coverSrc = coverImg ? coverImg.src : '';
-        var urls = card.getAttribute('data-modal-embed').split('|');
-        urls.forEach(function (url, i) {
-          items.push({ title: title, index: i, total: urls.length, cover: coverSrc, url: url });
-        });
-      });
+        var embedAttr = card.getAttribute('data-modal-embed');
 
-      items.forEach(function (item) {
         var thumb = document.createElement('button');
         thumb.type = 'button';
         thumb.className = 'video-thumb';
-        thumb.setAttribute('data-cursor-label', 'Assistir');
-        if (item.cover) {
+        thumb.setAttribute('data-cursor-label', 'Ver detalhes');
+        if (coverSrc) {
           var img = document.createElement('img');
-          img.src = item.cover;
-          img.alt = item.title;
+          img.src = coverSrc;
+          img.alt = title;
           thumb.appendChild(img);
         }
         var play = document.createElement('span');
@@ -1808,14 +1805,29 @@
         thumb.appendChild(play);
         var label = document.createElement('span');
         label.className = 'thumb-label';
-        label.textContent = item.total > 1 ? item.title + ' — Vídeo ' + (item.index + 1) : item.title;
+        label.textContent = title;
         thumb.appendChild(label);
         thumb.addEventListener('click', function () {
-          modalTitle.textContent = item.title;
-          modalDesc.textContent = '';
-          modalMeta.textContent = '';
+          modalTitle.textContent = title;
+          modalDesc.textContent = desc;
+          modalMeta.textContent = meta;
           modalVideoList.innerHTML = '';
-          showEmbed(item.url);
+          var embedUrls = embedAttr.split('|');
+          showEmbed(embedUrls[0]);
+          if (embedUrls.length > 1) {
+            embedUrls.forEach(function (url, i) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.textContent = 'Vídeo ' + (i + 1);
+              if (i === 0) btn.classList.add('active');
+              btn.addEventListener('click', function () {
+                showEmbed(url);
+                modalVideoList.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+              });
+              modalVideoList.appendChild(btn);
+            });
+          }
           modalBackdrop.classList.add('open');
         });
         allVideosGallery.appendChild(thumb);
@@ -1824,19 +1836,14 @@
       galleryBuilt = true;
     }
 
-    var totalVideoCount = 0;
-    document.querySelectorAll('#audiovisual .work-card[data-modal-embed]').forEach(function (card) {
-      totalVideoCount += card.getAttribute('data-modal-embed').split('|').length;
-    });
-    allVideosToggle.textContent = 'Ver todos os vídeos (' + totalVideoCount + ')';
+    allVideosToggle.textContent = 'Ver todos os vídeos (' + projectCards.length + ')';
 
     allVideosToggle.addEventListener('click', function () {
       if (!galleryBuilt) buildAllVideosGallery();
-      var willShow = allVideosGallery.hasAttribute('hidden');
-      allVideosGallery.toggleAttribute('hidden');
-      allVideosToggle.textContent = willShow
-        ? 'Ocultar vídeos'
-        : 'Ver todos os vídeos (' + totalVideoCount + ')';
+      allVideosGallery.hidden = !allVideosGallery.hidden;
+      allVideosToggle.textContent = allVideosGallery.hidden
+        ? 'Ver todos os vídeos (' + projectCards.length + ')'
+        : 'Ocultar vídeos';
     });
 
     /* ---------- Custom cursor (small dot only) ---------- */
