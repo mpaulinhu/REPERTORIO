@@ -146,7 +146,7 @@
 
   @media (hover: none), (pointer: coarse) {
     body { cursor: auto; }
-    #cursorDot { display: none !important; }
+    #cursorDot, #cursorRing { display: none !important; }
   }
 
   /* ---------- Ambient background glow ---------- */
@@ -216,18 +216,44 @@
 
   /* ---------- Custom cursor ---------- */
 
-  #cursorDot {
+  #cursorDot, #cursorRing {
     position: fixed;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
     top: 0;
     left: 0;
     z-index: 999;
     pointer-events: none;
-    transform: translate(-50%, -50%);
-    transition: opacity 0.2s ease;
+    border-radius: 50%;
+    transition: opacity 0.2s ease, width 0.25s cubic-bezier(.2,.8,.2,1), height 0.25s cubic-bezier(.2,.8,.2,1), background 0.25s ease, border-color 0.25s ease;
+  }
+
+  #cursorDot {
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    background: var(--accent);
+  }
+
+  #cursorRing {
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 1.5px solid var(--accent-2);
+    opacity: 0.5;
+  }
+
+  body.cursor-hover #cursorDot {
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    background: var(--accent-2);
+  }
+
+  body.cursor-hover #cursorRing {
+    width: 54px;
+    height: 54px;
+    margin: -27px 0 0 -27px;
+    border-color: var(--accent);
+    opacity: 0.9;
   }
 
   /* ---------- Header ---------- */
@@ -390,7 +416,7 @@
     font-family: var(--display);
     font-weight: 600;
     font-size: clamp(2.4rem, 6vw, 3.8rem);
-    line-height: 1.08;
+    line-height: 1.22;
     margin: 0;
     letter-spacing: -0.01em;
     display: inline-block;
@@ -1094,6 +1120,7 @@
 
 <div class="bg-glow" aria-hidden="true"><span></span><span></span></div>
 
+<div id="cursorRing"></div>
 <div id="cursorDot"></div>
 
 <button type="button" id="editToggle" aria-label="Ativar modo de edição" title="Editar página">
@@ -2618,21 +2645,63 @@
       window.refreshLoadMoreButton = updateLoadMoreButton;
     })();
 
-    /* ---------- Custom cursor (small dot only) ---------- */
+    /* ---------- Custom cursor with elastic follow physics ---------- */
 
     var isCoarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!isCoarse) {
       var dot = document.getElementById('cursorDot');
+      var ring = document.getElementById('cursorRing');
       dot.style.opacity = '0';
+      if (ring) ring.style.opacity = '0';
+
+      var mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+      var dotX = mouseX, dotY = mouseY;
+      var ringX = mouseX, ringY = mouseY;
+      var hasMoved = false;
 
       window.addEventListener('mousemove', function (e) {
-        dot.style.left = e.clientX + 'px';
-        dot.style.top = e.clientY + 'px';
-        dot.style.opacity = '1';
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (!hasMoved) {
+          hasMoved = true;
+          dotX = mouseX; dotY = mouseY;
+          ringX = mouseX; ringY = mouseY;
+          dot.style.opacity = '1';
+          if (ring) ring.style.opacity = '1';
+        }
       });
 
       window.addEventListener('mouseleave', function () {
         dot.style.opacity = '0';
+        if (ring) ring.style.opacity = '0';
+      });
+
+      if (prefersReducedMotion) {
+        window.addEventListener('mousemove', function () {
+          dot.style.transform = 'translate(' + mouseX + 'px, ' + mouseY + 'px)';
+          if (ring) ring.style.transform = 'translate(' + mouseX + 'px, ' + mouseY + 'px)';
+        });
+      } else {
+        (function tick() {
+          dotX += (mouseX - dotX) * 0.35;
+          dotY += (mouseY - dotY) * 0.35;
+          ringX += (mouseX - ringX) * 0.12;
+          ringY += (mouseY - ringY) * 0.12;
+          dot.style.transform = 'translate(' + dotX + 'px, ' + dotY + 'px)';
+          if (ring) ring.style.transform = 'translate(' + ringX + 'px, ' + ringY + 'px)';
+          requestAnimationFrame(tick);
+        })();
+      }
+
+      var hoverTargets = document.querySelectorAll('a, button, .work-card, [data-cursor-label]');
+      hoverTargets.forEach(function (el) {
+        el.addEventListener('mouseenter', function () {
+          document.body.classList.add('cursor-hover');
+        });
+        el.addEventListener('mouseleave', function () {
+          document.body.classList.remove('cursor-hover');
+        });
       });
     }
 
