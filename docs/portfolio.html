@@ -5,6 +5,13 @@
 
 <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+
 <meta property="og:type" content="website">
 <meta property="og:title" content="Marcos Paulo — Portfólio">
 <meta property="og:description" content="Áudio, imagem e código. Portfólio de Marcos Paulo Tavares Garcia dos Santos — audiovisual, acessibilidade e desenvolvimento.">
@@ -18,61 +25,30 @@
 <meta name="twitter:description" content="Áudio, imagem e código. Portfólio de Marcos Paulo Tavares Garcia dos Santos — audiovisual, acessibilidade e desenvolvimento.">
 <meta name="twitter:image" content="https://mpaulinhu.github.io/REPERTORIO/images/og-preview.svg">
 <style>
-  @font-face {
-    font-family: 'Poppins';
-    font-weight: 500;
-    font-display: swap;
-    src: url(data:font/woff2;base64,POPPINS_500_B64) format('woff2');
-  }
-  @font-face {
-    font-family: 'Poppins';
-    font-weight: 600;
-    font-display: swap;
-    src: url(data:font/woff2;base64,POPPINS_600_B64) format('woff2');
-  }
-  @font-face {
-    font-family: 'Poppins';
-    font-weight: 700;
-    font-display: swap;
-    src: url(data:font/woff2;base64,POPPINS_700_B64) format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    font-weight: 400;
-    font-display: swap;
-    src: url(data:font/woff2;base64,DMSANS_400_B64) format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    font-weight: 500;
-    font-display: swap;
-    src: url(data:font/woff2;base64,DMSANS_500_B64) format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Sans';
-    font-weight: 700;
-    font-display: swap;
-    src: url(data:font/woff2;base64,DMSANS_700_B64) format('woff2');
-  }
+  /* Fontes carregadas via <link> no head (Space Grotesk + Inter).
+     As antigas eram base64 placeholder que nunca resolvia. */
 
   :root {
-    --bg: #0A0D10;
-    --bg-raised: #10151A;
-    --card: #151B21;
-    --card-hover: #1B222A;
-    --text: #F5F7F8;
-    --text-dim: #8B96A0;
-    --text-faint: #545F68;
+    --bg: #08090B;
+    --bg-raised: #0E1013;
+    --card: #121417;
+    --card-hover: #191C21;
+    --text: #F2F3F5;
+    --text-dim: #8A9099;
+    --text-faint: #565C64;
     --accent: #2FE0C8;
     --accent-2: #3B82F6;
     --accent-grad: linear-gradient(115deg, #2FE0C8 0%, #3B82F6 100%);
     --accent-wash: rgba(47,224,200,0.10);
-    --border: #212930;
-    --overlay: rgba(4,6,8,0.78);
-    --depth-1: #0D1114;
-    --depth-2: #06080A;
-    --sans: 'DM Sans', -apple-system, 'Segoe UI', sans-serif;
-    --display: 'Poppins', -apple-system, 'Segoe UI', sans-serif;
+    --border: #1D2126;
+    --rule: #2A2F36;
+    --overlay: rgba(3,4,5,0.82);
+    --depth-1: #0B0D0F;
+    --depth-2: #050607;
+    --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    --display: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
+    /* display gigante e condensada (papel da Tusker Grotesk na referencia) */
+    --mega: 'Anton', 'Arial Narrow', 'Space Grotesk', sans-serif;
     --persp: 1400px;
     color-scheme: dark;
   }
@@ -88,6 +64,7 @@
       --text-faint: #8B939A;
       --accent-wash: rgba(11,140,125,0.10);
       --border: #DCE2DF;
+      --rule: #C3CBC6;
       --overlay: rgba(20,26,24,0.55);
       --depth-1: #DDE2DF;
       --depth-2: #C9D0CC;
@@ -105,6 +82,7 @@
     --text-faint: #8B939A;
     --accent-wash: rgba(11,140,125,0.10);
     --border: #DCE2DF;
+    --rule: #C3CBC6;
     --overlay: rgba(20,26,24,0.55);
     --depth-1: #DDE2DF;
     --depth-2: #C9D0CC;
@@ -112,18 +90,19 @@
   }
 
   :root[data-theme="dark"] {
-    --bg: #0A0D10;
-    --bg-raised: #10151A;
-    --card: #151B21;
-    --card-hover: #1B222A;
-    --text: #F5F7F8;
-    --text-dim: #8B96A0;
-    --text-faint: #545F68;
+    --bg: #08090B;
+    --bg-raised: #0E1013;
+    --card: #121417;
+    --card-hover: #191C21;
+    --text: #F2F3F5;
+    --text-dim: #8A9099;
+    --text-faint: #565C64;
     --accent-wash: rgba(47,224,200,0.10);
-    --border: #212930;
-    --overlay: rgba(4,6,8,0.78);
-    --depth-1: #0D1114;
-    --depth-2: #06080A;
+    --border: #1D2126;
+    --rule: #2A2F36;
+    --overlay: rgba(3,4,5,0.82);
+    --depth-1: #0B0D0F;
+    --depth-2: #050607;
     color-scheme: dark;
   }
 
@@ -700,229 +679,6 @@
     .work-cover::after { display: none; }
   }
 
-  /* ---------- Mini-game no card do hero ---------- */
-
-  .mix-game {
-    position: absolute;
-    inset: 0;
-    z-index: 4;
-    border-radius: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px;
-    cursor: pointer;
-  }
-
-  /* enquanto joga ou mostra o placar, tampa o icone da camera
-     pra o texto nunca ficar por cima do desenho */
-  .mix-game.playing,
-  .mix-game.over {
-    background: color-mix(in srgb, var(--card) 94%, transparent);
-    backdrop-filter: blur(3px);
-  }
-
-  /* botao inicial — discreto, so aparece de verdade no hover */
-  .mix-start {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: color-mix(in srgb, var(--card) 88%, transparent);
-    color: var(--text-dim);
-    font-family: var(--display);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    /* visível o tempo todo (senão ninguém descobre que existe),
-       só ganha destaque no hover */
-    opacity: 0.75;
-    align-self: flex-end;
-    margin: 0 auto;
-    width: auto;
-    max-width: max-content;
-    flex: 0 0 auto;
-    white-space: nowrap;
-    line-height: 1;
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(.2,.8,.2,1), color 0.2s ease, border-color 0.2s ease;
-    backdrop-filter: blur(4px);
-  }
-
-  /* flex-shrink:0 + tamanho fixo: sem isso o SVG estica e vira um triangulo gigante */
-  .mix-start svg {
-    width: 13px;
-    height: 13px;
-    flex: 0 0 13px;
-    display: block;
-  }
-
-  .hero-scene:hover .mix-start,
-  .mix-start:focus-visible {
-    opacity: 1;
-    transform: translateY(-2px);
-  }
-
-  .mix-start:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .mix-game.playing .mix-start,
-  .mix-game.over .mix-start { display: none; }
-
-  /* area de jogo */
-  .mix-play {
-    display: none;
-    width: 100%;
-    height: 100%;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .mix-game.playing .mix-play { display: flex; }
-
-  .mix-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-family: var(--display);
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-  }
-
-  .mix-head b { color: var(--text); font-size: 0.85rem; }
-  .mix-time { color: var(--accent); font-variant-numeric: tabular-nums; }
-
-  .mix-faders {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 7px;
-    align-items: stretch;
-  }
-
-  /* cada canal é um fader vertical */
-  .mix-ch {
-    position: relative;
-    border-radius: 7px;
-    border: 1px solid var(--border);
-    background: color-mix(in srgb, var(--bg-raised) 70%, transparent);
-    overflow: hidden;
-    cursor: pointer;
-    padding: 0;
-    transition: border-color 0.15s ease, transform 0.12s ease;
-  }
-
-  .mix-ch:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
-  .mix-ch:active { transform: scale(0.97); }
-
-  /* o "sinal" subindo dentro do canal */
-  .mix-ch i {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 0%;
-    background: linear-gradient(to top, var(--accent), var(--accent-2));
-    opacity: 0.25;
-    transition: height 0.18s linear;
-  }
-
-  .mix-ch.live {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent) inset, 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
-  }
-
-  .mix-ch.live i { opacity: 0.95; }
-
-  .mix-ch.hit i { background: var(--accent); opacity: 1; }
-  .mix-ch.miss { border-color: #E5484D; }
-  .mix-ch.miss i { background: #E5484D; opacity: 0.8; }
-
-  .mix-hint {
-    margin: 0;
-    text-align: center;
-    font-size: 0.6rem;
-    color: var(--text-faint);
-    min-height: 1em;
-  }
-
-  /* tela final */
-  .mix-over {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    text-align: center;
-  }
-
-  .mix-game.over .mix-over { display: flex; }
-
-  .mix-over-score {
-    margin: 0;
-    font-family: var(--display);
-    font-size: 2.1rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--text);
-  }
-
-  .mix-over-msg {
-    margin: 0;
-    font-size: 0.72rem;
-    line-height: 1.45;
-    color: var(--text-dim);
-    max-width: 22ch;
-  }
-
-  .mix-over-label {
-    margin: 0;
-    font-family: var(--display);
-    font-size: 0.58rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-  }
-
-  .mix-again {
-    margin-top: 4px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--accent);
-    background: transparent;
-    color: var(--accent);
-    font-family: var(--display);
-    font-size: 0.7rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
-  }
-
-  .mix-again:hover { background: var(--accent); color: #041210; }
-
-  /* enquanto joga, a cena para de girar pra nao atrapalhar a mira */
-  .hero-scene.game-on .scene-stage {
-    transform: none !important;
-    transition: transform 0.5s cubic-bezier(.2,.8,.2,1);
-  }
-
-  .hero-scene.game-on .scene-plane.back,
-  .hero-scene.game-on .scene-plane.mid { opacity: 0.15; }
-
-  .hero-scene.game-on .scene-plane.front > svg { opacity: 0.06; }
-
-  /* no touch o botao fica sempre visivel (nao existe hover) */
-  @media (hover: none), (pointer: coarse) {
-    .mix-start { opacity: 1; transform: none; }
-  }
-
   /* ---------- Easter egg: type "mix" to turn the glow up ---------- */
 
   body.party .bg-glow span {
@@ -1053,37 +809,28 @@
 
   /* ---------- Scroll reveal (3D entrance) ---------- */
 
-  .reveal {
-    opacity: 0;
-    transform: perspective(var(--persp)) translateY(50px) rotateX(-8deg);
-    transform-origin: center bottom;
-    transition: opacity 0.8s cubic-bezier(.2,.7,.2,1), transform 0.8s cubic-bezier(.2,.7,.2,1);
-  }
-
-  .reveal.in { opacity: 1; transform: perspective(var(--persp)) translateY(0) rotateX(0deg); }
+  /* Entrada animada por secao foi removida de proposito.
+     O IntersectionObserver perdia secoes de forma inconsistente e o conteudo
+     ficava permanentemente invisivel — falha grave num portfolio. Conteudo
+     sempre visivel vale mais que animacao de entrada. O movimento do site
+     agora vem do hero, dos cards e da cena 3D, que nao escondem nada. */
+  .reveal { opacity: 1; transform: none; }
 
   .section-head h2 {
     overflow: hidden;
   }
 
+  /* cada palavra e a mascara; o <i> dentro dela e o que sobe (GSAP) */
   .section-head h2 .word {
     display: inline-block;
-    transform: translateY(115%) rotate(4deg);
-    opacity: 0;
-    transition: transform 0.75s cubic-bezier(.16,.9,.2,1), opacity 0.6s ease;
+    overflow: hidden;
+    vertical-align: bottom;
+    /* folga p/ descendentes (g, ç) nao serem cortados pela mascara */
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
   }
 
-  .reveal.in .section-head h2 .word {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-
-  .section-head h2 .word:nth-child(1) { transition-delay: 0.02s; }
-  .section-head h2 .word:nth-child(2) { transition-delay: 0.09s; }
-  .section-head h2 .word:nth-child(3) { transition-delay: 0.16s; }
-  .section-head h2 .word:nth-child(4) { transition-delay: 0.23s; }
-  .section-head h2 .word:nth-child(5) { transition-delay: 0.3s; }
-  .section-head h2 .word:nth-child(6) { transition-delay: 0.37s; }
+  .section-head h2 .word > i { display: inline-block; font-style: normal; }
 
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
@@ -1091,120 +838,366 @@
     * { scroll-behavior: auto !important; animation: none !important; }
   }
 
-  /* ---------- Hero: stacked 3D headline ---------- */
+  /* ---------- Hero: tipografia display + retrato ---------- */
 
-  .hero { padding: 80px 0 60px; perspective: var(--persp); }
+  /* sem padding embaixo: o retrato encosta na faixa, sem sobra vazia */
+  .hero { padding: 72px 0 0; position: relative; }
 
-  .banner { display: flex; justify-content: space-between; align-items: center; gap: 48px; }
-
-  @media (max-width: 780px) { .banner { flex-direction: column-reverse; text-align: center; padding-top: 24px; } }
-
-  .intro { display: flex; flex-direction: column; gap: 30px; max-width: 640px; }
-
-  .hero-lines { display: flex; flex-direction: column; gap: 4px; }
-
-  .hero-line {
-    position: relative;
-    overflow: visible;
-    padding-bottom: 0.15em;
-    transform-style: preserve-3d;
-    opacity: 0;
-    transform: translateY(0.45em);
-    animation: heroLineUp 0.8s cubic-bezier(.2,.85,.25,1) forwards;
+  /* o hero ocupa a primeira tela — a cortina (losango) abre por tras dele */
+  @media (min-width: 820px) {
+    .hero {
+      min-height: calc(100vh - 86px);
+      display: flex;
+      align-items: center;
+      padding-top: 0;
+    }
+    .hero > .wrap { width: 100%; }
   }
 
-  .hero-line:nth-child(1) { animation-delay: 0.55s; }
-  .hero-line:nth-child(2) { animation-delay: 0.72s; }
+  /* ---------- Plano de fundo que abre do losango ----------
+     Mesma mecanica da referencia: um clip-path de 4 pontos (losango) que o
+     GSAP expande ate virar retangulo cheio conforme o scroll. */
+
+  /* Cortina de ENTRADA — vive so na primeira tela e some assim que o
+     usuario rola de verdade (ver motor de animacao). Fixa, cobre a
+     viewport, fica atras do header/hero. Depois que ela some o site
+     inteiro volta ao fundo solido do tema: nenhuma imagem atras do
+     conteudo real (paragrafos, cards, timeline) — e o que causava o
+     problema de legibilidade. */
+  .site-plane {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bg);
+  }
+
+  .site-plane-art {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  /* losango inicial — so entra quando o JS assume; sem ele fica aberto */
+  html.js-plane #planeArt1 {
+    clip-path: polygon(50% 10%, 60% 50%, 50% 90%, 40% 50%);
+  }
+
+  .site-plane-art img {
+    width: 100%;
+    height: 100%;
+    /* contain: a arte aparece INTEIRA, sem corte e sem zoom */
+    object-fit: contain;
+    object-position: center center;
+    filter: saturate(0.95) contrast(1.02);
+  }
+
+  /* Veu forte: a arte e clara e o titulo do hero (preto/accent) fica por
+     cima dela nesse breve momento — precisa de contraste solido, nao um
+     "toque" de escurecimento. */
+  .site-plane::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+  }
+
+  /* todo o conteudo do site fica acima da camada de fundo */
+  header.site, main, footer, .marquee { position: relative; z-index: 2; }
+
+  @media (max-width: 819px) {
+    /* no celular a arte panoramica fica minuscula com contain — cover
+       preenche melhor, e o veu sobe pro texto continuar legivel */
+    .site-plane-art img { object-fit: cover; }
+    .site-plane::after { background: color-mix(in srgb, var(--bg) 88%, transparent); }
+  }
+
+  /* A faixa fica acima do hero na pilha e ganha fundo solido: se algo do
+     hero (retrato/parallax) avancar, passa por tras dela, nunca por cima.
+     Sem z-index/position no .hero — criar contexto de empilhamento la
+     desalinhava o layout inteiro. */
+  .marquee {
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(color-mix(in srgb, var(--accent) 4%, var(--bg)), color-mix(in srgb, var(--accent) 4%, var(--bg)));
+  }
+  section.block { position: relative; z-index: 2; }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: clamp(24px, 3.5vw, 48px);
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  /* o hero perdeu o padding-bottom (pro retrato encostar na faixa),
+     entao o texto carrega o proprio respiro */
+  .hero-type { display: flex; flex-direction: column; gap: 28px; min-width: 0; padding-bottom: 56px; }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    animation: fadeUp 0.8s ease 0.42s both;
+  }
+
+  .hero-meta i {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    max-width: 90px;
+  }
+
+  .hero-title {
+    margin: 0;
+    font-family: var(--mega);
+    font-weight: 400; /* Anton so tem um peso, ja e pesada por natureza */
+    /* domina a tela: condensada permite ir muito maior sem quebrar linha */
+    font-size: clamp(3.4rem, 10.5vw, 8.6rem);
+    /* respiro entre linhas — 0.86 grudava demais e cortava acento */
+    line-height: 0.98;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+  }
+
+  /* .hl e a faixa que mascara; o <i> dentro dela e o que o GSAP move.
+     Sao dois niveis porque nao da pra mascarar e transladar no mesmo box. */
+  .hero-title .hl {
+    display: block;
+    overflow: hidden;
+    /* folga em cima p/ acentos (Á) e embaixo p/ descendentes (g, ç):
+       sem isso a mascara corta letra. As margens negativas devolvem o
+       espaco pro layout, mantendo o ritmo das linhas. */
+    padding: 0.12em 0 0.1em;
+    margin: -0.12em 0 -0.1em;
+  }
+
+  .hero-title .hl > i {
+    display: block;
+    font-style: normal;
+  }
+
+  .hero-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
 
   @keyframes heroLineUp {
     to { opacity: 1; transform: translateY(0); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-line { animation: none; opacity: 1; transform: none; }
+    .hero-title .hl { animation: none; opacity: 1; transform: none; }
   }
 
-  .hero-line .stack {
-    position: relative;
-    display: inline-block;
-  }
-
-  .hero-line h1, .hero-line .role-word {
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: clamp(2.4rem, 6vw, 3.8rem);
-    line-height: 1.22;
-    margin: 0;
-    letter-spacing: -0.01em;
-    display: inline-block;
-    transform-style: preserve-3d;
-    animation: layerIn 0.9s cubic-bezier(.2,.8,.2,1) both;
-    /* folga para descendentes (g, p, ç) sem alterar o espaçamento das linhas */
-    padding-bottom: 0.18em;
-    margin-bottom: -0.18em;
-  }
-
-  .hero-line:nth-child(1) h1 { animation-delay: 0.05s; }
-  .hero-line:nth-child(2) .role-word { animation-delay: 0.22s; }
-  .hero-line:nth-child(2) .role-word.grad { animation-delay: 0.34s; }
-
-  .hero-line .role-word.grad {
-    background: var(--accent-grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-left: 0.3ch;
-    /* background-clip:text corta a perna do "g" quando a caixa é justa.
-       O padding dá folga e a margem negativa devolve o espaço no layout. */
-    padding-bottom: 0.18em;
-    margin-bottom: -0.18em;
-  }
-
-  @keyframes layerIn {
-    0% { opacity: 0; transform: translateY(60%) translateZ(-120px) rotateX(35deg); }
-    100% { opacity: 1; transform: translateY(0) translateZ(0) rotateX(0deg); }
-  }
-
-  .intro .lede {
-    font-size: 1.05rem;
+  .hero-type .lede {
+    font-size: 1.03rem;
     color: var(--text-dim);
-    line-height: 1.7;
+    line-height: 1.75;
     margin: 0;
-    animation: fadeUp 0.8s ease 0.55s both;
+    max-width: 52ch;
+    animation: fadeUp 0.8s ease 0.72s both;
+  }
+
+  /* ---------- Retrato do hero ---------- */
+
+  /* Retrato recortado (PNG/WebP com alfa): sem moldura, sem fundo — a figura
+     "flutua" sobre a pagina, como nas referencias. */
+  .hero-portrait {
+    position: relative;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    animation: fadeUp 0.9s ease 0.5s both;
+  }
+
+  .hero-portrait img {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* transborda a coluna: o retrato e o elemento dominante do hero */
+    max-width: 122%;
+    margin-right: -11%;
+    /* nao pode estourar a dobra — senao a legenda cai fora da tela */
+    max-height: min(76vh, 700px);
+    object-fit: contain;
+    object-position: bottom center;
+    /* a foto termina na cintura: sem isso o corte reto na base fica feio.
+       O fade dissolve o corpo no fundo em vez de cortar. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 84%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 84%, transparent 100%);
+    /* drop-shadow brigaria com a mascara (sombra da silhueta cortada) */
+  }
+
+  .hero-portrait figcaption {
+    position: absolute;
+    left: 0;
+    /* acima da area onde a imagem comeca a desvanecer */
+    bottom: 14%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @media (max-width: 900px) {
+    /* no mobile o retrato nao transborda — centralizado e contido */
+    .hero-portrait img { max-width: 100%; margin-right: 0; }
+    .hero-portrait figcaption { left: 50%; transform: translateX(-50%); }
+  }
+
+  /* ---------- Fotos nas secoes ---------- */
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
+  }
+
+  @media (max-width: 820px) {
+    .about-grid { grid-template-columns: 1fr; }
+  }
+
+  .about-figure { margin: 0; }
+
+  .about-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    filter: grayscale(1) contrast(1.05);
+    transition: filter 0.55s ease;
+  }
+
+  .about-figure:hover img { filter: grayscale(0) contrast(1); }
+
+  /* fotos verticais: em vez de cortar numa faixa larga, ficam contidas
+     numa coluna estreita com a legenda ao lado */
+  .section-figure {
+    margin: 0 0 56px;
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: 28px;
+    align-items: end;
+  }
+
+  .section-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center 25%;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    filter: grayscale(1) contrast(1.05);
+    transition: filter 0.55s ease;
+  }
+
+  .section-figure:hover img { filter: grayscale(0) contrast(1); }
+
+  .section-figure figcaption {
+    font-family: var(--sans);
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+    max-width: 34ch;
+    padding-bottom: 6px;
+    border-left: 1px solid var(--rule);
+    padding-left: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .section-figure { grid-template-columns: 1fr; gap: 16px; align-items: start; }
+    .section-figure img { max-width: 280px; }
+    .section-figure figcaption { border-left: none; padding-left: 0; }
   }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
   .actions { display: flex; gap: 18px; flex-wrap: wrap; animation: fadeUp 0.8s ease 0.7s both; }
 
-  @media (max-width: 780px) { .actions { justify-content: center; } }
+  /* o hero e alinhado a esquerda em qualquer largura — centralizar so os
+     botoes quebrava o alinhamento com o titulo e o texto */
 
   .btn {
     font-family: var(--sans);
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 13px 28px;
-    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 14px 26px;
+    border-radius: 2px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: transform 0.25s ease;
+    transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
     cursor: none;
   }
 
-  .btn:hover { transform: scale(0.97) translateZ(10px); }
-  .btn.primary { background: var(--accent-grad); color: #06110F; font-weight: 700; }
-  .btn.secondary { border: 1.5px solid var(--accent-2); color: var(--text); }
-  .btn.secondary:hover { background: var(--accent-wash); }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--accent); color: #05100E; }
+  .btn.primary:hover { background: var(--text); color: var(--bg); }
+  .btn.secondary { border: 1px solid var(--rule); color: var(--text); }
+  .btn.secondary:hover { border-color: var(--text); background: var(--text); color: var(--bg); }
 
-  /* ---------- Hero scene: tilting camera/monitor stack ---------- */
+  /* ---------- Cena 3D (camera/monitor) — vive na secao 04 ---------- */
+
+  /* cabecalho da secao 04: titulo a esquerda, cena 3D a direita */
+  .head-with-scene {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 40px;
+    align-items: center;
+  }
+
+  @media (max-width: 820px) {
+    .head-with-scene { grid-template-columns: 1fr; }
+    .head-with-scene .hero-scene { display: none; }
+  }
 
   .hero-scene {
-    width: 300px;
-    height: 300px;
+    width: 220px;
+    height: 220px;
     flex-shrink: 0;
     perspective: 1000px;
-    animation: fadeUp 1s ease 0.4s both;
   }
 
   @media (max-width: 480px) { .hero-scene { width: 210px; height: 210px; } }
@@ -1258,6 +1251,7 @@
     border-radius: 50%;
     background: #F04848;
     animation: blink 1.6s ease-in-out infinite;
+    will-change: top, left;
   }
 
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
@@ -1274,26 +1268,48 @@
 
   section.block { padding: 40px 0 96px; perspective: var(--persp); }
 
-  .section-head { text-align: center; margin-bottom: 64px; }
+  .section-head {
+    text-align: left;
+    margin-bottom: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+  }
 
   .section-head .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-family: var(--sans);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 18px;
+  }
+
+  /* numero da secao — a assinatura do layout (01, 02, 03...) */
+  .section-head .eyebrow b {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
     color: var(--accent);
-    margin: 0 0 12px;
   }
 
   .section-head h2 {
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+    font-family: var(--mega);
+    font-weight: 400;
+    font-size: clamp(2.4rem, 6.2vw, 4.6rem);
+    line-height: 0.92;
+    letter-spacing: 0;
+    text-transform: uppercase;
     margin: 0;
+    max-width: 18ch;
+    text-wrap: balance;
   }
 
-  .section-head p { color: var(--text-dim); max-width: 46ch; margin: 14px auto 0; font-size: 0.95rem; }
+  .section-head p { color: var(--text-dim); max-width: 52ch; margin: 18px 0 0; font-size: 0.97rem; line-height: 1.7; }
 
   h3.subhead {
     font-family: var(--display);
@@ -1322,9 +1338,9 @@
     color: var(--text-dim);
     font-size: 1.02rem;
     line-height: 1.85;
-    text-align: center;
+    text-align: left;
     max-width: 62ch;
-    margin: 0 auto;
+    margin: 0;
   }
 
   /* ---------- Skills ---------- */
@@ -1841,6 +1857,45 @@
     font-size: 0.85rem;
     font-family: inherit;
   }
+
+  /* ================= Ajustes de mobile =================
+     Auditado a 390px: legibilidade de texto pequeno e area de toque.
+     Alvo de toque de 44px e o minimo recomendado (WCAG 2.5.5 / iOS HIG). */
+
+  @media (max-width: 700px) {
+    /* 10.9px era ilegivel no celular */
+    .chip { font-size: 0.78rem; padding: 4px 9px; }
+    .work-cover .badge { font-size: 0.72rem; }
+    .section-figure figcaption { font-size: 0.9rem; }
+    .hero-portrait figcaption { font-size: 0.74rem; padding: 9px 15px; }
+
+    /* links de contato: area de toque confortavel */
+    .contact-icon { padding: 6px 0; }
+    .contact-icon .label,
+    .contact-icon .value { font-size: 0.86rem; }
+
+    .work-links a { min-height: 44px; display: inline-flex; align-items: center; }
+
+    /* o menu e o toggle de tema precisam ser faceis de acertar com o dedo */
+    .icon-btn { min-width: 44px; min-height: 44px; }
+    .theme-toggle { min-height: 34px; }
+
+    /* rodape e listas de link: cada item com alvo proprio */
+    footer a, .menu-overlay nav a { min-height: 44px; display: inline-flex; align-items: center; }
+
+    /* modal ocupa a tela toda no celular em vez de caixinha apertada */
+    .modal-form input, .modal-form textarea { font-size: 16px; /* evita zoom automatico no iOS */ }
+  }
+
+  @media (max-width: 480px) {
+    /* titulo de secao nao pode espremer em telas estreitas */
+    .section-head h2 { font-size: clamp(1.6rem, 8vw, 2.1rem); }
+    .hero-title { font-size: clamp(2.4rem, 12vw, 3.4rem); }
+
+    /* em tela estreita o nome quebra em 2 linhas e a regua fica espremida */
+    .hero-meta { flex-wrap: wrap; gap: 8px; font-size: 0.66rem; }
+    .hero-meta i { display: none; }
+  }
 </style>
 
 <div class="bg-glow" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1864,6 +1919,18 @@
     <div class="intro-bar"><i id="introBarFill"></i></div>
   </div>
   <div class="intro-curtain"></div>
+</div>
+
+<!-- Cortina de ENTRADA, restrita a primeira tela: abre em losango e some
+     assim que o usuario rola de verdade. Dali em diante o site usa o fundo
+     solido do tema — a arte nunca briga com a leitura do conteudo. -->
+<div class="site-plane" id="sitePlane" aria-hidden="true">
+  <div class="site-plane-art" id="planeArt1">
+    <picture>
+      <source srcset="images/hero-bg-arte.webp" type="image/webp">
+      <img src="images/hero-bg-arte.jpg" alt="" width="2000" height="1063" loading="eager">
+    </picture>
+  </div>
 </div>
 
 <div id="scrollProgress" aria-hidden="true"><i></i></div>
@@ -1913,57 +1980,28 @@
 
   <section class="hero" id="sobre">
     <div class="wrap">
-      <div class="banner">
-        <div class="intro">
-          <div class="hero-lines">
-            <div class="hero-line"><h1>Olá, eu sou o Marcos<span class="grad-text">.</span></h1></div>
-            <div class="hero-line"><span class="role-word">Áudio, imagem e</span><span class="role-word grad">código.</span></div>
-          </div>
+      <div class="hero-grid">
+        <div class="hero-type">
+          <p class="hero-meta"><span>Marcos Paulo T. G. dos Santos</span><i></i><span>Brasil</span></p>
+          <h1 class="hero-title">
+            <span class="hl"><i>Áudio,</i></span>
+            <span class="hl"><i>imagem</i></span>
+            <span class="hl"><i>e <em>código</em>.</i></span>
+          </h1>
           <p class="lede">Especialista audiovisual e de acessibilidade na ELO Editora, em transição para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e escrever código — as duas coisas com o mesmo cuidado técnico.</p>
           <div class="actions">
             <a href="#" class="btn primary" data-cursor-label="Baixar">Download CV</a>
             <a href="mailto:mp030606@gmail.com" class="btn secondary" data-cursor-label="E-mail">Entrar em contato</a>
           </div>
         </div>
-        <div class="hero-scene" id="heroScene">
-          <div class="scene-stage" id="sceneStage">
-            <div class="scene-plane back">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5h16v11H4z"/><path d="M8 20h8M12 16v4M7 8l3 2-3 2M13 12h4"/></svg>
-            </div>
-            <div class="scene-plane mid">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
-            </div>
-            <div class="scene-plane front">
-              <span class="rec-dot"></span>
-              <span class="frame-lines"></span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="7" width="13" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>
 
-              <!-- mini-game: acerte o nivel dos canais -->
-              <div class="mix-game" id="mixGame">
-                <button type="button" class="mix-start" id="mixStart">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5v14l11-7z"/></svg>
-                  <span>Jogar</span>
-                </button>
-
-                <div class="mix-play" id="mixPlay">
-                  <div class="mix-head">
-                    <span class="mix-score">Pontos <b id="mixScore">0</b></span>
-                    <span class="mix-time" id="mixTime">20s</span>
-                  </div>
-                  <div class="mix-faders" id="mixFaders"></div>
-                  <p class="mix-hint" id="mixHint">Clique no canal aceso</p>
-                </div>
-
-                <div class="mix-over" id="mixOver">
-                  <p class="mix-over-label">pontos</p>
-                  <p class="mix-over-score"><b id="mixFinal">0</b></p>
-                  <p class="mix-over-msg" id="mixMsg"></p>
-                  <button type="button" class="mix-again" id="mixAgain">Jogar de novo</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <figure class="hero-portrait">
+          <picture>
+            <source srcset="images/retrato-recorte.webp" type="image/webp">
+            <img src="images/retrato-recorte.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="1024" height="1507" fetchpriority="high">
+          </picture>
+          <figcaption><i class="live-dot"></i>disponível para novos projetos</figcaption>
+        </figure>
       </div>
     </div>
   </section>
@@ -1978,25 +2016,36 @@
   <section class="block about reveal">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Sobre mim</p>
+        <p class="eyebrow"><b>01</b>Sobre mim</p>
         <h2>De uma mesa de som para um editor de código</h2>
       </div>
-      <p>
-        Comecei na área de Administração — onde desenvolvi base em organização, processos e gestão —
-        e encontrei no audiovisual e na tecnologia o lugar onde quero atuar. Trabalho com sonorização,
-        edição de vídeo, transmissão ao vivo e acessibilidade, especialmente em eventos, projetos para
-        a igreja e produções colaborativas — incluindo audiodescrição e conteúdo assistido por IA.
-        Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para desenvolvimento web,
-        levando comigo o mesmo cuidado técnico e a mesma exigência de qualidade que tinha operando
-        áudio e vídeo ao vivo.
-      </p>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>
+            Comecei na área de Administração — onde desenvolvi base em organização, processos e gestão —
+            e encontrei no audiovisual e na tecnologia o lugar onde quero atuar. Trabalho com sonorização,
+            edição de vídeo, transmissão ao vivo e acessibilidade, especialmente em eventos, projetos para
+            a igreja e produções colaborativas — incluindo audiodescrição e conteúdo assistido por IA.
+            Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para desenvolvimento web,
+            levando comigo o mesmo cuidado técnico e a mesma exigência de qualidade que tinha operando
+            áudio e vídeo ao vivo.
+          </p>
+        </div>
+
+        <figure class="about-figure">
+          <picture>
+            <source srcset="images/estudio.webp" type="image/webp">
+            <img loading="lazy" src="images/estudio.jpg" alt="Marcos Paulo em seu estúdio, com telas de código, timeline de vídeo, mesa de som e câmera" width="1600" height="1066" onerror="this.closest('.about-figure').remove();">
+          </picture>
+        </figure>
+      </div>
     </div>
   </section>
 
   <section class="block reveal" id="skills">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Inventário</p>
+        <p class="eyebrow"><b>02</b>Inventário</p>
         <h2>Ferramentas</h2>
       </div>
       <div class="skills-cards">
@@ -2019,7 +2068,7 @@
   <section class="block reveal" id="desenvolvimento">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Caderno 01</p>
+        <p class="eyebrow"><b>03</b>Desenvolvimento</p>
         <h2>Desenvolvimento</h2>
         <p>Frente nova, em transição desde o audiovisual — cursando ADS, contrato como desenvolvedor web assinando agora.</p>
       </div>
@@ -2102,9 +2151,29 @@
   <section class="block reveal" id="audiovisual">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Caderno 02</p>
-        <h2>Audiovisual &amp; acessibilidade</h2>
-        <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
+        <p class="eyebrow"><b>04</b>Audiovisual</p>
+        <div class="head-with-scene">
+          <div>
+            <h2>Audiovisual &amp; acessibilidade</h2>
+            <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
+          </div>
+
+          <div class="hero-scene" id="heroScene" aria-hidden="true">
+            <div class="scene-stage" id="sceneStage">
+              <div class="scene-plane back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5h16v11H4z"/><path d="M8 20h8M12 16v4M7 8l3 2-3 2M13 12h4"/></svg>
+              </div>
+              <div class="scene-plane mid">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
+              </div>
+              <div class="scene-plane front" id="recScene">
+                <span class="rec-dot" id="recDot"></span>
+                <span class="frame-lines"></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="7" width="13" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="cards-grid" id="audiovisualGrid">
@@ -2790,10 +2859,15 @@
   <section class="block reveal" id="ia">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Diferencial</p>
+        <p class="eyebrow"><b>05</b>IA aplicada</p>
         <h2>IA aplicada ao audiovisual</h2>
         <p>Onde as duas frentes se encontram: uso inteligência artificial como ferramenta de produção real, não como novidade.</p>
       </div>
+
+      <figure class="section-figure">
+        <img loading="lazy" src="images/robo-ia-v2.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="1126" height="2000" onerror="this.closest('.section-figure').remove();">
+        <figcaption>Uso IA como ferramenta de produção — audiodescrição, narração e tratamento visual entram no fluxo real de trabalho, não como demonstração.</figcaption>
+      </figure>
 
       <div class="cards-grid">
 
@@ -2867,7 +2941,7 @@
   <section class="block reveal">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Trajetória</p>
+        <p class="eyebrow"><b>06</b>Trajetória</p>
         <h2>Linha do tempo</h2>
       </div>
       <div class="timeline">
@@ -2897,13 +2971,18 @@
           <p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p>
         </div>
       </div>
+
+      <figure class="section-figure wide">
+        <img loading="lazy" src="images/equipe-v2.jpg" alt="Equipe de tecnologia reunida no escritório" width="720" height="1280" onerror="this.closest('.section-figure').remove();">
+        <figcaption>Time de tecnologia da ELO Editora — onde a transição para desenvolvimento deixou de ser plano e virou prática diária.</figcaption>
+      </figure>
     </div>
   </section>
 
   <section class="block reveal" id="contatos">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Vamos falar</p>
+        <p class="eyebrow"><b>07</b>Contato</p>
         <h2>Contatos</h2>
       </div>
       <div class="contacts-icons">
@@ -3128,7 +3207,7 @@
 
     (function () {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var targets = document.querySelectorAll('.hero-line h1, .hero-line .role-word');
+      var targets = document.querySelectorAll('.hero-title .hl');
       var delay = 0;
       targets.forEach(function (el) {
         var walk = function (node) {
@@ -3172,24 +3251,264 @@
       update();
     })();
 
-    /* Split section headings into words for the reveal animation */
-    document.querySelectorAll('.section-head h2').forEach(function (h2) {
-      var words = h2.textContent.trim().split(/\s+/);
-      h2.innerHTML = words.map(function (w) { return '<span class="word">' + w + '</span>'; }).join(' ');
-    });
+    /* ---------- Motor de animacao de scroll (GSAP + ScrollTrigger) ----------
 
-    /* Scroll reveal */
-    var revealEls = document.querySelectorAll('.reveal');
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+       Regra de ouro depois do bug do IntersectionObserver: NADA aqui pode
+       esconder conteudo de forma permanente. O CSS deixa tudo visivel; o GSAP
+       parte do estado visivel e so anima a ENTRADA (from()). Se a lib nao
+       carregar, a pagina continua legivel e completa. */
+
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      /* quebra os titulos de secao em palavras. Cada palavra e uma mascara
+         (.word) com um <i> dentro — e o <i> que sobe. */
+      document.querySelectorAll('.section-head h2').forEach(function (h2) {
+        if (h2.querySelector('.word')) return;
+        var words = h2.textContent.trim().split(/\s+/);
+        h2.innerHTML = words.map(function (w) {
+          return '<span class="word"><i>' + w + '</i></span>';
+        }).join(' ');
+      });
+
+      var boot = function () {
+        if (!window.gsap || !window.ScrollTrigger) return;
+        var gsap = window.gsap;
+        gsap.registerPlugin(window.ScrollTrigger);
+
+        var EASE = 'power3.out';
+
+        /* 1. Titulo do hero: cada linha sobe de tras da mascara (.hl).
+              So dispara quando a intro sai — senao a animacao roda escondida
+              atras do overlay e o texto aparece ja parado (ou travado). */
+        var heroAnimado = false;
+        var animarHero = function () {
+          if (heroAnimado) return;
+          heroAnimado = true;
+          gsap.utils.toArray('.hero-title .hl > i').forEach(function (line, i) {
+            gsap.from(line, {
+              yPercent: 108, duration: 1.05, delay: 0.1 + i * 0.1, ease: 'power4.out'
+            });
+          });
+        };
+
+        if (document.getElementById('introOverlay')) {
+          var esperaIntro = setInterval(function () {
+            if (!document.getElementById('introOverlay')) {
+              clearInterval(esperaIntro);
+              animarHero();
+            }
+          }, 80);
+          /* teto de seguranca: anima de qualquer jeito depois de 6s */
+          setTimeout(function () { clearInterval(esperaIntro); animarHero(); }, 6000);
+        } else {
+          animarHero();
+        }
+
+        /* 2. Cabecalho de secao: numero, titulo e texto entram em cascata.
+              Tweens independentes (nao timeline): uma timeline mantem o
+              controle das propriedades e impede a rede de seguranca de
+              destravar o elemento se algo der errado. */
+        gsap.utils.toArray('.section-head').forEach(function (head) {
+          var trigger = { trigger: head, start: 'top 84%', once: true };
+          var eyebrow = head.querySelector('.eyebrow');
+          var texto = head.querySelector('p');
+
+          if (eyebrow) {
+            gsap.from(eyebrow, {
+              scrollTrigger: trigger, y: 18, opacity: 0, duration: 0.5, ease: EASE
+            });
+          }
+          gsap.from(head.querySelectorAll('h2 .word > i'), {
+            scrollTrigger: trigger, yPercent: 106, duration: 0.75, stagger: 0.055,
+            delay: 0.08, ease: 'power4.out'
+          });
+          if (texto) {
+            gsap.from(texto, {
+              scrollTrigger: trigger, y: 20, opacity: 0, duration: 0.6, delay: 0.28, ease: EASE
+            });
+          }
         });
-      }, { threshold: 0.12 });
-      revealEls.forEach(function (el) { io.observe(el); });
-    } else {
-      revealEls.forEach(function (el) { el.classList.add('in'); });
-    }
+
+        /* 3. Cards entram escalonados conforme a linha aparece */
+        gsap.utils.toArray('.cards-grid').forEach(function (grid) {
+          gsap.from(grid.children, {
+            scrollTrigger: { trigger: grid, start: 'top 82%', once: true },
+            y: 46, opacity: 0, duration: 0.7, stagger: 0.08, ease: EASE
+          });
+        });
+
+        /* 4. Skills: cada ferramenta pipoca em sequencia */
+        gsap.utils.toArray('.skills-cards').forEach(function (wrap) {
+          gsap.from(wrap.children, {
+            scrollTrigger: { trigger: wrap, start: 'top 84%', once: true },
+            y: 26, opacity: 0, scale: 0.94, duration: 0.5, stagger: 0.035, ease: 'back.out(1.6)'
+          });
+        });
+
+        /* 5. Fotos das secoes: imagem revela por mascara + legenda depois */
+        gsap.utils.toArray('.section-figure').forEach(function (fig) {
+          var trigger = { trigger: fig, start: 'top 82%', once: true };
+          var img = fig.querySelector('img');
+          var cap = fig.querySelector('figcaption');
+          if (img) {
+            gsap.from(img, {
+              scrollTrigger: trigger, clipPath: 'inset(100% 0 0 0)', scale: 1.14,
+              duration: 1.1, ease: 'power4.out'
+            });
+          }
+          if (cap) {
+            gsap.from(cap, {
+              scrollTrigger: trigger, x: -18, opacity: 0, duration: 0.6, delay: 0.35, ease: EASE
+            });
+          }
+        });
+
+        /* 6. Foto do "sobre": mesma revelacao por mascara */
+        gsap.utils.toArray('.about-figure').forEach(function (fig) {
+          gsap.from(fig.querySelector('img'), {
+            scrollTrigger: { trigger: fig, start: 'top 82%', once: true },
+            clipPath: 'inset(0 0 100% 0)', scale: 1.14, duration: 1.1, ease: 'power4.out'
+          });
+        });
+
+        /* 7. Texto do "sobre" e itens da timeline entram por bloco */
+        gsap.utils.toArray('.about-text p, .tl-item').forEach(function (el) {
+          gsap.from(el, {
+            scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+            y: 26, opacity: 0, duration: 0.7, ease: EASE
+          });
+        });
+
+        /* 8b. CORTINA DO HERO: a arte e um efeito de ENTRADA, restrito a
+               primeira tela. Ela abre em losango e some assim que o usuario
+               comeca a rolar de verdade — dali em diante o site inteiro
+               usa o fundo solido do tema, sem imagem nenhuma atras do
+               conteudo. Legibilidade de texto vence efeito visual: uma
+               ilustracao cheia de detalhe atras de paragrafos e cards
+               tornava boa parte do site dificil de ler. */
+        var plane = document.getElementById('sitePlane');
+        var art1 = document.getElementById('planeArt1');
+        if (plane && art1) {
+          document.documentElement.classList.add('js-plane');
+
+          var clipDoLosango = function (t) {
+            /* t=0 losango fechado, t=1 tela cheia — interpola os 4 pontos */
+            var topoY = 10 + (0 - 10) * t;
+            var dirX = 60 + (100 - 60) * t, dirY = 50 + (0 - 50) * t;
+            var baseY = 90 + (100 - 90) * t;
+            var esqX = 40 + (0 - 40) * t, esqY = 50 + (100 - 50) * t;
+            return 'polygon(50% ' + topoY + '%, ' + dirX + '% ' + dirY + '%, ' +
+                   '50% ' + baseY + '%, ' + esqX + '% ' + esqY + '%)';
+          };
+
+          var estado = { open: 0, fade: 1 };
+          var aplicar = function () {
+            art1.style.clipPath = clipDoLosango(estado.open);
+            art1.style.opacity = estado.fade;
+            /* o veu (::after) e o proprio ::after do .site-plane, que so
+               precisa existir enquanto a arte estiver visivel */
+            plane.style.opacity = estado.fade;
+          };
+
+          var tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: document.body,
+              start: 'top top',
+              /* toda a sequencia cabe na primeira tela e meia de scroll —
+                 depois disso a cortina ja sumiu de vez */
+              end: '+=150%',
+              scrub: 0.6,
+              invalidateOnRefresh: true
+            }
+          });
+          tl.to(estado, { open: 1, ease: 'none', duration: 1, onUpdate: aplicar })   /* losango abre */
+            .to(estado, { open: 1, ease: 'none', duration: 0.15, onUpdate: aplicar }) /* segura um instante */
+            .to(estado, { fade: 0, ease: 'none', duration: 0.85, onUpdate: aplicar }); /* some de vez */
+          aplicar();
+        }
+
+        /* 8. Retrato do hero: contra-scroll leve */
+        var portraitImg = document.querySelector('.hero-portrait img');
+        if (portraitImg) {
+          gsap.to(portraitImg, {
+            yPercent: -7,
+            ease: 'none',
+            scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 }
+          });
+        }
+
+        /* 9. Contatos: cada card sobe em sequencia */
+        gsap.utils.toArray('.contacts-icons').forEach(function (wrap) {
+          gsap.from(wrap.children, {
+            scrollTrigger: { trigger: wrap, start: 'top 86%', once: true },
+            y: 30, opacity: 0, duration: 0.6, stagger: 0.07, ease: EASE
+          });
+        });
+
+        ScrollTrigger.refresh();
+
+        /* REDE DE SEGURANCA (licao do bug do IntersectionObserver):
+           se por qualquer motivo um elemento ficar preso no estado inicial
+           do gsap.from() — rAF suspenso, aba em segundo plano, trigger que
+           nao disparou — ele e revelado a forca. Conteudo invisivel e sempre
+           pior que conteudo sem animacao. */
+        var destravar = function () {
+          var alvos = document.querySelectorAll(
+            '.about-text p, .tl-item, .section-head .eyebrow, .section-head p,' +
+            '.section-head h2 .word > i, .hero-title .hl > i, .cards-grid > *,' +
+            '.skills-cards > *, .section-figure img, .section-figure figcaption,' +
+            '.about-figure img, .contacts-icons > *'
+          );
+          var vh = window.innerHeight;
+          var presos = 0;
+          alvos.forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            /* libera o que esta na tela E tambem o que ja passou por ela
+               (ficou acima do topo) — esse ja deveria ter animado. So o que
+               ainda esta abaixo da dobra e poupado, pra nao matar a
+               animacao de entrada dele. */
+            var jaDeveriaAparecer = r.top < vh * 0.95;
+            if (!jaDeveriaAparecer) return;
+            var cs = getComputedStyle(el);
+            var invisivel = parseFloat(cs.opacity) < 0.06;
+            var cortado = cs.clipPath && cs.clipPath.indexOf('100%') !== -1;
+            if (invisivel || cortado) {
+              presos++;
+              gsap.set(el, { clearProps: 'all' });
+              el.style.opacity = '';
+              el.style.transform = '';
+              el.style.clipPath = '';
+            }
+          });
+          return presos;
+        };
+
+        /* varre enquanto o usuario rola: qualquer elemento que chegue na tela
+           e continue invisivel e liberado ~1.6s depois (tempo de sobra pra
+           qualquer animacao legitima terminar — a mais longa dura 1.3s) */
+        var varreduraTimer = null;
+        var agendarVarredura = function () {
+          clearTimeout(varreduraTimer);
+          varreduraTimer = setTimeout(destravar, 1600);
+        };
+        window.addEventListener('scroll', agendarVarredura, { passive: true });
+        window.addEventListener('resize', agendarVarredura, { passive: true });
+
+        /* a aba em segundo plano congela o rAF e trava tweens no meio;
+           ao voltar, revisa tudo */
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) setTimeout(destravar, 900);
+        });
+
+        setTimeout(destravar, 3500);
+        setTimeout(destravar, 8000);
+      };
+
+      if (window.gsap && window.ScrollTrigger) boot();
+      else window.addEventListener('load', boot);
+    })();
 
     /* Video / detail modal */
     var modalBackdrop = document.getElementById('modalBackdrop');
@@ -3262,7 +3581,7 @@
       var editPanel = document.getElementById('editPanel');
       var saveBtn = document.getElementById('saveEditsBtn');
       var statusMsg = document.getElementById('editStatusMsg');
-      var EDITABLE_SELECTOR = '.hero-line h1, .role-word, .intro .lede, .about p, .work-info h4, .work-info p.desc, .section-head h2, .section-head p, .work-info p.period';
+      var EDITABLE_SELECTOR = '.hero-title .hl, .hero-type .lede, .about p, .work-info h4, .work-info p.desc, .section-head h2, .section-head p, .work-info p.period';
 
       function syncCardData(card) {
         if (!card || !card.classList || !card.classList.contains('work-card')) return;
@@ -3705,165 +4024,116 @@
       });
     }
 
-    /* ---------- Hero parallax on scroll ---------- */
+    /* O parallax manual do hero foi removido: agora o hero e pinado pelo
+       ScrollTrigger enquanto o losango abre, e mexer no transform por fora
+       fazia o conteudo tremer e brigar com o pin. O contra-scroll do retrato
+       vive no motor GSAP (item 8), so quando NAO ha pin. */
 
-    if (!prefersReducedMotion) {
-      var heroIntro = document.querySelector('.hero .intro');
-      var heroSceneEl = document.getElementById('heroScene');
-      if (heroIntro) heroIntro.classList.add('parallax');
-      if (heroSceneEl) heroSceneEl.classList.add('parallax');
-      var pTicking = false;
-      var applyParallax = function () {
-        var y = window.scrollY;
-        if (y < window.innerHeight * 1.2) {
-          if (heroIntro) heroIntro.style.transform = 'translateY(' + (y * 0.16) + 'px)';
-          if (heroSceneEl) heroSceneEl.style.transform = 'translateY(' + (y * 0.3) + 'px)';
-        }
-        pTicking = false;
-      };
-      window.addEventListener('scroll', function () {
-        if (!pTicking) { pTicking = true; requestAnimationFrame(applyParallax); }
-      }, { passive: true });
-    }
-
-    /* ---------- Mini-game: acerte o canal que acender ---------- */
+    /* ---------- Bolinha REC foge do cursor ---------- */
 
     (function () {
-      var game = document.getElementById('mixGame');
-      if (!game) return;
+      var sceneEl = document.getElementById('recScene');
+      var dotEl = document.getElementById('recDot');
+      if (!sceneEl || !dotEl) return;
 
-      var startBtn = document.getElementById('mixStart');
-      var againBtn = document.getElementById('mixAgain');
-      var fadersEl = document.getElementById('mixFaders');
-      var scoreEl = document.getElementById('mixScore');
-      var timeEl = document.getElementById('mixTime');
-      var hintEl = document.getElementById('mixHint');
-      var finalEl = document.getElementById('mixFinal');
-      var msgEl = document.getElementById('mixMsg');
-      var sceneEl = document.getElementById('heroScene');
+      var FLEE_DIST = 60; /* px — raio em que a bolinha comeca a fugir */
+      var MARGIN = 16;    /* px — respiro em relacao a borda do card */
+      var EASE = 0.14;    /* suavidade do movimento por frame (0-1) */
 
-      var CHANNELS = 4;
-      var ROUND_MS = 20000;
+      var pos = { x: 0, y: 0 };   /* posicao real, renderizada */
+      var target = { x: 0, y: 0 }; /* posicao alvo, pra onde pos vai suavizando */
+      var pointer = { x: -999, y: -999 };
+      var placed = false;
 
-      var channels = [];
-      var score = 0;
-      var liveIdx = -1;
-      var liveTimer = null;
-      var endTimer = null;
-      var tickTimer = null;
-      var endsAt = 0;
-      var stepMs = 1100;
-      var running = false;
-
-      /* monta os 4 canais uma vez */
-      for (var i = 0; i < CHANNELS; i++) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'mix-ch';
-        b.setAttribute('aria-label', 'Canal ' + (i + 1));
-        b.innerHTML = '<i></i>';
-        (function (idx, btn) {
-          btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            if (!running) return;
-            if (idx === liveIdx) {
-              score += 1;
-              scoreEl.textContent = score;
-              btn.classList.add('hit');
-              hintEl.textContent = pick(['boa!', 'no tempo', 'isso', 'limpo']);
-              setTimeout(function () { btn.classList.remove('hit'); }, 160);
-              nextLive();
-            } else {
-              score = Math.max(0, score - 1);
-              scoreEl.textContent = score;
-              btn.classList.add('miss');
-              hintEl.textContent = 'canal errado';
-              setTimeout(function () { btn.classList.remove('miss'); }, 260);
-            }
-          });
-        })(i, b);
-        fadersEl.appendChild(b);
-        channels.push(b);
+      function place() {
+        dotEl.style.left = pos.x + 'px';
+        dotEl.style.top = pos.y + 'px';
       }
 
-      function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-      function clearLive() {
-        channels.forEach(function (c) {
-          c.classList.remove('live');
-          c.querySelector('i').style.height = '0%';
-        });
+      function cornerStart() {
+        if (placed || !sceneEl.clientWidth) return;
+        pos.x = target.x = MARGIN;
+        pos.y = target.y = MARGIN;
+        place();
+        placed = true;
       }
 
-      function nextLive() {
-        clearTimeout(liveTimer);
-        clearLive();
+      function onPointerMove(e) {
+        var rect = sceneEl.getBoundingClientRect();
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        pointer.x = clientX - rect.left;
+        pointer.y = clientY - rect.top;
+      }
 
-        /* nunca repete o mesmo canal duas vezes seguidas */
-        var idx = Math.floor(Math.random() * CHANNELS);
-        if (idx === liveIdx) idx = (idx + 1) % CHANNELS;
-        liveIdx = idx;
-
-        var ch = channels[liveIdx];
-        ch.classList.add('live');
-        ch.querySelector('i').style.height = (55 + Math.random() * 45) + '%';
-
-        /* vai ficando mais rapido conforme o jogo anda */
-        stepMs = Math.max(480, stepMs - 28);
-        liveTimer = setTimeout(function () {
-          if (!running) return;
-          hintEl.textContent = 'passou...';
-          nextLive();
-        }, stepMs);
+      function onPointerLeave() {
+        pointer.x = -999;
+        pointer.y = -999;
       }
 
       function tick() {
-        var left = Math.max(0, endsAt - Date.now());
-        timeEl.textContent = Math.ceil(left / 1000) + 's';
-        if (left <= 0) { finish(); return; }
-        tickTimer = setTimeout(tick, 200);
+        requestAnimationFrame(tick);
+        if (!placed) return;
+
+        var w = sceneEl.clientWidth;
+        var h = sceneEl.clientHeight;
+        if (!w || !h) return;
+        var minX = MARGIN, maxX = Math.max(minX, w - 9 - MARGIN);
+        var minY = MARGIN, maxY = Math.max(minY, h - 9 - MARGIN);
+
+        var cx = target.x + 4.5;
+        var cy = target.y + 4.5;
+        var dx = cx - pointer.x;
+        var dy = cy - pointer.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < FLEE_DIST) {
+          var strength = 1 - dist / FLEE_DIST;
+          var nx = dist > 0.01 ? dx / dist : (Math.random() - 0.5);
+          var ny = dist > 0.01 ? dy / dist : (Math.random() - 0.5);
+          var push = strength * 16;
+
+          var wantX = target.x + nx * push;
+          var wantY = target.y + ny * push;
+          var clampedX = Math.max(minX, Math.min(maxX, wantX));
+          var clampedY = Math.max(minY, Math.min(maxY, wantY));
+
+          /* presa numa borda: sem deslocamento no vetor direto, escorrega
+             tangencialmente pro lado que mais aumenta a distancia — evita
+             travar grudada num canto */
+          if (Math.abs(wantX - clampedX) + Math.abs(wantY - clampedY) > 0.01 &&
+              Math.abs(clampedX - target.x) + Math.abs(clampedY - target.y) < 0.5) {
+            var tx = -ny, ty = nx;
+            var plusX = Math.max(minX, Math.min(maxX, target.x + tx * push));
+            var plusY = Math.max(minY, Math.min(maxY, target.y + ty * push));
+            var minusX = Math.max(minX, Math.min(maxX, target.x - tx * push));
+            var minusY = Math.max(minY, Math.min(maxY, target.y - ty * push));
+            var distPlus = Math.pow(plusX - pointer.x, 2) + Math.pow(plusY - pointer.y, 2);
+            var distMinus = Math.pow(minusX - pointer.x, 2) + Math.pow(minusY - pointer.y, 2);
+            if (distPlus >= distMinus) { clampedX = plusX; clampedY = plusY; }
+            else { clampedX = minusX; clampedY = minusY; }
+          }
+
+          target.x = clampedX;
+          target.y = clampedY;
+        }
+
+        /* interpola suavemente a posicao real em direcao ao alvo — isso
+           elimina os "degraus" de mover a bolinha direto por eventos de
+           mousemove, que chegam em rajadas irregulares */
+        pos.x += (target.x - pos.x) * EASE;
+        pos.y += (target.y - pos.y) * EASE;
+        place();
       }
 
-      function start() {
-        running = true;
-        score = 0;
-        stepMs = 1100;
-        liveIdx = -1;
-        scoreEl.textContent = '0';
-        hintEl.textContent = 'clique no canal aceso';
-        game.classList.remove('over');
-        game.classList.add('playing');
-        if (sceneEl) sceneEl.classList.add('game-on');
-        endsAt = Date.now() + ROUND_MS;
-        tick();
-        nextLive();
-        endTimer = setTimeout(finish, ROUND_MS + 60);
-      }
+      cornerStart();
+      window.addEventListener('load', cornerStart);
+      setTimeout(cornerStart, 300);
 
-      function finish() {
-        running = false;
-        clearTimeout(liveTimer);
-        clearTimeout(endTimer);
-        clearTimeout(tickTimer);
-        clearLive();
-        game.classList.remove('playing');
-        game.classList.add('over');
-        if (sceneEl) sceneEl.classList.remove('game-on');
-        finalEl.textContent = score;
-        msgEl.textContent =
-          score >= 25 ? 'isso é ouvido de operador de mesa.' :
-          score >= 15 ? 'bom reflexo — dava pra rodar um ao vivo.' :
-          score >= 7  ? 'no ritmo. tenta de novo?' :
-                        'todo mundo começa passando o tempo.';
-      }
-
-      startBtn.addEventListener('click', function (e) { e.stopPropagation(); start(); });
-      againBtn.addEventListener('click', function (e) { e.stopPropagation(); start(); });
-
-      /* se sair da aba, encerra pra nao rodar timer escondido */
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden && running) finish();
-      });
+      sceneEl.addEventListener('mousemove', onPointerMove);
+      sceneEl.addEventListener('touchmove', onPointerMove, { passive: true });
+      sceneEl.addEventListener('mouseleave', onPointerLeave);
+      requestAnimationFrame(tick);
     })();
 
     /* ---------- Easter egg: type "mix" anywhere ---------- */

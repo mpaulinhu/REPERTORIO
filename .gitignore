@@ -27,3 +27,8 @@ desktop.ini
 ~$*
 /_rascunhos/
 site/
+
+# Fotos originais (matéria-prima) — só as versões otimizadas em docs/images/
+# precisam estar no repo pro GitHub Pages
+/Fotos/
+docs/portfolio-backup-pre-refactor.html
