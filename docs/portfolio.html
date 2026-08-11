@@ -3946,10 +3946,10 @@
         if (!it.fixo) it.el.style.visibility = 'hidden';
       });
 
-      var INICIO = 60;       /* logo apos as linhas assentarem */
-      var POR_LETRA = 85;    /* cada letra trava ~85ms depois da anterior */
-      var GIRO = 45;         /* tempo entre trocas de simbolo */
-      var JANELA = 520;      /* quanto tempo cada letra fica girando antes de travar */
+      var INICIO = 0;        /* comeca junto com a subida das linhas */
+      var POR_LETRA = 130;   /* cada letra trava ~130ms depois da anterior — bem mais lento */
+      var GIRO = 75;         /* tempo entre trocas de simbolo — giro suave, nao piscante */
+      var JANELA = 780;      /* quanto tempo cada letra fica girando antes de travar */
       var t0 = null;
 
       /* A cortina de intro cobre a tela por ~2s. Se a decodificacao comecar
@@ -3999,10 +3999,10 @@
         }
       }
 
-      /* Espera as linhas do titulo terminarem de subir de tras da mascara
-         (`hero:visivel`). Antes disso as letras existem mas estao fora da
-         area visivel do .hl — a decodificacao rodava escondida e o titulo
-         aparecia ja resolvido. */
+      /* `hero:visivel` dispara junto com o inicio da subida das linhas (nao
+         depois): a letra ja nasce girando por tras da mascara, entao quando
+         a linha revela ela aparece em movimento, sem pausa "parada, depois
+         começa a trocar". */
       document.addEventListener('hero:visivel', iniciar, { once: true });
       /* rede de seguranca: se o GSAP nao carregar ou o evento nao vier, o
          titulo nao pode ficar preso em simbolos aleatorios */
@@ -4065,16 +4065,14 @@
           var linhas = gsap.utils.toArray('.hero-title .hl > i');
           linhas.forEach(function (line, i) {
             gsap.from(line, {
-              yPercent: 108, duration: 1.05, delay: 0.1 + i * 0.1, ease: 'power4.out',
-              onComplete: i === linhas.length - 1 ? function () {
-                /* So agora as letras estao visiveis: ate aqui elas sobem
-                   mascaradas por `overflow:hidden` do .hl. Comecar a
-                   decodificacao antes disso a fazia rodar inteira atras da
-                   mascara — o titulo aparecia ja resolvido. */
-                document.dispatchEvent(new CustomEvent('hero:visivel'));
-              } : undefined
+              yPercent: 108, duration: 1.05, delay: 0.1 + i * 0.1, ease: 'power4.out'
             });
           });
+          /* A decodificacao comeca JUNTO com a subida das linhas, nao depois:
+             a letra ja nasce girando simbolos por tras da mascara e, quando
+             a linha sobe e revela, o efeito ja esta em andamento — sem a
+             pausa "linha sobe parada, so depois começa a trocar". */
+          document.dispatchEvent(new CustomEvent('hero:visivel'));
         };
 
         if (document.getElementById('introOverlay')) {
