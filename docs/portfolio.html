@@ -155,10 +155,14 @@
     html.theme-anim * { transition: none !important; }
   }
 
-  /* A cor de base vive no <html>, nao no <body>: o body tem
-     `position: relative` e, com fundo proprio, ele pintava por cima do
-     #bgCanvas (z-index -1) — o fundo vivo ficava invisivel. */
-  html { background: var(--bg); }
+  /* NENHUM dos dois pinta fundo: quando o <body> e transparente o navegador
+     propaga o fundo do <html> para o canvas de pintura da pagina inteira, o
+     que cobria o #bgCanvas. A cor de base e desenhada pelo proprio canvas
+     (primeiro fillRect), entao aqui os dois ficam transparentes. */
+  /* rede de seguranca: se o canvas nao subir (JS off, reduced-motion, erro),
+     a classe fica ausente e o <html> volta a pintar a cor do tema */
+  html:not(.bg-vivo) { background: var(--bg); }
+  html.bg-vivo { background: transparent; }
 
   body {
     margin: 0;
@@ -1973,13 +1977,14 @@
        base do <html> e abaixo do conteudo, que usa z-index 2. */
     z-index: 0;
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 1.2s ease;
+    /* sem fade-in: este canvas pinta a cor de base da pagina, entao comecar
+       transparente deixaria o site branco no primeiro segundo */
+    opacity: 1;
   }
-  #bgCanvas.on { opacity: 1; }
 
   /* no tema escuro a massa some um pouco mais no fundo */
   :root[data-theme="dark"] #bgCanvas { mix-blend-mode: screen; }
+
 
   @media (prefers-reduced-motion: reduce) {
     #bgCanvas { display: none; }
@@ -3941,10 +3946,10 @@
         if (!it.fixo) it.el.style.visibility = 'hidden';
       });
 
-      var INICIO = 40;       /* praticamente colado no fim da cortina */
-      var POR_LETRA = 46;    /* cada letra trava ~46ms depois da anterior */
-      var GIRO = 38;         /* tempo entre trocas de simbolo */
-      var JANELA = 300;      /* quanto tempo cada letra fica girando antes de travar */
+      var INICIO = 60;       /* logo apos as linhas assentarem */
+      var POR_LETRA = 85;    /* cada letra trava ~85ms depois da anterior */
+      var GIRO = 45;         /* tempo entre trocas de simbolo */
+      var JANELA = 520;      /* quanto tempo cada letra fica girando antes de travar */
       var t0 = null;
 
       /* A cortina de intro cobre a tela por ~2s. Se a decodificacao comecar
@@ -3994,17 +3999,14 @@
         }
       }
 
-      /* dispara quando a intro termina (evento emitido no finishIntro);
-         se nao houver intro nenhuma, comeca logo */
-      if (document.getElementById('introOverlay')) {
-        document.addEventListener('intro:fim', iniciar, { once: true });
-        /* rede de seguranca: se o evento nao vier (intro pulada por clique,
-           por exemplo), o titulo nao pode ficar preso em simbolos. 2.6s cobre
-           a duracao da intro sem competir com o evento no caso normal. */
-        window.setTimeout(iniciar, 2600);
-      } else {
-        iniciar();
-      }
+      /* Espera as linhas do titulo terminarem de subir de tras da mascara
+         (`hero:visivel`). Antes disso as letras existem mas estao fora da
+         area visivel do .hl — a decodificacao rodava escondida e o titulo
+         aparecia ja resolvido. */
+      document.addEventListener('hero:visivel', iniciar, { once: true });
+      /* rede de seguranca: se o GSAP nao carregar ou o evento nao vier, o
+         titulo nao pode ficar preso em simbolos aleatorios */
+      window.setTimeout(iniciar, 5000);
     })();
 
     /* ---------- Scroll progress bar ---------- */
@@ -4060,9 +4062,17 @@
         var animarHero = function () {
           if (heroAnimado) return;
           heroAnimado = true;
-          gsap.utils.toArray('.hero-title .hl > i').forEach(function (line, i) {
+          var linhas = gsap.utils.toArray('.hero-title .hl > i');
+          linhas.forEach(function (line, i) {
             gsap.from(line, {
-              yPercent: 108, duration: 1.05, delay: 0.1 + i * 0.1, ease: 'power4.out'
+              yPercent: 108, duration: 1.05, delay: 0.1 + i * 0.1, ease: 'power4.out',
+              onComplete: i === linhas.length - 1 ? function () {
+                /* So agora as letras estao visiveis: ate aqui elas sobem
+                   mascaradas por `overflow:hidden` do .hl. Comecar a
+                   decodificacao antes disso a fazia rodar inteira atras da
+                   mascara — o titulo aparecia ja resolvido. */
+                document.dispatchEvent(new CustomEvent('hero:visivel'));
+              } : undefined
             });
           });
         };
@@ -4380,54 +4390,126 @@
     modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
 
-    /* ---------- Fundo vivo ----------
-       Massa de cor que respira devagar atras do site inteiro. Canvas 2D em
-       baixa resolucao (nao WebGL): o desfoque esconde a falta de pixels, e o
-       custo de GPU/bateria fica proximo de zero. Cada "bolha" e um gradiente
-       radial andando numa orbita propria; o grao por cima tira o aspecto de
-       degrade chapado. */
+    /* ---------- Fundo vivo (WebGL) ----------
+       Massa de cor organica com grao, no espirito do p5aholic.me: um shader
+       de ruido fractal (fBm) rodando na GPU, nao gradientes CSS empilhados.
+       A diferenca esta na textura — ruido procedural cria bordas irregulares
+       que respiram, enquanto gradiente radial sempre parece um circulo
+       desfocado.
+
+       Renderiza em ~40% da resolucao real (o resultado e suave, ninguem
+       percebe) e a 30fps, entao o custo de GPU fica baixo. Se WebGL nao
+       estiver disponivel, a pagina simplesmente mantem o fundo solido. */
 
     (function () {
       var canvas = document.getElementById('bgCanvas');
       if (!canvas) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      var ctx = canvas.getContext('2d', { alpha: true });
-      if (!ctx) return;
+      var gl = canvas.getContext('webgl', { alpha: false, antialias: false, depth: false })
+            || canvas.getContext('experimental-webgl', { alpha: false });
+      if (!gl) return;   /* sem WebGL: fundo solido do tema, sem quebrar nada */
 
-      /* Resolucao propositalmente baixa: o resultado e borrado de qualquer
-         forma, entao renderizar em tamanho real seria desperdicio puro. */
-      var ESCALA = 0.18;
-      var larg = 0, alt = 0;
+      var VERT = [
+        'attribute vec2 p;',
+        'void main(){ gl_Position = vec4(p, 0.0, 1.0); }'
+      ].join('\n');
 
-      var BOLHAS = [
-        { cor: [47, 224, 200], raio: 0.62, vx: 0.021, vy: 0.014, fx: 0.28, fy: 0.34, alfa: 0.55 },
-        { cor: [59, 130, 246], raio: 0.55, vx: -0.017, vy: 0.023, fx: 0.72, fy: 0.30, alfa: 0.50 },
-        { cor: [47, 224, 200], raio: 0.44, vx: 0.013, vy: -0.019, fx: 0.50, fy: 0.74, alfa: 0.38 },
-        { cor: [125, 211, 252], raio: 0.38, vx: -0.024, vy: -0.012, fx: 0.22, fy: 0.68, alfa: 0.30 }
-      ];
+      var FRAG = [
+        'precision highp float;',
+        'uniform vec2  uRes;',
+        'uniform float uTime;',
+        'uniform vec3  uBase;',   /* cor de fundo do tema */
+        'uniform vec3  uCorA;',   /* turquesa da identidade */
+        'uniform vec3  uCorB;',   /* azul da identidade */
+        'uniform float uForca;',  /* quanto a cor cobre o fundo */
 
-      /* textura de grao: gerada uma vez e repetida como padrao */
-      var grao = (function () {
-        var g = document.createElement('canvas');
-        var n = 90;
-        g.width = g.height = n;
-        var gc = g.getContext('2d');
-        var img = gc.createImageData(n, n);
-        for (var i = 0; i < img.data.length; i += 4) {
-          var v = 128 + (Math.random() - 0.5) * 90;
-          img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-          img.data[i + 3] = 16;
-        }
-        gc.putImageData(img, 0, 0);
-        return g;
-      })();
+        /* ruido de valor + fBm — base da textura organica */
+        'float hash(vec2 v){ return fract(sin(dot(v, vec2(127.1, 311.7))) * 43758.5453123); }',
+        'float noise(vec2 v){',
+        '  vec2 i = floor(v), f = fract(v);',
+        '  float a = hash(i), b = hash(i + vec2(1.0, 0.0));',
+        '  float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));',
+        '  vec2 u = f * f * (3.0 - 2.0 * f);',
+        '  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;',
+        '}',
+        'float fbm(vec2 v){',
+        '  float s = 0.0, amp = 0.55;',
+        '  for (int i = 0; i < 5; i++){',
+        '    s += amp * noise(v);',
+        '    v = v * 2.02 + vec2(37.1, 17.3);',
+        '    amp *= 0.5;',
+        '  }',
+        '  return s;',
+        '}',
 
+        'void main(){',
+        '  vec2 uv = gl_FragCoord.xy / uRes.xy;',
+        '  vec2 q = uv * vec2(uRes.x / uRes.y, 1.0) * 1.6;',
+        '  float t = uTime * 0.055;',
+
+        /* domain warping: o ruido distorce as proprias coordenadas, o que
+           produz o aspecto de fluido em vez de manchas estaticas */
+        '  vec2 w1 = vec2(fbm(q + vec2(0.0, t)), fbm(q + vec2(5.2, 1.3 - t)));',
+        '  vec2 w2 = vec2(fbm(q + 3.4 * w1 + vec2(1.7, 9.2) + 0.6 * t),',
+        '                 fbm(q + 3.4 * w1 + vec2(8.3, 2.8) - 0.4 * t));',
+        '  float n = fbm(q + 3.0 * w2);',
+
+        /* duas massas de cor com distribuicao diferente na tela */
+        '  float mA = smoothstep(0.32, 0.92, n) * smoothstep(1.15, 0.15, uv.x + n * 0.35);',
+        '  float mB = smoothstep(0.38, 0.95, 1.0 - n) * smoothstep(-0.15, 0.95, uv.x - n * 0.25);',
+
+        '  vec3 cor = uBase;',
+        '  cor = mix(cor, uCorA, clamp(mA * uForca, 0.0, 1.0));',
+        '  cor = mix(cor, uCorB, clamp(mB * uForca * 0.9, 0.0, 1.0));',
+
+        /* grao: tira o aspecto plastico do degrade */
+        '  float g = hash(gl_FragCoord.xy + uTime) - 0.5;',
+        '  cor += g * 0.022;',
+
+        '  gl_FragColor = vec4(cor, 1.0);',
+        '}'
+      ].join('\n');
+
+      function compilar(tipo, src) {
+        var s = gl.createShader(tipo);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) return null;
+        return s;
+      }
+
+      var vs = compilar(gl.VERTEX_SHADER, VERT);
+      var fs = compilar(gl.FRAGMENT_SHADER, FRAG);
+      if (!vs || !fs) return;
+
+      var prog = gl.createProgram();
+      gl.attachShader(prog, vs);
+      gl.attachShader(prog, fs);
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+      gl.useProgram(prog);
+
+      /* dois triangulos cobrindo a tela */
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+      var uRes   = gl.getUniformLocation(prog, 'uRes');
+      var uTime  = gl.getUniformLocation(prog, 'uTime');
+      var uBase  = gl.getUniformLocation(prog, 'uBase');
+      var uCorA  = gl.getUniformLocation(prog, 'uCorA');
+      var uCorB  = gl.getUniformLocation(prog, 'uCorB');
+      var uForca = gl.getUniformLocation(prog, 'uForca');
+
+      var ESCALA = 0.4;
       function medir() {
-        larg = Math.max(1, Math.round(window.innerWidth * ESCALA));
-        alt = Math.max(1, Math.round(window.innerHeight * ESCALA));
-        canvas.width = larg;
-        canvas.height = alt;
+        canvas.width  = Math.max(1, Math.round(window.innerWidth  * ESCALA));
+        canvas.height = Math.max(1, Math.round(window.innerHeight * ESCALA));
+        gl.viewport(0, 0, canvas.width, canvas.height);
       }
       medir();
 
@@ -4439,82 +4521,45 @@
       }
       lerTema();
 
-      var t = 0;
-      var rodando = true;
+      var t0 = Date.now();
       var timer = null;
 
       function quadro() {
-        if (!rodando) return;
-        t += 0.0075;
-        ctx.clearRect(0, 0, larg, alt);
-        ctx.globalCompositeOperation = 'source-over';
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, (Date.now() - t0) / 1000);
 
-        for (var i = 0; i < BOLHAS.length; i++) {
-          var b = BOLHAS[i];
-          /* orbita lenta em torno de um ponto fixo — sem trajetoria repetida
-             obvia porque cada eixo usa frequencia diferente */
-          var cx = (b.fx + Math.sin(t * (1 + i * 0.37) + i) * b.vx * 8) * larg;
-          var cy = (b.fy + Math.cos(t * (1.2 + i * 0.29) + i * 2) * b.vy * 8) * alt;
-          var r = b.raio * Math.max(larg, alt) * (0.9 + Math.sin(t * 1.7 + i) * 0.1);
-
-          var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-          /* no tema claro a cor precisa ser bem mais discreta: fundo claro
-             com cor forte por tras de texto preto destroi a leitura */
-          var a = b.alfa * (claro ? 0.42 : 0.62);
-          g.addColorStop(0, 'rgba(' + b.cor[0] + ',' + b.cor[1] + ',' + b.cor[2] + ',' + a + ')');
-          g.addColorStop(1, 'rgba(' + b.cor[0] + ',' + b.cor[1] + ',' + b.cor[2] + ',0)');
-          ctx.fillStyle = g;
-          ctx.fillRect(0, 0, larg, alt);
-        }
-      }
-
-      /* setInterval em vez de requestAnimationFrame: o canvas e minusculo
-         (259x180) e redesenhar custa quase nada, mas o rAF e suspenso em
-         varios contextos (aba sem composicao, janela em segundo plano,
-         economia de energia) — e ali a animacao simplesmente congelava,
-         parecendo um fundo estatico colorido. */
-      function ligarLoop() {
-        if (timer) return;
-        timer = window.setInterval(quadro, 1000 / 30);
-      }
-      function desligarLoop() {
-        if (!timer) return;
-        window.clearInterval(timer);
-        timer = null;
-      }
-
-      /* o grao vai numa camada CSS separada, sobre o canvas escalado */
-      var padrao = document.createElement('div');
-      padrao.setAttribute('aria-hidden', 'true');
-      padrao.style.cssText =
-        'position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;' +
-        'background-image:url(' + grao.toDataURL() + ');background-repeat:repeat';
-      document.body.appendChild(padrao);
-
-      /* o canvas e minusculo e esticado por CSS — o navegador interpola e
-         entrega o desfoque de graca, sem filtro caro */
-      canvas.style.filter = 'blur(42px)';
-
-      window.addEventListener('resize', medir);
-
-      /* pausa quando a aba sai de foco: nada de gastar bateria em background */
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) {
-          rodando = false;
-          desligarLoop();
+        if (claro) {
+          /* base: a cor de fundo do tema claro (#F3F5F4) */
+          gl.uniform3f(uBase, 0.953, 0.961, 0.957);
+          /* turquesa e azul da identidade. Sobre fundo claro a cor precisa
+             ser saturada para aparecer, mas o texto preto corre por cima —
+             por isso uForca segura a cobertura em vez de clarear a cor. */
+          gl.uniform3f(uCorA, 0.106, 0.780, 0.690);
+          gl.uniform3f(uCorB, 0.145, 0.420, 0.900);
+          gl.uniform1f(uForca, 0.62);
         } else {
-          rodando = true;
-          ligarLoop();
+          gl.uniform3f(uBase, 0.031, 0.035, 0.043);
+          gl.uniform3f(uCorA, 0.184, 0.878, 0.784);
+          gl.uniform3f(uCorB, 0.231, 0.510, 0.965);
+          gl.uniform1f(uForca, 0.55);
         }
-      });
 
-      /* acompanha a troca de tema */
-      var obs = new MutationObserver(lerTema);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+
+      function ligar()  { if (!timer) timer = window.setInterval(quadro, 1000 / 30); }
+      function desligar(){ if (timer) { window.clearInterval(timer); timer = null; } }
+
+      window.addEventListener('resize', function () { medir(); quadro(); });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) desligar(); else ligar();
+      });
+      var obs = new MutationObserver(function () { lerTema(); quadro(); });
       obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
       quadro();
-      ligarLoop();
-      window.setTimeout(function () { canvas.classList.add('on'); }, 60);
+      document.documentElement.classList.add('bg-vivo');
+      ligar();
     })();
 
     /* ---------- Case imersivo: overlay full-screen por projeto ----------
