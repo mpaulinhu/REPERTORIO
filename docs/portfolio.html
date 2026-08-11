@@ -3951,15 +3951,21 @@
          junto com o load, ela termina atras da cortina e ninguem ve nada —
          por isso o cronometro so parte quando a intro sai. */
       var comecou = false;
+      var timerLetras = null;
+
       function iniciar() {
         if (comecou) return;
         comecou = true;
-        requestAnimationFrame(decodificar);
+        t0 = Date.now();
+        /* setInterval, nao requestAnimationFrame: o rAF e suspenso quando a
+           janela nao esta compondo quadros, e ali a decodificacao congelava
+           no meio — letras paradas em simbolo aleatorio. */
+        timerLetras = window.setInterval(decodificar, 1000 / 30);
+        decodificar();
       }
 
-      function decodificar(ts) {
-        if (t0 === null) t0 = ts;
-        var passado = ts - t0;
+      function decodificar() {
+        var passado = Date.now() - t0;
         var faltam = false;
 
         for (var i = 0; i < lista.length; i++) {
@@ -3982,7 +3988,10 @@
           }
         }
 
-        if (faltam) requestAnimationFrame(decodificar);
+        if (!faltam && timerLetras) {
+          window.clearInterval(timerLetras);
+          timerLetras = null;
+        }
       }
 
       /* dispara quando a intro termina (evento emitido no finishIntro);
@@ -4177,55 +4186,47 @@
             plane.style.opacity = estado.fade;
           };
 
-          var tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: document.body,
-              start: 'top top',
-              /* toda a sequencia cabe na primeira tela e meia de scroll —
-                 depois disso a cortina ja sumiu de vez */
-              end: '+=150%',
-              scrub: 0.6,
-              invalidateOnRefresh: true
+          /* A cortina e dirigida direto pelo scroll, sem GSAP.
+             O `scrub` do ScrollTrigger interpola via requestAnimationFrame, e
+             quando o rAF e estrangulado (aba sem composicao, economia de
+             energia) o fade nao acontece: a cortina pula de opaca para sumida
+             de uma vez. Lendo `scrollY` no proprio evento de scroll, o estado
+             e sempre exato para a posicao atual, com ou sem rAF. */
+          var atualizarCortina = function () {
+            var h = window.innerHeight || 1;
+            var p = window.scrollY / h;          /* 0 = topo, 1 = uma tela */
+
+            /* 0 -> 0.75 de tela: o losango abre */
+            var abertura = Math.min(1, Math.max(0, p / 0.75));
+            /* 0.85 -> 1.35 de tela: a cortina some em fade */
+            var saida = Math.min(1, Math.max(0, (p - 0.85) / 0.5));
+
+            estado.open = abertura;
+            estado.fade = 1 - saida;
+            aplicar();
+
+            if (saida >= 1) {
+              plane.style.display = 'none';
+            } else if (plane.style.display === 'none') {
+              plane.style.display = '';
             }
-          });
-          tl.to(estado, { open: 1, ease: 'none', duration: 1, onUpdate: aplicar })   /* losango abre */
-            .to(estado, { open: 1, ease: 'none', duration: 0.15, onUpdate: aplicar }) /* segura um instante */
-            .to(estado, { fade: 0, ease: 'none', duration: 0.85, onUpdate: aplicar }); /* some de vez */
-          aplicar();
+          };
+
+          window.addEventListener('scroll', atualizarCortina, { passive: true });
+          window.addEventListener('resize', atualizarCortina);
+          atualizarCortina();
 
           /* A cortina e um efeito de ENTRADA e so faz sentido a partir do topo.
              Quando a pagina abre ja rolada — link direto para #secao, F5 no meio,
              ou o navegador restaurando a posicao anterior — o losango ficava
              congelado no estado fechado por cima do conteudo. Nesse caso ele e
              descartado de uma vez, em vez de tentar animar do meio. */
-          var descartarCortina = function () {
-            estado.open = 1;
-            estado.fade = 0;
-            aplicar();
-            plane.style.display = 'none';
-            if (tl.scrollTrigger) tl.scrollTrigger.kill();
-            tl.kill();
-          };
-
-          if (window.scrollY > 40) {
-            descartarCortina();
-          } else {
-            /* O salto para a ancora acontece DEPOIS: a intro trava o scroll no
-               load e so o libera ao terminar. Entao vigio o scroll por alguns
-               segundos — se a pagina aparecer ja rolada sem que o usuario tenha
-               rolado gradualmente, e salto de ancora e a cortina e descartada. */
-            var vigia = function () {
-              if (plane.style.display === 'none') return;
-              if (window.scrollY > window.innerHeight * 0.9) {
-                descartarCortina();
-                window.removeEventListener('scroll', vigia);
-              }
-            };
-            window.addEventListener('scroll', vigia, { passive: true });
-            window.setTimeout(function () {
-              window.removeEventListener('scroll', vigia);
-            }, 6000);
-          }
+          /* A pagina pode abrir ja rolada (link com #ancora, F5 no meio).
+             `atualizarCortina` ja resolve o estado certo para qualquer
+             posicao, entao basta reavaliar quando a intro liberar o scroll. */
+          document.addEventListener('intro:fim', function () {
+            window.setTimeout(atualizarCortina, 60);
+          }, { once: true });
         }
 
         /* 8. Retrato do hero: contra-scroll leve */
@@ -4440,10 +4441,11 @@
 
       var t = 0;
       var rodando = true;
+      var timer = null;
 
       function quadro() {
         if (!rodando) return;
-        t += 0.0016;
+        t += 0.0075;
         ctx.clearRect(0, 0, larg, alt);
         ctx.globalCompositeOperation = 'source-over';
 
@@ -4464,8 +4466,21 @@
           ctx.fillStyle = g;
           ctx.fillRect(0, 0, larg, alt);
         }
+      }
 
-        requestAnimationFrame(quadro);
+      /* setInterval em vez de requestAnimationFrame: o canvas e minusculo
+         (259x180) e redesenhar custa quase nada, mas o rAF e suspenso em
+         varios contextos (aba sem composicao, janela em segundo plano,
+         economia de energia) — e ali a animacao simplesmente congelava,
+         parecendo um fundo estatico colorido. */
+      function ligarLoop() {
+        if (timer) return;
+        timer = window.setInterval(quadro, 1000 / 30);
+      }
+      function desligarLoop() {
+        if (!timer) return;
+        window.clearInterval(timer);
+        timer = null;
       }
 
       /* o grao vai numa camada CSS separada, sobre o canvas escalado */
@@ -4486,9 +4501,10 @@
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
           rodando = false;
-        } else if (!rodando) {
+          desligarLoop();
+        } else {
           rodando = true;
-          requestAnimationFrame(quadro);
+          ligarLoop();
         }
       });
 
@@ -4496,7 +4512,8 @@
       var obs = new MutationObserver(lerTema);
       obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-      requestAnimationFrame(quadro);
+      quadro();
+      ligarLoop();
       window.setTimeout(function () { canvas.classList.add('on'); }, 60);
     })();
 
