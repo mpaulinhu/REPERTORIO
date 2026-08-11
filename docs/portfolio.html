@@ -155,9 +155,14 @@
     html.theme-anim * { transition: none !important; }
   }
 
+  /* A cor de base vive no <html>, nao no <body>: o body tem
+     `position: relative` e, com fundo proprio, ele pintava por cima do
+     #bgCanvas (z-index -1) — o fundo vivo ficava invisivel. */
+  html { background: var(--bg); }
+
   body {
     margin: 0;
-    background: var(--bg);
+    background: transparent;
     color: var(--text);
     font-family: var(--sans);
     font-size: 16px;
@@ -359,7 +364,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 22px 0;
+    gap: 16px;
+    /* o elemento tambem tem a classe .wrap, que da o recuo lateral do site.
+       Declarar `padding: 22px 0` aqui zerava esse recuo e colava o logo na
+       borda da tela — por isso so o padding VERTICAL e definido. */
+    padding-top: 22px;
+    padding-bottom: 22px;
   }
 
   .brand {
@@ -770,17 +780,21 @@
     position: fixed;
     inset: 0;
     z-index: 200;
-    background: var(--overlay);
-    backdrop-filter: blur(14px);
+    /* fundo SOLIDO: o veu translucido deixava o conteudo da pagina
+       aparecendo por tras e os links do menu ficavam ilegiveis */
+    background: var(--bg);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 44px;
+    gap: clamp(22px, 5vh, 44px);
+    padding: 84px 24px 40px;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.35s ease;
     perspective: var(--persp);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .menu-overlay.open { opacity: 1; visibility: visible; }
@@ -788,16 +802,23 @@
   .menu-overlay h2 {
     font-family: var(--display);
     font-weight: 600;
-    font-size: 1.6rem;
+    font-size: clamp(1.05rem, 4vw, 1.6rem);
     color: var(--accent);
     margin: 0;
+    text-align: center;
+    line-height: 1.3;
   }
 
-  .menu-overlay nav { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+  .menu-overlay nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(14px, 3.4vh, 28px);
+  }
 
   .menu-overlay nav a {
     font-family: var(--display);
-    font-size: 2rem;
+    font-size: clamp(1.3rem, 6vw, 2rem);
     font-weight: 500;
     color: var(--text);
     transition: color 0.25s ease, transform 0.25s ease;
@@ -806,6 +827,23 @@
   }
 
   .menu-overlay nav a:hover { color: var(--accent); transform: translateZ(40px) scale(1.06); }
+
+  /* trava o scroll do fundo enquanto o menu esta aberto */
+  body.menu-open { overflow: hidden; }
+  /* o header e sticky e leva z-index 2 (regra do empilhamento geral), entao
+     ficava ATRAS do menu (z 200) — o botao de fechar sumia junto. Com o menu
+     aberto ele sobe e fica fixo no topo da viewport. */
+  body.menu-open header.site {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 210;
+    background: transparent;
+    backdrop-filter: none;
+  }
+  body.menu-open header.site::after { opacity: 0; }
+  /* dentro do menu so o botao de fechar interessa */
+  body.menu-open header.site .brand,
+  body.menu-open header.site .theme-toggle { opacity: 0; pointer-events: none; }
 
   /* ---------- Scroll reveal (3D entrance) ---------- */
 
@@ -867,10 +905,14 @@
   .site-plane {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    /* acima do fundo vivo (z 0), abaixo do conteudo (z 2) */
+    z-index: 1;
     overflow: hidden;
     pointer-events: none;
-    background: var(--bg);
+    /* transparente de proposito: com fundo solido a cortina tapava o
+       #bgCanvas e o fundo vivo nunca aparecia na primeira tela.
+       O <html> ja garante a cor de base. */
+    background: transparent;
   }
 
   .site-plane-art {
@@ -1603,10 +1645,24 @@
 
   /* ---------- Contacts ---------- */
 
-  .contacts-icons { display: flex; flex-wrap: wrap; justify-content: center; gap: 56px; perspective: 900px; }
+  .contacts-icons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    /* alinha pelo TOPO: sem isso cada item esticava conforme o proprio texto
+       ("Marcos Paulo T. G. dos Santos" vs "@mpaulin") e os icones ficavam em
+       alturas diferentes */
+    align-items: flex-start;
+    gap: 40px 32px;
+    perspective: 900px;
+  }
 
   .contact-icon {
-    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    /* largura previsivel para os textos quebrarem dentro do proprio item,
+       em vez de empurrar a largura da coluna */
+    width: 152px;
+    text-align: center;
     transition: transform 0.3s cubic-bezier(.2,.8,.2,1);
     transform-style: preserve-3d;
     cursor: none;
@@ -1616,6 +1672,7 @@
 
   .contact-icon .box {
     width: 64px; height: 64px; border-radius: 50%;
+    flex-shrink: 0;
     background: var(--card);
     border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
@@ -1624,7 +1681,12 @@
 
   .contact-icon .box svg { width: 26px; height: 26px; }
   .contact-icon .label { font-family: var(--display); font-weight: 600; font-size: 0.88rem; margin: 0; }
-  .contact-icon .value { font-size: 0.8rem; color: var(--text-dim); margin: 0; }
+  .contact-icon .value {
+    font-size: 0.8rem; color: var(--text-dim); margin: 4px 0 0;
+    line-height: 1.45;
+    /* e-mail e nome longo precisam quebrar dentro do item */
+    overflow-wrap: anywhere;
+  }
 
   /* ---------- Video modal ---------- */
 
@@ -1896,6 +1958,597 @@
     .hero-meta { flex-wrap: wrap; gap: 8px; font-size: 0.66rem; }
     .hero-meta i { display: none; }
   }
+
+  /* ================= Fundo vivo =================
+     Massa de cor suave que se move devagar atras do site inteiro. Fica atras
+     de tudo e com opacidade baixa: precisa dar profundidade sem competir com
+     o texto. A leitura vence o efeito — por isso os valores sao contidos. */
+  #bgCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* z-index 0 (nao -1): com valor negativo o canvas cai atras do fundo do
+       proprio contexto de empilhamento e some. Em 0 ele fica acima da cor
+       base do <html> e abaixo do conteudo, que usa z-index 2. */
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  #bgCanvas.on { opacity: 1; }
+
+  /* no tema escuro a massa some um pouco mais no fundo */
+  :root[data-theme="dark"] #bgCanvas { mix-blend-mode: screen; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #bgCanvas { display: none; }
+  }
+
+  /* ================= Frentes de atuacao (audiovisual) =================
+     Substitui 3 cards que nao tinham conteudo por tras: eram descricao do
+     que eu faco, nao pecas clicaveis. Agora sao um resumo com arte propria. */
+
+  .av-resumo { margin-bottom: 54px; }
+
+  .av-intro {
+    max-width: 720px;
+    margin-bottom: 30px;
+  }
+  .av-intro .eyebrow-min {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .av-intro p:not(.eyebrow-min) {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+  .av-intro b { color: var(--text); font-weight: 600; }
+
+  .av-pilares {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .av-pilar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.25s ease, transform 0.25s ease;
+  }
+  .av-pilar:hover { border-color: var(--rule); transform: translateY(-3px); }
+
+  .av-arte {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-raised);
+  }
+  .av-arte img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .av-txt { padding: 20px 22px 22px; display: flex; flex-direction: column; flex: 1; }
+  .av-txt .av-tag {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 9px;
+  }
+  .av-txt h4 {
+    margin: 0 0 10px;
+    font-family: var(--display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .av-txt > p:not(.av-tag):not(.av-quando) {
+    margin: 0 0 16px;
+    font-size: 0.92rem;
+    line-height: 1.62;
+    color: var(--text-dim);
+  }
+  .av-txt .stack-row { margin-bottom: 14px; }
+  .av-txt .av-quando {
+    margin: auto 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.76rem;
+    color: var(--text-faint);
+  }
+
+  /* divisor entre o resumo e a grade de trabalhos publicados */
+  .av-divisor {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 30px;
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .av-divisor::before, .av-divisor::after {
+    content: '';
+    height: 1px;
+    background: var(--border);
+    flex: 1;
+  }
+  .av-divisor span { flex-shrink: 0; }
+
+  @media (max-width: 900px) {
+    .av-pilares { grid-template-columns: 1fr; gap: 18px; }
+    .av-resumo { margin-bottom: 40px; }
+    .av-intro p:not(.eyebrow-min) { font-size: 0.95rem; }
+  }
+
+  /* ================= Case imersivo (overlay de projeto) =================
+     Tela cheia com o print como fundo. O scroll troca de cena: a imagem
+     antiga sai em fade + escala, a nova entra. Fecha no Esc, no X ou
+     arrastando ate o fim. */
+
+  .case-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: #05060a;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
+    overscroll-behavior: contain;
+  }
+  .case-overlay.open { opacity: 1; visibility: visible; }
+
+  /* trilho que gera a altura de scroll: 1 tela por cena */
+  .case-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+    /* snap: o scroll assenta na cena mais proxima em vez de parar no meio,
+       eliminando o estado "entre duas cenas" que parecia travamento.
+       `proximity` (e nao `mandatory`) para o gesto do usuario ainda mandar —
+       com mandatory, rolagens curtas eram engolidas e voltavam ao inicio. */
+    scroll-snap-type: y proximity;
+  }
+  .case-scene { scroll-snap-align: start; }
+  .case-scroll::-webkit-scrollbar { width: 0; height: 0; }
+  .case-scroll { scrollbar-width: none; }
+
+  /* camada de fundo fixa: as imagens empilhadas */
+  .case-stage {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    /* perspectiva mais curta que a global (1400px): a placa e grande e ocupa
+       meia tela — de longe demais a inclinacao quase nao aparece. */
+    perspective: 900px;
+    perspective-origin: 72% 50%;
+  }
+  .case-shot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity;
+  }
+  .case-shot.active { opacity: 1; }
+
+  /* camada 1: a propria imagem borrada preenchendo a tela (ambiente) */
+  .case-shot .blur {
+    position: absolute;
+    inset: -8%;
+    width: 116%;
+    height: 116%;
+    object-fit: cover;
+    filter: blur(52px) saturate(1.5) brightness(0.72);
+    transform: scale(1.06);
+    opacity: 0.9;
+  }
+  /* escurece so o lado do texto — o print fica por cima desta camada */
+  .case-shot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(to right, rgba(5,6,10,0.93) 0%, rgba(5,6,10,0.7) 46%, rgba(5,6,10,0.2) 100%),
+      linear-gradient(to top, rgba(5,6,10,0.8) 0%, rgba(5,6,10,0) 50%);
+  }
+
+  /* camada 2: o print nitido, inteiro, flutuando a direita.
+     .plate cuida do POSICIONAMENTO e da animacao de entrada;
+     .plate-3d cuida da INCLINACAO que segue o mouse — separados para os
+     dois transforms nao brigarem pelo mesmo atributo. */
+  .case-shot .plate {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: clamp(28px, 7vw, 120px);
+    transform: translateY(-50%) translateX(26px) scale(0.97);
+    /* um pouco mais estreita que antes: inclinada, a placa "cresce" para a
+       esquerda e encostaria no texto */
+    width: min(46vw, 720px);
+    max-height: 76vh;
+    opacity: 0;
+    transform-style: preserve-3d;
+    transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .case-shot.active .plate {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+
+  .case-shot .plate-3d {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow:
+      0 40px 90px rgba(0,0,0,0.62),
+      0 0 0 1px rgba(0,0,0,0.5);
+    transform-style: preserve-3d;
+    transform: rotateY(-13deg) rotateX(5deg) translateZ(0);
+    transition: transform 0.16s ease-out, box-shadow 0.4s ease;
+    will-change: transform;
+  }
+  /* brilho que atravessa o vidro conforme a placa inclina */
+  .case-shot .plate-3d::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg,
+      rgba(255,255,255,0.14) 0%,
+      rgba(255,255,255,0.03) 26%,
+      rgba(255,255,255,0) 52%);
+    mix-blend-mode: screen;
+  }
+  .case-shot .plate img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 76vh;
+    object-fit: contain;
+    object-position: top center;
+  }
+  /* print de celular: moldura estreita, retrato */
+  .case-shot.is-phone .plate { width: min(30vw, 310px); }
+  .case-shot.is-phone .plate-3d {
+    border-radius: 26px;
+    border-color: rgba(255,255,255,0.2);
+  }
+  /* leve textura/glow da identidade do site */
+  .case-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(1100px 700px at 78% 18%, var(--accent-wash), transparent 62%);
+    pointer-events: none;
+  }
+
+  /* cada cena = 1 viewport de scroll */
+  .case-scene {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: 0 clamp(20px, 7vw, 110px);
+    pointer-events: none;
+  }
+  .case-copy {
+    position: relative;
+    z-index: 3;
+    max-width: min(44vw, 560px);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .case-scene.in .case-copy { opacity: 1; transform: none; }
+
+  .case-copy .step {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .case-copy .step i {
+    width: 26px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+    opacity: 0.7;
+  }
+  .case-copy h3 {
+    font-family: var(--display);
+    font-size: clamp(1.7rem, 4.2vw, 3rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    color: #F2F3F5;
+    margin: 0 0 16px;
+  }
+  .case-copy p {
+    font-size: clamp(0.95rem, 1.35vw, 1.08rem);
+    line-height: 1.65;
+    color: #B9C0C8;
+    margin: 0;
+  }
+  .case-copy .case-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .case-copy .case-chips span {
+    font-size: 0.76rem;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.05);
+    color: #D6DBE1;
+    backdrop-filter: blur(6px);
+  }
+
+  /* capa da primeira cena: titulo grande do projeto.
+     A largura fica limitada para o texto nunca passar por baixo do print. */
+  .case-scene.cover .case-copy { max-width: min(40vw, 560px); }
+  .case-scene.cover h3 { font-size: clamp(2rem, 4.4vw, 3.6rem); }
+  .case-scene.cover .case-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+  }
+  .case-scene.cover .case-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.25s ease, background 0.25s ease;
+  }
+  .case-scene.cover .case-links a.primary {
+    background: var(--accent-grad);
+    color: #04120F;
+  }
+  .case-scene.cover .case-links a.ghost {
+    border: 1px solid rgba(255,255,255,0.22);
+    color: #E8ECEF;
+  }
+  .case-scene.cover .case-links a:hover { transform: translateY(-2px); }
+
+  /* barra superior: titulo + fechar */
+  .case-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px clamp(16px, 4vw, 36px);
+    background: linear-gradient(to bottom, rgba(5,6,10,0.85), transparent);
+    pointer-events: none;
+  }
+  .case-bar .who {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9AA3AC;
+    pointer-events: auto;
+    margin-right: auto;
+  }
+  /* Selo obrigatorio nos cases de sistema interno: deixa explicito que as
+     telas foram reconstruidas e que nenhum dado real aparece. */
+  .case-bar .demo-tag {
+    pointer-events: auto;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: #C8D0D6;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    padding: 6px 13px;
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+  }
+  .case-bar .demo-tag[hidden] { display: none; }
+  .case-close {
+    pointer-events: auto;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(10,12,16,0.6);
+    color: #E8ECEF;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .case-close:hover { background: rgba(255,255,255,0.14); transform: rotate(90deg); }
+  .case-close svg { width: 18px; height: 18px; }
+
+  /* indice lateral de cenas */
+  .case-dots {
+    position: fixed;
+    right: clamp(14px, 2.4vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+  }
+  .case-dots button {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .case-dots button i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.28);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .case-dots button.on i { background: var(--accent); transform: scale(1.5); }
+
+  /* dica de scroll na primeira cena */
+  .case-hint {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%);
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8A9099;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .case-hint.show { opacity: 1; }
+  .case-hint i {
+    width: 1px;
+    height: 22px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: caseHintPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes caseHintPulse {
+    0%, 100% { opacity: 0.25; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(5px); }
+  }
+
+  /* barra de progresso do case */
+  .case-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    z-index: 7;
+    background: rgba(255,255,255,0.08);
+  }
+  .case-progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent-grad);
+    transition: width 0.15s linear;
+  }
+
+  body.case-open { overflow: hidden; }
+  /* Dentro do case o cursor custom sai de cena — mas o body do site inteiro
+     usa `cursor: none`, entao e obrigatorio devolver o cursor nativo aqui,
+     senao o mouse simplesmente some. */
+  body.case-open,
+  body.case-open .case-overlay { cursor: auto; }
+  body.case-open .case-close,
+  body.case-open .case-dots button,
+  body.case-open .case-links a { cursor: pointer; }
+  body.case-open #cursorRing, body.case-open #cursorDot { opacity: 0 !important; }
+
+  @media (max-width: 860px) {
+    /* no celular o print sobe e o texto ocupa a parte de baixo, largura cheia */
+    .case-scene { padding: 0 20px 56px; align-items: flex-end; }
+    .case-copy,
+    .case-scene.cover .case-copy { max-width: none; width: 100%; }
+    .case-shot .plate {
+      top: 66px; /* abaixo da barra com o nome do projeto e o X */
+      right: 50%;
+      transform: translateX(50%) translateY(-14px) scale(0.97);
+      width: min(86vw, 460px);
+      max-height: 34vh;
+    }
+    .case-shot.active .plate { transform: translateX(50%) translateY(0) scale(1); }
+    /* sem mouse nao ha tilt: a placa fica reta para nao cortar as bordas */
+    .case-shot .plate-3d { transform: none; }
+    .case-shot .plate img { max-height: 34vh; }
+    .case-shot.is-phone .plate { width: min(40vw, 180px); max-height: 38vh; }
+    .case-shot.is-phone .plate img { max-height: 38vh; }
+    /* na capa o texto e mais longo: o print encolhe para caber os dois */
+    .case-shot:first-child .plate { max-height: 26vh; }
+    .case-shot:first-child .plate img { max-height: 26vh; }
+    .case-shot::after {
+      background:
+        linear-gradient(to top, rgba(5,6,10,0.96) 0%, rgba(5,6,10,0.9) 42%, rgba(5,6,10,0.42) 100%);
+    }
+    /* no celular o indice vira faixa horizontal no rodape,
+       para nao roubar largura do texto */
+    .case-dots {
+      right: auto;
+      left: 50%;
+      top: auto;
+      bottom: 14px;
+      transform: translateX(-50%);
+      flex-direction: row;
+      gap: 6px;
+    }
+    .case-dots button { width: 22px; height: 22px; }
+    .case-copy h3 { font-size: clamp(1.4rem, 6vw, 2rem); }
+    .case-scene.cover h3 { font-size: clamp(1.9rem, 9vw, 2.8rem); }
+    .case-copy p { font-size: 0.94rem; }
+    .case-scene.cover .case-links a { flex: 1 1 auto; justify-content: center; }
+    /* a dica de scroll ocuparia o mesmo lugar dos dots — no celular
+       os proprios dots ja comunicam que ha mais cenas */
+    .case-hint { display: none; }
+    /* o selo de dados ficticios espremia o nome do projeto em 3 linhas:
+       no celular ele vai para baixo da barra, em linha propria */
+    .case-bar { flex-wrap: wrap; row-gap: 8px; padding-bottom: 10px; }
+    .case-bar .who { font-size: 0.62rem; letter-spacing: 0.1em; order: 1; }
+    .case-bar .case-close { order: 2; }
+    .case-bar .demo-tag { order: 3; width: 100%; text-align: center; font-size: 0.62rem; padding: 5px 10px; }
+    .case-shot .plate { top: 96px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .case-shot, .case-copy, .case-overlay { transition-duration: 0.01ms !important; }
+    .case-hint i { animation: none; }
+  }
 </style>
 
 <div class="bg-glow" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1924,6 +2577,11 @@
 <!-- Cortina de ENTRADA, restrita a primeira tela: abre em losango e some
      assim que o usuario rola de verdade. Dali em diante o site usa o fundo
      solido do tema — a arte nunca briga com a leitura do conteudo. -->
+<!-- Fundo vivo: massa de cor com grao que se move devagar atras de todo o
+     site. Fica abaixo de tudo (z-index -1) e com opacidade baixa para nao
+     atrapalhar a leitura. Desliga sozinho em prefers-reduced-motion. -->
+<canvas id="bgCanvas" aria-hidden="true"></canvas>
+
 <div class="site-plane" id="sitePlane" aria-hidden="true">
   <div class="site-plane-art" id="planeArt1">
     <picture>
@@ -2075,7 +2733,7 @@
 
       <div class="cards-grid tight">
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Automação de transmissão multi-PC" data-modal-desc="Sistema local que inicia uma transmissão ao vivo com um clique, abrindo Holyrics, Lumikit e vMix simultaneamente em 3 computadores pela rede local. Backend em Python/Flask com um painel web instalável como PWA — nasceu direto da experiência operando transmissões ao vivo." data-modal-meta="2026 · Projeto pessoal">
+        <article class="work-card" data-case="automacao-transmissao" data-cursor-label="Ver case" data-modal-title="Automação de transmissão multi-PC" data-modal-desc="Sistema local que inicia uma transmissão ao vivo com um clique, abrindo Holyrics, Lumikit e vMix simultaneamente em 3 computadores pela rede local. Backend em Python/Flask com um painel web instalável como PWA — nasceu direto da experiência operando transmissões ao vivo." data-modal-meta="2026 · Projeto pessoal">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/automacao-transmissao.jpg" alt="Automação de transmissão multi-PC" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
@@ -2084,7 +2742,7 @@
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="9" y="14" width="7" height="6" rx="1"/><rect x="15" y="4" width="6" height="6" rx="1"/><path d="M6 10v4h9M18 10v4"/></svg>
               <div class="reveal-label">
                 <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
+                <span class="format">Ver case</span>
               </div>
             </div>
           </div>
@@ -2099,7 +2757,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Mix de Fone — controle individual via Ui24R" data-modal-desc="Interface web que permite músicos controlarem seus próprios fones (aux) em uma mesa Soundcraft Ui24R, sem expor os controles completos da mesa. Servidor Node.js mantém conexão única com a mesa via WebSocket, com monitor em tempo real e chat integrado para o operador de House Mix." data-modal-meta="2026 · Projeto pessoal">
+        <article class="work-card" data-case="mix-de-fone" data-cursor-label="Ver case" data-modal-title="Mix de Fone — controle individual via Ui24R" data-modal-desc="Interface web que permite músicos controlarem seus próprios fones (aux) em uma mesa Soundcraft Ui24R, sem expor os controles completos da mesa. Servidor Node.js mantém conexão única com a mesa via WebSocket, com monitor em tempo real e chat integrado para o operador de House Mix." data-modal-meta="2026 · Projeto pessoal">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/mix-de-fone-ui24r.jpg" alt="Mix de Fone — controle via Ui24R" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
@@ -2108,7 +2766,7 @@
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
               <div class="reveal-label">
                 <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
+                <span class="format">Ver case</span>
               </div>
             </div>
           </div>
@@ -2123,7 +2781,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Sistema ELO Ecosystem" data-modal-desc="O sistema que roda por trás de tudo na ELO Editora e na PeraBook: o painel que a equipe usa para cadastrar e gerenciar livros, o app onde os leitores compram e leem os livros digitais, e os sites das duas marcas. Faço parte do time que desenvolve e mantém esse sistema, corrigindo problemas e construindo novas telas e funcionalidades." data-modal-meta="2026 — atual · ELO Editora">
+        <article class="work-card" data-case="elo-ecosystem" data-cursor-label="Ver case" data-modal-title="Sistema ELO Ecosystem" data-modal-desc="O sistema que roda por trás de tudo na ELO Editora e na PeraBook: o painel que a equipe usa para cadastrar e gerenciar livros, o app onde os leitores compram e leem os livros digitais, e os sites das duas marcas. Desenvolvido em equipe com Dalila Rodrigues e Vander Loto — atuo no desenvolvimento e na manutenção, corrigindo problemas e construindo novas telas e funcionalidades." data-modal-meta="2026 — atual · ELO Editora">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/elo-ecosystem.jpg" alt="Sistema ELO Ecosystem" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
@@ -2132,15 +2790,15 @@
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4M17.5 11v4M6.5 11v4"/></svg>
               <div class="reveal-label">
                 <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
+                <span class="format">Ver case</span>
               </div>
             </div>
           </div>
           <div class="work-info">
             <p class="period">2026 — atual</p>
             <h4>Sistema ELO Ecosystem</h4>
-            <p class="desc">Painel de gestão, loja de livros digitais e sites da ELO Editora e da PeraBook. Faço parte do time que desenvolve esse sistema.</p>
-            <div class="stack-row"><span class="chip">Vue</span><span class="chip">React</span><span class="chip">TypeScript</span></div>
+            <p class="desc">Sistema interno com 30+ áreas — do cadastro do livro à venda, integrado a ERP, meios de pagamento e ferramentas de projeto. Em equipe com Dalila Rodrigues e Vander Loto.</p>
+            <div class="stack-row"><span class="chip">React</span><span class="chip">TypeScript</span><span class="chip">Firebase</span></div>
           </div>
         </article>
 
@@ -2155,7 +2813,7 @@
         <div class="head-with-scene">
           <div>
             <h2>Audiovisual &amp; acessibilidade</h2>
-            <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora e como freelancer.</p>
+            <p>Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora.</p>
           </div>
 
           <div class="hero-scene" id="heroScene" aria-hidden="true">
@@ -2176,70 +2834,60 @@
         </div>
       </div>
 
+      <!-- Frentes de atuacao: nao sao pecas com link, e sim o que eu faco em
+           audiovisual. Viravam cards vazios ("Ver detalhes" sem nada para ver),
+           entao viraram uma faixa de resumo antes da grade de trabalhos. -->
+      <div class="av-resumo reveal">
+        <div class="av-intro">
+          <p class="eyebrow-min">Frentes de atuação</p>
+          <p>Trabalho com som e imagem desde 2023, hoje na <b>ELO Editora</b>. Três frentes se repetem no meu dia: acessibilidade, design sonoro e produção ao vivo.</p>
+        </div>
+
+        <div class="av-pilares">
+          <article class="av-pilar">
+            <div class="av-arte">
+              <img loading="lazy" src="images/av-libras.jpg" alt="">
+            </div>
+            <div class="av-txt">
+              <p class="av-tag">Acessibilidade</p>
+              <h4>Libras e audiodescrição</h4>
+              <p>Edito vídeos infantis com intérprete de Libras gravado via vMix e produzo audiodescrição com apoio de IA — o mesmo conteúdo alcança quem não ouve e quem não enxerga.</p>
+              <div class="stack-row"><span class="chip">Premiere</span><span class="chip">vMix</span></div>
+              <p class="av-quando">fev/2025 — atual · ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte">
+              <img loading="lazy" src="images/av-radionovela.jpg" alt="">
+            </div>
+            <div class="av-txt">
+              <p class="av-tag">Design sonoro</p>
+              <h4>Radionovela e sonorização de livros</h4>
+              <p>Transformo obras literárias em experiência de áudio: roteiro sonoro, vozes, trilha e mixagem no Reaper. Colaborei também na produção de som para um programa da TV Cultura.</p>
+              <div class="stack-row"><span class="chip">Reaper</span><span class="chip">Audition</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte">
+              <img loading="lazy" src="images/av-aovivo.jpg" alt="">
+            </div>
+            <div class="av-txt">
+              <p class="av-tag">Ao vivo</p>
+              <h4>Transmissão e switching</h4>
+              <p>Operação de câmera e corte em mesa Blackmagic ATEM, produção via vMix (inclusive podcasts), mixagem na Soundcraft Ui24R e automação com Stream Deck — igrejas, eventos e conteúdo da ELO.</p>
+              <div class="stack-row"><span class="chip">ATEM</span><span class="chip">vMix</span><span class="chip">Ui24R</span></div>
+              <p class="av-quando">desde 2023 · ELO Editora</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <p class="av-divisor"><span>Trabalhos publicados</span></p>
+
       <div class="cards-grid" id="audiovisualGrid">
-
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Edição com Libras e audiodescrição" data-modal-desc="Na ELO Editora: edição de vídeos infantis com inserção de intérprete de Libras (gravação via vMix) e criação de audiodescrição com IA, tornando o conteúdo acessível a pessoas com deficiência visual." data-modal-meta="fev/2025 — atual · ELO Editora">
-          <div class="tilt-wrap">
-            <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/libras-audiodescricao.jpg" alt="Edição com Libras e audiodescrição" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
-              <span class="badge">Acessibilidade</span>
-              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
-              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="9"/><path d="M8 13c1.5 1.5 6.5 1.5 8 0M9 9h.01M15 9h.01"/></svg>
-              <div class="reveal-label">
-                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-info">
-            <p class="period">fev/2025 — atual</p>
-            <h4>Edição com Libras e audiodescrição</h4>
-            <p class="desc">Vídeos infantis com intérprete de Libras e audiodescrição gerada por IA, na ELO Editora.</p>
-            <div class="stack-row"><span class="chip">Premiere</span><span class="chip">vMix</span></div>
-          </div>
-        </article>
-
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Radionovelas e sonorização de livros" data-modal-desc="Criação de radionovelas e sonorização de obras literárias, transformando livros em experiências imersivas em áudio. Já colaborei também na produção de som para um programa da TV Cultura." data-modal-meta="ELO Editora · Design sonoro">
-          <div class="tilt-wrap">
-            <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/radionovelas-sonorizacao.jpg" alt="Radionovelas e sonorização de livros" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
-              <span class="badge">Design sonoro</span>
-              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
-              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
-              <div class="reveal-label">
-                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-info">
-            <p class="period">ELO Editora</p>
-            <h4>Radionovelas e sonorização de livros</h4>
-            <p class="desc">Livros transformados em experiências imersivas em áudio. Colaboração pontual com a TV Cultura.</p>
-            <div class="stack-row"><span class="chip">Design sonoro</span></div>
-          </div>
-        </article>
-
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Transmissão ao vivo de eventos" data-modal-desc="Operação de câmera e switching com mesa Blackmagic ATEM, produção ao vivo via vMix (incluindo podcasts), mixagem pela Soundcraft UI24R e automação com Stream Deck." data-modal-meta="ELO Editora + freelance · Ao vivo">
-          <div class="tilt-wrap">
-            <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/transmissao-ao-vivo.jpg" alt="Transmissão ao vivo de eventos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
-              <span class="badge">Ao vivo</span>
-              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
-              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="7" width="14" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/><circle cx="18.5" cy="5.5" r="0.6" fill="currentColor" stroke="none"/></svg>
-              <div class="reveal-label">
-                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-info">
-            <p class="period">2023 — atual</p>
-            <h4>Transmissão ao vivo de eventos</h4>
-            <p class="desc">Câmera, switching, mixagem e automação de produção — igrejas, podcasts e eventos da ELO.</p>
-            <div class="stack-row"><span class="chip">ATEM</span><span class="chip">vMix</span><span class="chip">UI24R</span></div>
-          </div>
-        </article>
 
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/NphFE33WGPj/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Clipe oficial — Conferência dos Jovens AVIVA" data-modal-desc="Clipe da Conferência de Jovens com o grupo ADJA Praise. Cuidei da sonorização inteira do zero — organização e mixagem no Reaper — além da edição do vídeo." data-modal-meta="dez/2025 · Behance">
           <div class="tilt-wrap">
@@ -2869,71 +3517,43 @@
         <figcaption>Uso IA como ferramenta de produção — audiodescrição, narração e tratamento visual entram no fluxo real de trabalho, não como demonstração.</figcaption>
       </figure>
 
-      <div class="cards-grid">
-
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Audiodescrição com IA" data-modal-desc="Criação de audiodescrição utilizando Inteligência Artificial para tornar conteúdo infantil acessível a pessoas com deficiência visual, na ELO Editora." data-modal-meta="ELO Editora · Acessibilidade">
-          <div class="tilt-wrap">
-            <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/audiodescricao-ia.jpg" alt="Audiodescrição com IA" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
-              <span class="badge">Selo IA</span>
-              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
-              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>
-              <div class="reveal-label">
-                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
-              </div>
+      <!-- Mesma decisao da secao de audiovisual: estes tres nao sao pecas
+           clicaveis, e sim como a IA entra no meu fluxo. Viram resumo. -->
+      <div class="av-resumo reveal">
+        <div class="av-pilares">
+          <article class="av-pilar">
+            <div class="av-arte"><img loading="lazy" src="images/ia-audiodescricao.jpg" alt=""></div>
+            <div class="av-txt">
+              <p class="av-tag">Acessibilidade</p>
+              <h4>Audiodescrição com IA</h4>
+              <p>Descrevo o que acontece na tela e gero a narração com voz sintética — conteúdo infantil da ELO passa a alcançar quem não enxerga, num volume que gravação humana não daria conta.</p>
+              <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">NaturalReader</span></div>
+              <p class="av-quando">ELO Editora</p>
             </div>
-          </div>
-          <div class="work-info">
-            <p class="period">ELO Editora</p>
-            <h4>Audiodescrição com IA</h4>
-            <p class="desc">Conteúdo infantil tornado acessível a pessoas com deficiência visual usando geração de voz por IA.</p>
-            <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">NaturalReader</span></div>
-          </div>
-        </article>
+          </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Narração e tratamento de voz" data-modal-desc="Geração e tratamento de voz com IA para narrações e conteúdo de vídeos, livros e projetos digitais — parte do fluxo de produção de radionovelas e sonorização de livros." data-modal-meta="ELO Editora · Voz sintética">
-          <div class="tilt-wrap">
-            <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/narracao-voz-ia.jpg" alt="Narração e tratamento de voz" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
-              <span class="badge">Selo IA</span>
-              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
-              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 11a7 7 0 01-14 0M12 18v4M9 22h6"/></svg>
-              <div class="reveal-label">
-                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
-              </div>
+          <article class="av-pilar">
+            <div class="av-arte"><img loading="lazy" src="images/ia-voz.jpg" alt=""></div>
+            <div class="av-txt">
+              <p class="av-tag">Voz sintética</p>
+              <h4>Narração e tratamento de voz</h4>
+              <p>Gero e trato voz por IA para narração de vídeos, livros e projetos digitais. A saída da máquina é o começo: equalização, ritmo e respiração ainda passam por mim no Reaper.</p>
+              <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">Reaper</span></div>
+              <p class="av-quando">ELO Editora</p>
             </div>
-          </div>
-          <div class="work-info">
-            <p class="period">ELO Editora</p>
-            <h4>Narração e tratamento de voz</h4>
-            <p class="desc">Geração e tratamento de voz por IA para narrações de vídeos, livros e projetos digitais.</p>
-            <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">ChatGPT</span></div>
-          </div>
-        </article>
+          </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-title="Roteiro e tratamento visual assistidos" data-modal-desc="Correções de roteiro e tratamento visual no Photoshop com apoio de IA, além do uso de ChatGPT no fluxo de criação de conteúdo para livros e produções digitais." data-modal-meta="ELO Editora · Produção">
-          <div class="tilt-wrap">
-            <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/roteiro-visual-ia.jpg" alt="Roteiro e tratamento visual assistidos" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
-              <span class="badge">Selo IA</span>
-              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
-              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 4h9l3 3v13H6z"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>
-              <div class="reveal-label">
-                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-                <span class="format">Ver detalhes</span>
-              </div>
+          <article class="av-pilar">
+            <div class="av-arte"><img loading="lazy" src="images/ia-roteiro.jpg" alt=""></div>
+            <div class="av-txt">
+              <p class="av-tag">Produção</p>
+              <h4>Roteiro e tratamento visual</h4>
+              <p>Uso IA para revisar roteiro e apoiar tratamento de imagem no Photoshop. Acelera a parte repetitiva do fluxo editorial e me deixa o tempo para o que exige decisão.</p>
+              <div class="stack-row"><span class="chip">Photoshop</span><span class="chip">ChatGPT</span></div>
+              <p class="av-quando">ELO Editora</p>
             </div>
-          </div>
-          <div class="work-info">
-            <p class="period">ELO Editora</p>
-            <h4>Roteiro e tratamento visual assistidos</h4>
-            <p class="desc">Correção de roteiro e tratamento visual apoiados por IA no fluxo de produção editorial.</p>
-            <div class="stack-row"><span class="chip">Photoshop</span><span class="chip">ChatGPT</span></div>
-          </div>
-        </article>
-
+          </article>
+        </div>
       </div>
     </div>
   </section>
@@ -2946,22 +3566,22 @@
       </div>
       <div class="timeline">
         <div class="tl-item">
-          <p class="tl-date">2026 — jan</p>
+          <p class="tl-date">ago/2026 — atual</p>
+          <h4>Desenvolvedor web na ELO Editora</h4>
+          <p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p>
+        </div>
+        <div class="tl-item">
+          <p class="tl-date">jan/2026</p>
           <h4>Início do Tecnólogo em ADS</h4>
           <p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p>
         </div>
         <div class="tl-item">
-          <p class="tl-date">2026 — ago</p>
-          <h4>Transição para desenvolvedor web</h4>
-          <p>Um mês de teste como desenvolvedor web e contrato sendo assinado — mantendo a atuação em audiovisual e acessibilidade.</p>
-        </div>
-        <div class="tl-item">
-          <p class="tl-date">2025 — fev</p>
+          <p class="tl-date">fev/2025 — atual</p>
           <h4>Audiovisual &amp; Accessibility Specialist na ELO Editora</h4>
           <p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p>
         </div>
         <div class="tl-item">
-          <p class="tl-date">2023 — jun</p>
+          <p class="tl-date">jun/2023</p>
           <h4>Início como técnico e operador de som freelance</h4>
           <p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p>
         </div>
@@ -3016,6 +3636,28 @@
   </section>
 
 </main>
+
+<!-- ============ Case imersivo (overlay full-screen por projeto) ============ -->
+<div class="case-overlay" id="caseOverlay" role="dialog" aria-modal="true" aria-label="Detalhes do projeto" hidden>
+  <div class="case-stage" id="caseStage" aria-hidden="true"></div>
+
+  <div class="case-bar">
+    <span class="who" id="caseWho">Projeto</span>
+    <span class="demo-tag" id="caseDemoTag" hidden>Telas reconstruídas · dados fictícios</span>
+    <button type="button" class="case-close" id="caseClose" aria-label="Fechar projeto (Esc)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="case-dots" id="caseDots" aria-hidden="true"></div>
+
+  <div class="case-scroll" id="caseScroll">
+    <div id="caseScenes"></div>
+  </div>
+
+  <div class="case-hint" id="caseHint"><i></i>role para navegar<i></i></div>
+  <div class="case-progress" aria-hidden="true"><i id="caseProgressBar"></i></div>
+</div>
 
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-box">
@@ -3085,6 +3727,23 @@
   (function () {
     var root = document.documentElement;
 
+    /* ---------- F5 volta ao topo ----------
+       Por padrao o navegador restaura o scroll no reload. Aqui isso atrapalha:
+       o site tem cortina de entrada + animacoes de scroll que so fazem sentido
+       a partir do topo, e reabrir no meio da pagina deixava tudo no estado
+       errado. Com 'manual' o navegador para de restaurar — mas link com
+       ancora (#audiovisual) continua funcionando, porque ali o salto e
+       intencional e refeito quando a intro termina. */
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+      if (!location.hash) {
+        window.scrollTo(0, 0);
+        window.addEventListener('load', function () {
+          if (!location.hash) window.scrollTo(0, 0);
+        });
+      }
+    }
+
     /* Theme */
     var themeToggle = document.getElementById('themeToggle');
     function isDark() {
@@ -3121,10 +3780,17 @@
       menuOverlay.classList.toggle('open', open);
       iconMenu.style.display = open ? 'none' : 'block';
       iconClose.style.display = open ? 'block' : 'none';
+      /* trava o scroll do fundo: sem isso a pagina rolava por tras do menu,
+         e ao fechar o usuario caia em outro ponto do site */
+      document.body.classList.toggle('menu-open', open);
+      menuOverlay.setAttribute('aria-hidden', open ? 'false' : 'true');
     }
     menuToggle.addEventListener('click', function () { setMenu(!menuOverlay.classList.contains('open')); });
     menuOverlay.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function () { setMenu(false); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menuOverlay.classList.contains('open')) setMenu(false);
     });
 
     /* Show edit button only with ?editar=1 in the URL */
@@ -3159,6 +3825,20 @@
         document.documentElement.style.overflow = '';
         introOverlay.classList.add('intro-hide');
         document.body.classList.add('site-enter');
+        /* avisa quem espera a tela ficar visivel (ex.: decodificacao do titulo,
+           que rodaria escondida atras da cortina) */
+        document.dispatchEvent(new CustomEvent('intro:fim'));
+        /* O lock de scroll acima engole o salto da ancora (#audiovisual, #ia…):
+           o navegador tenta pular no load, nao consegue, e a posicao se perde.
+           Refaz o salto agora que a pagina rola de novo. */
+        if (location.hash && location.hash.length > 1) {
+          var alvo = document.getElementById(location.hash.slice(1));
+          if (alvo) {
+            requestAnimationFrame(function () {
+              alvo.scrollIntoView({ block: 'start' });
+            });
+          }
+        }
         setTimeout(function () {
           introOverlay.classList.add('intro-gone');
           setTimeout(function () { introOverlay.remove(); }, 500);
@@ -3231,6 +3911,91 @@
         };
         walk(el);
       });
+
+      /* ---------- Letras se formando (decodificacao) ----------
+         Cada letra sorteia simbolos em alta velocidade e vai travando na
+         certa, da esquerda para a direita. A largura nao muda durante o
+         efeito porque so o CONTEUDO do span troca — a caixa continua sendo
+         a da letra final, entao o titulo nao "pula". */
+      var chars = document.querySelectorAll('.hero-title .char');
+      if (!chars.length) return;
+
+      var POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&@*+=<>/\\';
+      var lista = Array.prototype.slice.call(chars).map(function (el) {
+        var txt = el.textContent;
+        return {
+          el: el,
+          final: txt,
+          /* pontuacao (virgula, ponto) fica parada: embaralhar sinal grafico
+             so gera ruido, nao leitura de "decodificando" */
+          fixo: /[^A-Za-zÀ-ÿ0-9]/.test(txt),
+          travou: false
+        };
+      });
+
+      /* Estado inicial: a letra existe (mantem a largura da caixa) mas fica
+         invisivel ate a onda de decodificacao chegar nela. Sem isso, as
+         letras do fim ficariam paradas exibindo um simbolo aleatorio por
+         segundos, o que parece bug e nao efeito. */
+      lista.forEach(function (it) {
+        if (!it.fixo) it.el.style.visibility = 'hidden';
+      });
+
+      var INICIO = 40;       /* praticamente colado no fim da cortina */
+      var POR_LETRA = 46;    /* cada letra trava ~46ms depois da anterior */
+      var GIRO = 38;         /* tempo entre trocas de simbolo */
+      var JANELA = 300;      /* quanto tempo cada letra fica girando antes de travar */
+      var t0 = null;
+
+      /* A cortina de intro cobre a tela por ~2s. Se a decodificacao comecar
+         junto com o load, ela termina atras da cortina e ninguem ve nada —
+         por isso o cronometro so parte quando a intro sai. */
+      var comecou = false;
+      function iniciar() {
+        if (comecou) return;
+        comecou = true;
+        requestAnimationFrame(decodificar);
+      }
+
+      function decodificar(ts) {
+        if (t0 === null) t0 = ts;
+        var passado = ts - t0;
+        var faltam = false;
+
+        for (var i = 0; i < lista.length; i++) {
+          var it = lista[i];
+          if (it.travou) continue;
+          if (it.fixo) { it.travou = true; continue; }
+          var quandoTrava = INICIO + i * POR_LETRA;
+          if (passado >= quandoTrava) {
+            it.el.textContent = it.final;
+            it.el.style.visibility = '';
+            it.travou = true;
+          } else if (passado > quandoTrava - JANELA) {
+            /* so embaralha quem esta prestes a travar: cria a onda que corre
+               da esquerda para a direita, em vez da tela inteira piscando */
+            it.el.style.visibility = '';
+            it.el.textContent = POOL[(Math.random() * POOL.length) | 0];
+            faltam = true;
+          } else {
+            faltam = true;
+          }
+        }
+
+        if (faltam) requestAnimationFrame(decodificar);
+      }
+
+      /* dispara quando a intro termina (evento emitido no finishIntro);
+         se nao houver intro nenhuma, comeca logo */
+      if (document.getElementById('introOverlay')) {
+        document.addEventListener('intro:fim', iniciar, { once: true });
+        /* rede de seguranca: se o evento nao vier (intro pulada por clique,
+           por exemplo), o titulo nao pode ficar preso em simbolos. 2.6s cobre
+           a duracao da intro sem competir com o evento no caso normal. */
+        window.setTimeout(iniciar, 2600);
+      } else {
+        iniciar();
+      }
     })();
 
     /* ---------- Scroll progress bar ---------- */
@@ -3427,6 +4192,40 @@
             .to(estado, { open: 1, ease: 'none', duration: 0.15, onUpdate: aplicar }) /* segura um instante */
             .to(estado, { fade: 0, ease: 'none', duration: 0.85, onUpdate: aplicar }); /* some de vez */
           aplicar();
+
+          /* A cortina e um efeito de ENTRADA e so faz sentido a partir do topo.
+             Quando a pagina abre ja rolada — link direto para #secao, F5 no meio,
+             ou o navegador restaurando a posicao anterior — o losango ficava
+             congelado no estado fechado por cima do conteudo. Nesse caso ele e
+             descartado de uma vez, em vez de tentar animar do meio. */
+          var descartarCortina = function () {
+            estado.open = 1;
+            estado.fade = 0;
+            aplicar();
+            plane.style.display = 'none';
+            if (tl.scrollTrigger) tl.scrollTrigger.kill();
+            tl.kill();
+          };
+
+          if (window.scrollY > 40) {
+            descartarCortina();
+          } else {
+            /* O salto para a ancora acontece DEPOIS: a intro trava o scroll no
+               load e so o libera ao terminar. Entao vigio o scroll por alguns
+               segundos — se a pagina aparecer ja rolada sem que o usuario tenha
+               rolado gradualmente, e salto de ancora e a cortina e descartada. */
+            var vigia = function () {
+              if (plane.style.display === 'none') return;
+              if (window.scrollY > window.innerHeight * 0.9) {
+                descartarCortina();
+                window.removeEventListener('scroll', vigia);
+              }
+            };
+            window.addEventListener('scroll', vigia, { passive: true });
+            window.setTimeout(function () {
+              window.removeEventListener('scroll', vigia);
+            }, 6000);
+          }
         }
 
         /* 8. Retrato do hero: contra-scroll leve */
@@ -3439,11 +4238,17 @@
           });
         }
 
-        /* 9. Contatos: cada card sobe em sequencia */
+        /* 9. Contatos: a lista inteira sobe de uma vez.
+              Antes cada item entrava em sequencia (stagger). Quando a secao ja
+              estava visivel no load — link com #contatos, por exemplo — a
+              sequencia congelava no meio e cada icone parava numa altura
+              diferente. Animar o container resolve: os itens nunca ganham
+              transform proprio, entao nao ha como ficarem desalinhados. */
         gsap.utils.toArray('.contacts-icons').forEach(function (wrap) {
-          gsap.from(wrap.children, {
-            scrollTrigger: { trigger: wrap, start: 'top 86%', once: true },
-            y: 30, opacity: 0, duration: 0.6, stagger: 0.07, ease: EASE
+          gsap.from(wrap, {
+            scrollTrigger: { trigger: wrap, start: 'top 92%', once: true },
+            y: 26, opacity: 0, duration: 0.6, ease: EASE,
+            clearProps: 'transform,opacity'
           });
         });
 
@@ -3573,6 +4378,489 @@
     modalClose.addEventListener('click', closeModal);
     modalBackdrop.addEventListener('click', function (e) { if (e.target === modalBackdrop) closeModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+    /* ---------- Fundo vivo ----------
+       Massa de cor que respira devagar atras do site inteiro. Canvas 2D em
+       baixa resolucao (nao WebGL): o desfoque esconde a falta de pixels, e o
+       custo de GPU/bateria fica proximo de zero. Cada "bolha" e um gradiente
+       radial andando numa orbita propria; o grao por cima tira o aspecto de
+       degrade chapado. */
+
+    (function () {
+      var canvas = document.getElementById('bgCanvas');
+      if (!canvas) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var ctx = canvas.getContext('2d', { alpha: true });
+      if (!ctx) return;
+
+      /* Resolucao propositalmente baixa: o resultado e borrado de qualquer
+         forma, entao renderizar em tamanho real seria desperdicio puro. */
+      var ESCALA = 0.18;
+      var larg = 0, alt = 0;
+
+      var BOLHAS = [
+        { cor: [47, 224, 200], raio: 0.62, vx: 0.021, vy: 0.014, fx: 0.28, fy: 0.34, alfa: 0.55 },
+        { cor: [59, 130, 246], raio: 0.55, vx: -0.017, vy: 0.023, fx: 0.72, fy: 0.30, alfa: 0.50 },
+        { cor: [47, 224, 200], raio: 0.44, vx: 0.013, vy: -0.019, fx: 0.50, fy: 0.74, alfa: 0.38 },
+        { cor: [125, 211, 252], raio: 0.38, vx: -0.024, vy: -0.012, fx: 0.22, fy: 0.68, alfa: 0.30 }
+      ];
+
+      /* textura de grao: gerada uma vez e repetida como padrao */
+      var grao = (function () {
+        var g = document.createElement('canvas');
+        var n = 90;
+        g.width = g.height = n;
+        var gc = g.getContext('2d');
+        var img = gc.createImageData(n, n);
+        for (var i = 0; i < img.data.length; i += 4) {
+          var v = 128 + (Math.random() - 0.5) * 90;
+          img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+          img.data[i + 3] = 16;
+        }
+        gc.putImageData(img, 0, 0);
+        return g;
+      })();
+
+      function medir() {
+        larg = Math.max(1, Math.round(window.innerWidth * ESCALA));
+        alt = Math.max(1, Math.round(window.innerHeight * ESCALA));
+        canvas.width = larg;
+        canvas.height = alt;
+      }
+      medir();
+
+      var claro = true;
+      function lerTema() {
+        var attr = document.documentElement.getAttribute('data-theme');
+        claro = attr ? attr === 'light'
+                     : !window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      lerTema();
+
+      var t = 0;
+      var rodando = true;
+
+      function quadro() {
+        if (!rodando) return;
+        t += 0.0016;
+        ctx.clearRect(0, 0, larg, alt);
+        ctx.globalCompositeOperation = 'source-over';
+
+        for (var i = 0; i < BOLHAS.length; i++) {
+          var b = BOLHAS[i];
+          /* orbita lenta em torno de um ponto fixo — sem trajetoria repetida
+             obvia porque cada eixo usa frequencia diferente */
+          var cx = (b.fx + Math.sin(t * (1 + i * 0.37) + i) * b.vx * 8) * larg;
+          var cy = (b.fy + Math.cos(t * (1.2 + i * 0.29) + i * 2) * b.vy * 8) * alt;
+          var r = b.raio * Math.max(larg, alt) * (0.9 + Math.sin(t * 1.7 + i) * 0.1);
+
+          var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+          /* no tema claro a cor precisa ser bem mais discreta: fundo claro
+             com cor forte por tras de texto preto destroi a leitura */
+          var a = b.alfa * (claro ? 0.42 : 0.62);
+          g.addColorStop(0, 'rgba(' + b.cor[0] + ',' + b.cor[1] + ',' + b.cor[2] + ',' + a + ')');
+          g.addColorStop(1, 'rgba(' + b.cor[0] + ',' + b.cor[1] + ',' + b.cor[2] + ',0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, larg, alt);
+        }
+
+        requestAnimationFrame(quadro);
+      }
+
+      /* o grao vai numa camada CSS separada, sobre o canvas escalado */
+      var padrao = document.createElement('div');
+      padrao.setAttribute('aria-hidden', 'true');
+      padrao.style.cssText =
+        'position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35;' +
+        'background-image:url(' + grao.toDataURL() + ');background-repeat:repeat';
+      document.body.appendChild(padrao);
+
+      /* o canvas e minusculo e esticado por CSS — o navegador interpola e
+         entrega o desfoque de graca, sem filtro caro */
+      canvas.style.filter = 'blur(42px)';
+
+      window.addEventListener('resize', medir);
+
+      /* pausa quando a aba sai de foco: nada de gastar bateria em background */
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+          rodando = false;
+        } else if (!rodando) {
+          rodando = true;
+          requestAnimationFrame(quadro);
+        }
+      });
+
+      /* acompanha a troca de tema */
+      var obs = new MutationObserver(lerTema);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+      requestAnimationFrame(quadro);
+      window.setTimeout(function () { canvas.classList.add('on'); }, 60);
+    })();
+
+    /* ---------- Case imersivo: overlay full-screen por projeto ----------
+       Cada projeto vira uma sequencia de "cenas". O print fica de fundo em
+       tela cheia e o scroll troca de cena com fade. Fecha no Esc/X/fim. */
+
+    (function () {
+      var CASES = {
+        'mix-de-fone': {
+          who: 'Mix de Fone · Soundcraft Ui24R',
+          cenas: [
+            {
+              img: 'images/projetos/mixfone-01-mix.png',
+              capa: true,
+              titulo: 'Mix de Fone',
+              texto: 'Cada músico controla o próprio fone pelo celular numa mesa Soundcraft Ui24R — sem receber acesso à mesa inteira. Um servidor Node.js segura uma única conexão WebSocket com a mesa e distribui para todo mundo, contornando o limite de conexões simultâneas do equipamento.',
+              chips: ['Node.js', 'WebSocket', 'PWA', 'Soundcraft Ui24R'],
+              links: [
+                { label: 'Ver repositório', href: 'https://github.com/mpaulinhu/ui24-musicos', tipo: 'primary' }
+              ]
+            },
+            {
+              img: 'images/projetos/mixfone-07-login.png',
+              step: 'A entrada',
+              titulo: 'Cada músico só enxerga o próprio fone',
+              texto: 'O músico escolhe o instrumento e entra com senha própria. A partir daí ele vê só os canais que interessam pra ele, com nome legível — "Violão", "Teclado L" — em vez do número cru do canal na mesa, e não alcança o mix de mais ninguém.'
+            },
+            {
+              img: 'images/projetos/mixfone-02-mobile.png',
+              phone: true,
+              alt: 'Tela do músico no celular, com os canais em grid de duas linhas',
+              step: 'No celular',
+              titulo: 'Feito para usar tocando',
+              texto: 'É onde o projeto realmente vive: instalável como app, os canais viram um grid de duas linhas com scroll lateral. Dá pra ajustar o fone entre um louvor e outro sem sair do lugar.',
+              chips: ['PWA', 'Mobile-first']
+            },
+            {
+              img: 'images/projetos/mixfone-03-chat.png',
+              step: 'Chat integrado',
+              titulo: 'Pedido sem sinal de mão',
+              texto: 'Atalhos prontos para os pedidos de sempre — "+ minha voz", "fone baixo", "microfonia!" — e campo livre pro resto. Resolve a comunicação que antes era gesto no meio do culto.'
+            },
+            {
+              img: 'images/projetos/mixfone-04-monitor.png',
+              step: 'Do outro lado',
+              titulo: 'A tela da House Mix',
+              texto: 'O operador acompanha num monitor à parte quem está online e o que cada um pediu, com horário. O mesmo servidor que fala com a mesa entrega o chat de graça.'
+            },
+            {
+              img: 'images/projetos/mixfone-05-geral.png',
+              step: 'Mute geral',
+              titulo: 'Tirar o instrumento de todos os fones',
+              texto: 'Quando o músico não está tocando, ele mesmo se tira de todos os fones e do som principal — sem depender de alguém na mesa para fazer isso.'
+            },
+            {
+              img: 'images/projetos/mixfone-06-admin.png',
+              step: 'Configuração',
+              titulo: 'Painel de admin completo',
+              texto: 'IP da mesa, senhas, músicos, canais e pares estéreo — tudo editável por tela, sem mexer em arquivo de configuração. Salvar reconecta o servidor sozinho.',
+              chips: ['Config por UI', 'Sem editar JSON']
+            }
+          ]
+        },
+        'elo-ecosystem': {
+          who: 'ELO Ecosystem · CoreHUB',
+          demo: true,
+          cenas: [
+            {
+              img: 'images/projetos/corehub-01-catalogo.png',
+              capa: true,
+              alt: 'Tela de catálogo do CoreHUB com livros em grade',
+              titulo: 'Um sistema, duas editoras',
+              texto: 'O CoreHUB é o sistema interno onde a ELO Editora e a PeraBook operam por inteiro — do cadastro do livro à venda, da produção do audiovisual ao recrutamento. São mais de 30 áreas num só lugar, cobrindo o que antes vivia espalhado em planilhas e sistemas separados. Desenvolvido em equipe com Dalila Rodrigues e Vander Loto.',
+              chips: ['React 19', 'TypeScript', 'Vite', 'Firestore', 'Cloud Functions', 'Tailwind']
+            },
+            {
+              img: 'images/projetos/corehub-05-menu.png',
+              alt: 'Menu lateral do CoreHUB com as seis áreas do sistema',
+              step: 'O que cabe dentro',
+              titulo: 'Seis frentes, uma base só',
+              texto: 'Acervo (catálogo, biblioteca digital, autores, coleções, validação). Produção (audiovisual, pipeline de EPUB, acessibilidade). Escritório de Projetos (editorial, tecnologia, marketing, dashboards). Comercialização (preços, estoque, publicação, promoções, códigos). Vendas (pedidos, devoluções, clientes, kits escolares, analytics). E presença digital, com os sites das duas marcas editáveis por lá.',
+              chips: ['30+ áreas', 'Multi-marca', '5 níveis de acesso']
+            },
+            {
+              img: 'images/projetos/corehub-02-dashboard.png',
+              step: 'Integrações',
+              titulo: 'O sistema conversa com o resto',
+              texto: 'ERP Versa para preço e estoque, Mercado Pago e Stripe no checkout, ClickUp e Microsoft Planner alimentando os projetos, Teams para avisos, EPUBCheck validando cada livro digital. Cerca de 100 Cloud Functions ligam essas pontas — o mesmo cadastro alimenta o site, o app de leitura, o relatório e a nota, sem ninguém redigitar nada.',
+              chips: ['ERP Versa', 'Mercado Pago', 'Stripe', 'ClickUp', 'Planner', 'Teams']
+            },
+            {
+              img: 'images/projetos/corehub-03-carga.png',
+              step: 'PM Office',
+              titulo: 'Do acompanhamento à decisão',
+              texto: 'KPIs por status, progresso por projeto agrupado por área e carga por pessoa na mesma tela. Os cartões filtram a visão ao serem clicados, então ela responde tanto "como estamos?" quanto "o que travou e com quem". Foi a frente em que atuei mais diretamente.',
+              chips: ['Gráficos', 'Filtro cruzado']
+            },
+            {
+              img: 'images/projetos/corehub-04-mobile.png',
+              phone: true,
+              alt: 'Catálogo do CoreHUB no celular, em duas colunas',
+              step: 'No celular',
+              titulo: 'Responsivo de verdade',
+              texto: 'A sidebar recolhe, o grid cai para duas colunas e os alvos de toque crescem. Consultar catálogo fora da mesa é caso de uso real — não sobra de layout. Acessibilidade WCAG 2.2 AA é requisito, não item de desejo.',
+              chips: ['Mobile-first', 'WCAG 2.2 AA']
+            }
+          ]
+        },
+        'automacao-transmissao': {
+          who: 'Automação de transmissão · multi-PC',
+          cenas: [
+            {
+              img: 'images/projetos/automacao-01-online.png',
+              capa: true,
+              titulo: 'Um clique, três computadores',
+              texto: 'Começar uma transmissão ao vivo era abrir programa por programa em três máquinas diferentes. Agora é um botão: o painel dispara em paralelo para os três PCs pela rede local, e cada agente abre o que é dele.',
+              chips: ['Python', 'Flask', 'PWA', 'Rede local'],
+              links: [
+                { label: 'Ver repositório', href: 'https://github.com/mpaulinhu/automarizar-apps-em-PCs-diferentes', tipo: 'primary' }
+              ]
+            },
+            {
+              img: 'images/projetos/automacao-03-offline.png',
+              step: 'Quando dá ruim',
+              titulo: 'Falha que aparece',
+              texto: 'O painel faz ping nos três agentes a cada 5 segundos. Se um não responde, ele diz qual e por quê, em vez de travar em silêncio — saber que o PC2 está fora antes de subir ao vivo é metade do problema resolvido. Cada agente também devolve o que abriu e o que falhou, com hora carimbada.',
+              chips: ['Holyrics', 'Lumikit', 'vMix', 'Reaper']
+            },
+            {
+              img: 'images/projetos/automacao-02-mobile.png',
+              phone: true,
+              alt: 'Painel de controle da live no celular, com o botão Iniciar tudo',
+              step: 'No celular',
+              titulo: 'Dispara do bolso',
+              texto: 'Instalável como app no celular. Dá pra iniciar tudo a caminho da mesa, sem precisar sentar em nenhum dos três computadores primeiro. O projeto nasceu da rotina de transmitir ao vivo toda semana — cada detalhe responde a um problema que eu mesmo tive na hora de subir a live.',
+              chips: ['PWA', 'Mobile']
+            }
+          ]
+        }
+      };
+
+      var overlay = document.getElementById('caseOverlay');
+      if (!overlay) return;
+
+      var stage = document.getElementById('caseStage');
+      var scenesWrap = document.getElementById('caseScenes');
+      var scroller = document.getElementById('caseScroll');
+      var dotsWrap = document.getElementById('caseDots');
+      var whoEl = document.getElementById('caseWho');
+      var demoTag = document.getElementById('caseDemoTag');
+      var closeBtn = document.getElementById('caseClose');
+      var hint = document.getElementById('caseHint');
+      var progressBar = document.getElementById('caseProgressBar');
+
+      var atual = -1;
+      var shots = [];
+      var scenes = [];
+      var dots = [];
+      var aberto = false;
+      var lastFocus = null;
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function montar(dados) {
+        stage.innerHTML = '';
+        scenesWrap.innerHTML = '';
+        dotsWrap.innerHTML = '';
+        shots = [];
+        scenes = [];
+        dots = [];
+        atual = -1;
+
+        whoEl.textContent = dados.who;
+        // Selo de dados ficticios: obrigatorio quando as telas sao de sistema
+        // interno reconstruido com conteudo inventado (nada real aparece).
+        demoTag.hidden = !dados.demo;
+
+        dados.cenas.forEach(function (cena, i) {
+          // fundo: imagem borrada de ambiente + print nitido flutuando
+          var shot = document.createElement('div');
+          shot.className = 'case-shot' + (cena.phone ? ' is-phone' : '');
+
+          var blur = document.createElement('img');
+          blur.className = 'blur';
+          blur.src = cena.img;
+          blur.alt = '';
+          blur.setAttribute('aria-hidden', 'true');
+          blur.loading = i === 0 ? 'eager' : 'lazy';
+          blur.decoding = 'async';
+          shot.appendChild(blur);
+
+          var plate = document.createElement('div');
+          plate.className = 'plate';
+          var plate3d = document.createElement('div');
+          plate3d.className = 'plate-3d';
+          var img = document.createElement('img');
+          img.src = cena.img;
+          img.alt = cena.alt || '';
+          img.loading = i === 0 ? 'eager' : 'lazy';
+          img.decoding = 'async';
+          plate3d.appendChild(img);
+          plate.appendChild(plate3d);
+          shot.appendChild(plate);
+
+          stage.appendChild(shot);
+          shots.push(shot);
+
+          // texto
+          var scene = document.createElement('section');
+          scene.className = 'case-scene' + (cena.capa ? ' cover' : '');
+          var html = '<div class="case-copy">';
+          if (cena.step) html += '<p class="step"><i></i>' + esc(cena.step) + '</p>';
+          html += '<h3>' + esc(cena.titulo) + '</h3>';
+          html += '<p>' + esc(cena.texto) + '</p>';
+          if (cena.chips && cena.chips.length) {
+            html += '<div class="case-chips">';
+            cena.chips.forEach(function (c) { html += '<span>' + esc(c) + '</span>'; });
+            html += '</div>';
+          }
+          if (cena.links && cena.links.length) {
+            html += '<div class="case-links">';
+            cena.links.forEach(function (l) {
+              html += '<a class="' + (l.tipo === 'primary' ? 'primary' : 'ghost') + '" href="' + esc(l.href) +
+                '" target="_blank" rel="noopener" data-cursor-label="Abrir">' + esc(l.label) + '</a>';
+            });
+            html += '</div>';
+          }
+          html += '</div>';
+          scene.innerHTML = html;
+          scenesWrap.appendChild(scene);
+          scenes.push(scene);
+
+          // indice lateral
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.innerHTML = '<i></i>';
+          dot.setAttribute('aria-label', 'Ir para a cena ' + (i + 1));
+          dot.addEventListener('click', function () {
+            scroller.scrollTo({ top: i * scroller.clientHeight, behavior: 'smooth' });
+          });
+          dotsWrap.appendChild(dot);
+          dots.push(dot);
+        });
+      }
+
+      function ativar(i) {
+        if (i === atual || i < 0 || i >= shots.length) return;
+        atual = i;
+        shots.forEach(function (s, n) { s.classList.toggle('active', n === i); });
+        scenes.forEach(function (s, n) { s.classList.toggle('in', n === i); });
+        dots.forEach(function (d, n) { d.classList.toggle('on', n === i); });
+        if (hint) hint.classList.toggle('show', i === 0 && shots.length > 1);
+      }
+
+      function onScroll() {
+        var h = scroller.clientHeight || 1;
+        // Limiar de 28% (nao 50% do Math.round): com meia tela de folga a
+        // troca demorava ~450px de rolagem e dava sensacao de travamento.
+        var bruto = scroller.scrollTop / h;
+        var i = Math.floor(bruto + 0.72);
+        if (i < 0) i = 0;
+        if (i > shots.length - 1) i = shots.length - 1;
+        ativar(i);
+        if (progressBar) {
+          var max = scroller.scrollHeight - h;
+          var pct = max > 0 ? (scroller.scrollTop / max) * 100 : 0;
+          progressBar.style.width = pct.toFixed(2) + '%';
+        }
+      }
+
+      function abrir(chave) {
+        var dados = CASES[chave];
+        if (!dados) return;
+        lastFocus = document.activeElement;
+        montar(dados);
+        overlay.hidden = false;
+        // força reflow para a transicao de opacidade valer
+        void overlay.offsetWidth;
+        overlay.classList.add('open');
+        document.body.classList.add('case-open');
+        aberto = true;
+        scroller.scrollTop = 0;
+        ativar(0);
+        onScroll();
+        closeBtn.focus();
+      }
+
+      function fechar() {
+        if (!aberto) return;
+        aberto = false;
+        overlay.classList.remove('open');
+        document.body.classList.remove('case-open');
+        window.setTimeout(function () {
+          if (!aberto) {
+            overlay.hidden = true;
+            stage.innerHTML = '';
+            scenesWrap.innerHTML = '';
+            dotsWrap.innerHTML = '';
+          }
+        }, 520);
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      /* Inclinacao 3D do print seguindo o mouse — mesma linguagem do tilt
+         dos cards da grade. Toque/telas grossas ficam de fora (nao ha hover)
+         e quem pediu menos movimento tambem. */
+      var semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var toque = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+      if (!semMovimento && !toque) {
+        overlay.addEventListener('mousemove', function (e) {
+          var alvo = shots[atual];
+          if (!alvo) return;
+          var p3d = alvo.querySelector('.plate-3d');
+          if (!p3d) return;
+          var px = (e.clientX / window.innerWidth) - 0.5;
+          var py = (e.clientY / window.innerHeight) - 0.5;
+          // -13deg de base: a placa nasce virada para o texto, como um
+          // monitor apoiado na mesa e apontado para quem le
+          p3d.style.transform =
+            'rotateY(' + (-13 + px * 18) + 'deg) rotateX(' + (5 - py * 14) + 'deg) translateZ(0)';
+        });
+        overlay.addEventListener('mouseleave', function () {
+          shots.forEach(function (s) {
+            var p3d = s.querySelector('.plate-3d');
+            if (p3d) p3d.style.transform = 'rotateY(-13deg) rotateX(5deg) translateZ(0)';
+          });
+        });
+      }
+
+      scroller.addEventListener('scroll', onScroll, { passive: true });
+      closeBtn.addEventListener('click', fechar);
+      document.addEventListener('keydown', function (e) {
+        if (!aberto) return;
+        if (e.key === 'Escape') { fechar(); return; }
+        var h = scroller.clientHeight;
+        if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+          e.preventDefault();
+          scroller.scrollTo({ top: (atual + 1) * h, behavior: 'smooth' });
+        } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+          e.preventDefault();
+          scroller.scrollTo({ top: (atual - 1) * h, behavior: 'smooth' });
+        }
+      });
+      window.addEventListener('resize', function () { if (aberto) onScroll(); });
+
+      // liga os cards que tem case ao overlay (no lugar do modal padrao)
+      document.querySelectorAll('[data-case]').forEach(function (card) {
+        var chave = card.getAttribute('data-case');
+        var cover = card.querySelector('.work-cover');
+        if (!cover) return;
+        cover.addEventListener('click', function (e) {
+          if (document.body.classList.contains('edit-mode')) return;
+          e.stopPropagation();
+          modalBackdrop.classList.remove('open');
+          abrir(chave);
+        }, true);
+      });
+    })();
 
     /* ---------- Edit mode (etapa 1: textos + salvar arquivo) ---------- */
 
