@@ -1990,6 +1990,28 @@
     #bgCanvas { display: none; }
   }
 
+  /* Contraste do texto de corpo sobre o fundo vivo — sem esconder o fundo,
+     sem caixa atras do texto. So uma sombra curta que separa a letra da cor
+     em movimento por tras (reportado dificil de ler no mobile, no paragrafo
+     "Sobre mim" e em texto pequeno em geral). O titulo do hero fica de fora:
+     ele ja e grande e preto/gradiente, tem contraste de sobra. */
+  .about-text p,
+  .section-head p,
+  .work-info .desc,
+  .av-txt p:not(.av-tag):not(.av-quando),
+  .tl-item p,
+  .contact-icon .value {
+    text-shadow: 0 0 2px var(--bg), 0 1px 3px var(--bg), 0 2px 14px var(--bg);
+  }
+  :root[data-theme="dark"] .about-text p,
+  :root[data-theme="dark"] .section-head p,
+  :root[data-theme="dark"] .work-info .desc,
+  :root[data-theme="dark"] .av-txt p:not(.av-tag):not(.av-quando),
+  :root[data-theme="dark"] .tl-item p,
+  :root[data-theme="dark"] .contact-icon .value {
+    text-shadow: 0 0 2px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.8), 0 2px 16px rgba(0,0,0,0.6);
+  }
+
   /* ================= Frentes de atuacao (audiovisual) =================
      Substitui 3 cards que nao tinham conteudo por tras: eram descricao do
      que eu faco, nao pecas clicaveis. Agora sao um resumo com arte propria. */
