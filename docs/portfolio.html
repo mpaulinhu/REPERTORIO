@@ -1990,18 +1990,46 @@
     #bgCanvas { display: none; }
   }
 
-  /* Contraste do texto de corpo sobre o fundo vivo — sem esconder o fundo,
-     sem caixa atras do texto. So uma sombra curta que separa a letra da cor
-     em movimento por tras (reportado dificil de ler no mobile, no paragrafo
-     "Sobre mim" e em texto pequeno em geral). O titulo do hero fica de fora:
-     ele ja e grande e preto/gradiente, tem contraste de sobra. */
+  /* Contraste do texto de corpo sobre o fundo vivo — sem esconder o fundo.
+     Duas camadas, como nas referencias (p5aholic/dunks1980): a COR do texto
+     vai no extremo de cada tema (branco puro no escuro, quase preto no
+     claro — mais contraste que a cor "dim" que ele tinha antes) e um painel
+     translucido atras separa a letra da cor em movimento sem virar caixa
+     solida. O titulo do hero fica de fora: grande e com gradiente, ja tem
+     contraste de sobra. */
   .about-text p,
   .section-head p,
   .work-info .desc,
   .av-txt p:not(.av-tag):not(.av-quando),
-  .tl-item p,
+  .tl-item p {
+    position: relative;
+    z-index: 1;
+    /* bloco unico, arredondado, com respiro proprio — nao "clone" por linha
+       (isso criava tiras separadas grudadas, com cara de recorte) */
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.7em 0.9em;
+    border-radius: 12px;
+    color: #0B0F0E;
+    background: rgba(255, 255, 255, 0.62);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  }
+  /* contact-icon .value: item de coluna centralizado, nao paragrafo corrido
+     — painel encolhido ao conteudo em vez do box-decoration-break */
   .contact-icon .value {
-    text-shadow: 0 0 2px var(--bg), 0 1px 3px var(--bg), 0 2px 14px var(--bg);
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 8px;
+    color: #0B0F0E;
+    background: rgba(255, 255, 255, 0.58);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 1px 18px rgba(0,0,0,0.06);
   }
   :root[data-theme="dark"] .about-text p,
   :root[data-theme="dark"] .section-head p,
@@ -2009,7 +2037,9 @@
   :root[data-theme="dark"] .av-txt p:not(.av-tag):not(.av-quando),
   :root[data-theme="dark"] .tl-item p,
   :root[data-theme="dark"] .contact-icon .value {
-    text-shadow: 0 0 2px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.8), 0 2px 16px rgba(0,0,0,0.6);
+    color: #FFFFFF;
+    background: rgba(5, 6, 8, 0.52);
+    box-shadow: 0 1px 18px rgba(0,0,0,0.35);
   }
 
   /* ================= Frentes de atuacao (audiovisual) =================
