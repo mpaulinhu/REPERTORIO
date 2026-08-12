@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
@@ -25,7 +25,7 @@
 <meta name="twitter:description" content="Áudio, imagem e código. Portfólio de Marcos Paulo Tavares Garcia dos Santos — audiovisual, acessibilidade e desenvolvimento.">
 <meta name="twitter:image" content="https://mpaulinhu.github.io/REPERTORIO/images/og-preview.svg">
 <style>
-  /* Fontes carregadas via <link> no head (Space Grotesk + Inter).
+  /* Fontes carregadas via <link> no head (Space Grotesk + Manrope).
      As antigas eram base64 placeholder que nunca resolvia. */
 
   :root {
@@ -45,8 +45,8 @@
     --overlay: rgba(3,4,5,0.82);
     --depth-1: #0B0D0F;
     --depth-2: #050607;
-    --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
-    --display: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
+    --sans: 'Manrope', -apple-system, 'Segoe UI', sans-serif;
+    --display: 'Space Grotesk', 'Manrope', -apple-system, sans-serif;
     /* display gigante e condensada (papel da Tusker Grotesk na referencia) */
     --mega: 'Anton', 'Arial Narrow', 'Space Grotesk', sans-serif;
     --persp: 1400px;
@@ -110,7 +110,11 @@
 
   html { scroll-behavior: smooth; }
 
-  html { overflow-x: hidden; }
+  /* NAO colocar overflow-x: hidden no <html>: o navegador computa o
+     overflow-y como `auto` junto, o <html> vira o container de rolagem e
+     todo `position: sticky` descendente (a barra do topo) para de grudar.
+     O corte horizontal fica so no <body>, que resolve o mesmo problema
+     sem quebrar o sticky. */
 
   /* ---------- Smooth theme crossfade ----------
      Applied only while switching (class added by JS), so normal hover
@@ -354,6 +358,23 @@
     z-index: 100;
     background: color-mix(in srgb, var(--bg) 78%, transparent);
     backdrop-filter: blur(10px);
+    /* rolando para baixo a barra sai de cena; rolando para cima ela volta
+       (classe .header-oculto pelo JS). Transform em vez de top: nao
+       dispara layout, so composicao. */
+    transition: transform 0.32s cubic-bezier(.2,.8,.2,1);
+    will-change: transform;
+  }
+
+  header.site.header-oculto { transform: translateY(-100%); }
+
+  /* com o menu aberto ou um modal/case em tela cheia a barra nunca some —
+     o botao de fechar mora nela */
+  body.menu-open header.site,
+  body.case-open header.site { transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    header.site { transition: none; }
+    header.site.header-oculto { transform: none; }
   }
 
   header.site::after {
@@ -950,8 +971,12 @@
     background: color-mix(in srgb, var(--bg) 88%, transparent);
   }
 
-  /* todo o conteudo do site fica acima da camada de fundo */
-  header.site, main, footer, .marquee { position: relative; z-index: 2; }
+  /* todo o conteudo do site fica acima da camada de fundo.
+     O header fica FORA desta lista de proposito: ele e position:sticky
+     (ver regra header.site acima) e um `position: relative` aqui — mesma
+     especificidade, mas declarado depois — anulava o sticky e fazia a
+     barra rolar junto com a pagina em vez de grudar no topo. */
+  main, footer, .marquee { position: relative; z-index: 2; }
 
   @media (max-width: 819px) {
     /* no celular a arte panoramica fica minuscula com contain — cover
@@ -1135,8 +1160,15 @@
   section.block.about {
     position: relative;
     isolation: isolate;
+    /* sangria ate a borda da tela. `50vw` inclui a largura da barra de
+       rolagem, mas o conteudo nao — entao num viewport com barra visivel a
+       secao estoura ~6px de cada lado e faz o <html> rolar na horizontal
+       (o `overflow-x: hidden` do body nao segura isso, porque quem rola e o
+       <html>). O overflow abaixo corta a propria sangria e resolve na raiz,
+       sem depender de esconder o sintoma la em cima. */
     margin: 0 calc(50% - 50vw);
     padding: 72px calc(50vw - 50%) 96px;
+    overflow-x: clip;
     color: #F2F3F5;
   }
   /* camada de fundo em <img> real (nao background-image): so uma tag <img>
@@ -1152,17 +1184,41 @@
     height: 100%;
     object-fit: cover;
     object-position: center 30%;
-    filter: saturate(0.9);
+    /* a arte e o ponto da secao: satura de volta em vez de lavar */
+    filter: saturate(1.05) contrast(1.02);
   }
+  /* Veu leve o suficiente para a pintura aparecer. O contraste do texto NAO
+     vem daqui (isso exigiria cobrir a arte toda) — vem do gradiente lateral
+     abaixo, que escurece so a faixa onde a coluna de texto mora. */
   section.block.about::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, rgba(6,7,9,0.82) 0%, rgba(6,7,9,0.9) 55%, rgba(6,7,9,0.96) 100%);
+    background: linear-gradient(180deg, rgba(6,7,9,0.34) 0%, rgba(6,7,9,0.42) 55%, rgba(6,7,9,0.58) 100%);
+  }
+  /* Reforco localizado: escuro na borda esquerda (titulo + paragrafo),
+     dissolvendo ate transparente antes da metade — a direita, onde fica a
+     foto do estudio, a pintura passa quase limpa. */
+  section.block.about::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, rgba(4,5,7,0.92) 0%, rgba(4,5,7,0.88) 38%, rgba(4,5,7,0.74) 52%, rgba(4,5,7,0.3) 62%, transparent 72%);
+  }
+  @media (max-width: 820px) {
+    /* coluna unica: o texto ocupa a largura toda, entao o reforco tem que
+       ser vertical (de cima para baixo), nao lateral */
+    section.block.about::before {
+      background: linear-gradient(180deg, rgba(4,5,7,0.82) 0%, rgba(4,5,7,0.74) 46%, rgba(4,5,7,0.6) 100%);
+    }
   }
   section.block.about .section-head { border-top-color: rgba(242,243,245,0.25); }
-  section.block.about .section-head .eyebrow { color: rgba(242,243,245,0.65); }
+  /* a etiqueta ja tem fundo escuro proprio (ver .section-head .eyebrow), entao
+     aqui NAO se mexe na cor do texto: o tom translucido que existia antes era
+     para a linha solta sobre a pintura, e sobre a pilula deixava a letra mais
+     fraca do que precisa */
   section.block.about .section-head .eyebrow b { color: var(--accent); }
   section.block.about .section-head h2,
   section.block.about .about-text p { color: #F2F3F5; }
@@ -1422,16 +1478,28 @@
     border-top: 1px solid var(--rule);
   }
 
+  /* Etiqueta escura, encolhida ao conteudo: o numero e a palavra vivem
+     dentro de uma pilula solida em vez de correrem soltos sobre o fundo
+     vivo. Resolve o contraste (a cor do fundo muda enquanto a pessoa rola,
+     entao texto solto ali nunca tem leitura garantida) e da a esta linha o
+     peso de rotulo que ela nao tinha. */
   .section-head .eyebrow {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
+    /* separa o "07" da palavra — sem isso sai "07CONTATO" grudado */
+    gap: 10px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #12161A;
+    border: 1px solid rgba(255,255,255,0.10);
     font-family: var(--sans);
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    color: #E8EBEE;
     margin: 0 0 18px;
   }
 
@@ -1492,12 +1560,16 @@
 
   /* ---------- Skills ---------- */
 
-  .skills-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; perspective: 900px; }
+  .skills-cards { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 24px; perspective: 900px; }
 
   .skill-box {
     position: relative;
     width: 128px;
-    aspect-ratio: 1;
+    /* altura fixa, nao aspect-ratio: nomes de duas linhas ("DaVinci
+       Resolve", "Python / Flask") faziam o card crescer e a fila ficava
+       com cartoes de alturas diferentes */
+    height: 128px;
+    flex: 0 0 auto;
     background: var(--card);
     border: 1px solid var(--border);
     border-top-left-radius: 28px;
@@ -1750,6 +1822,41 @@
 
   /* ---------- Contacts ---------- */
 
+  /* ---------- Contato: faixa escura de largura total ----------
+     A secao inteira recebe fundo proprio, em vez de correr sobre o fundo
+     vivo. Motivo: ali embaixo o fluido ja esta escurecido e passa por varias
+     manchas de cor, entao o texto (rotulos, e-mail, @) nunca tinha o mesmo
+     contraste em toda a largura — em parte da tela ficava ruim de ler. Com a
+     faixa, o contraste e o mesmo do primeiro ao ultimo item.
+     Mesmo padrao ja usado em `section.block.about`, inclusive a sangria com
+     `overflow-x: clip` para nao gerar rolagem horizontal (ver o comentario
+     la sobre 50vw x barra de rolagem). */
+  section.block#contatos {
+    position: relative;
+    isolation: isolate;
+    margin: 0 calc(50% - 50vw);
+    padding: 72px calc(50vw - 50%) 84px;
+    overflow-x: clip;
+    background: linear-gradient(180deg, #0C1013 0%, #0A0E11 100%);
+    color: #F2F3F5;
+  }
+  /* a faixa e escura nos dois temas, entao o conteudo tem cor fixa aqui */
+  section.block#contatos .section-head { border-top-color: rgba(242,243,245,0.18); }
+  /* a etiqueta escura sumiria sobre a faixa escura — aqui ela vira contorno
+     vazado, que le como rotulo sem competir com o titulo */
+  section.block#contatos .section-head .eyebrow {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.18);
+  }
+  section.block#contatos h2 { color: #F5F7F8; }
+  section.block#contatos .contact-icon .label { color: #F2F3F5; }
+  section.block#contatos .contact-icon .value { color: #AEB6BD; }
+  /* o circulo do icone precisa se destacar da faixa, nao sumir nela */
+  section.block#contatos .contact-icon .box {
+    background: #151A1F;
+    border-color: rgba(255,255,255,0.12);
+  }
+
   .contacts-icons {
     display: flex;
     flex-wrap: wrap;
@@ -1925,9 +2032,31 @@
     height: 56%;
     filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
   }
-  .skill-modal-badge.has-icon:not(.icon-mono) {
+  .skill-modal-badge.has-icon:not(.icon-mono):not(.icon-wide):not(.icon-photo) {
     filter: drop-shadow(0 14px 30px color-mix(in srgb, var(--skill-color, var(--accent)) 45%, transparent));
   }
+
+  /* logo horizontal (grid + palavra ao lado, ex. vMix): nao cabe num
+     quadrado — vira faixa larga sobre o fundo da marca */
+  .skill-modal-badge.icon-wide {
+    width: 100%;
+    max-width: 260px;
+    aspect-ratio: 16 / 7;
+    border-radius: 18px;
+    padding: 0 22px;
+    background: linear-gradient(155deg, color-mix(in srgb, var(--skill-color, var(--accent)) 92%, white 8%), color-mix(in srgb, var(--skill-color, var(--accent)) 68%, black 32%));
+    box-shadow: 0 18px 42px -12px color-mix(in srgb, var(--skill-color, var(--accent)) 65%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+  .skill-modal-badge.icon-wide img { object-fit: contain; }
+
+  /* foto/print real (nao logo): preenche o badge inteiro */
+  .skill-modal-badge.icon-photo {
+    background: none;
+    box-shadow: 0 18px 42px -14px rgba(0,0,0,0.45);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .skill-modal-badge.icon-photo img { object-fit: cover; }
 
   #skillModalName {
     font-family: var(--display);
@@ -1942,7 +2071,15 @@
 
   footer { padding: 48px 0 60px; border-top: 1px solid var(--border); }
   .footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .footer-inner p { font-size: 0.82rem; color: var(--text-faint); margin: 0; }
+  /* Esta linha vive no ponto mais escuro da pagina (o fundo fecha conforme
+     a pessoa desce), entao precisa de tom proprio: --text-faint (#8B939A)
+     media 1.19:1 e --text-dim (#515A5F) ficava em 4.44:1 no mobile, ambos
+     abaixo do minimo AA de 4.5:1. Medido em 6.0:1+ nas duas larguras. */
+  .footer-inner p { font-size: 0.82rem; color: #414A4F; margin: 0; }
+  /* No escuro o --text-dim (#8A9099) ficava em 4.40:1 sobre a mancha
+     turquesa do fundo vivo — a um passo de AA. Um tom mais claro so aqui
+     resolve sem mexer no token, que serve bem no resto do site. */
+  :root[data-theme="dark"] .footer-inner p { color: #A6ADB5; }
 
   /* ---------- Edit mode ---------- */
 
@@ -2160,7 +2297,11 @@
      translucido atras separa a letra da cor em movimento sem virar caixa
      solida. O titulo do hero fica de fora: grande e com gradiente, ja tem
      contraste de sobra. */
-  .block:not(.about) .section-head p,
+  /* O `:not(.eyebrow)` importa: sem ele esta regra pegava tambem a linha
+     "07 CONTATO", e o `display: block` daqui anulava o `display: flex` do
+     .eyebrow — matando junto o `gap` que separa o numero da palavra (ficava
+     "07CONTATO", grudado). O eyebrow tem painel proprio logo abaixo. */
+  .block:not(.about) .section-head p:not(.eyebrow),
   .tl-item p {
     position: relative;
     z-index: 1;
@@ -2197,6 +2338,21 @@
     color: #FFFFFF;
     background: rgba(5, 6, 8, 0.52);
     box-shadow: 0 1px 18px rgba(0,0,0,0.35);
+  }
+
+  /* Dentro da faixa escura de Contato os paineis translucidos acima nao
+     fazem sentido: eles existem para separar a letra do fundo VIVO, e ali o
+     fundo ja e solido. Mantidos, viravam pilulas claras soltas em volta de
+     cada e-mail/@ — ruido, nao leitura. O contraste nessa faixa vem da
+     propria cor do texto (definida junto com a faixa, mais acima). */
+  section.block#contatos .contact-icon .value,
+  :root[data-theme="dark"] section.block#contatos .contact-icon .value {
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    color: #AEB6BD;
   }
 
   /* ================= Frentes de atuacao (audiovisual) =================
@@ -2869,8 +3025,8 @@
 
         <figure class="hero-portrait">
           <picture>
-            <source srcset="images/retrato-recorte.webp" type="image/webp">
-            <img src="images/retrato-recorte.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="1024" height="1507" fetchpriority="high">
+            <source type="image/webp" srcset="images/retrato-recorte-sm.webp 1x, images/retrato-recorte-md.webp 2x">
+            <img src="images/retrato-recorte-sm.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="520" height="765" fetchpriority="high" decoding="async">
           </picture>
           <figcaption><i class="live-dot"></i>disponível para novos projetos</figcaption>
         </figure>
@@ -2910,8 +3066,9 @@
 
         <figure class="about-figure">
           <picture>
-            <source srcset="images/estudio.webp" type="image/webp">
-            <img loading="lazy" src="images/estudio.jpg" alt="Marcos Paulo em seu estúdio, com telas de código, timeline de vídeo, mesa de som e câmera" width="1600" height="1066" onerror="this.closest('.about-figure').remove();">
+            <source type="image/webp" srcset="images/estudio-sm.webp 1x, images/estudio-md.webp 2x">
+            <source type="image/jpeg" srcset="images/estudio-sm.jpg 1x, images/estudio-md.jpg 2x">
+            <img loading="lazy" decoding="async" src="images/estudio-sm.jpg" alt="Marcos Paulo em seu estúdio, com telas de código, timeline de vídeo, mesa de som e câmera" width="540" height="360" onerror="this.closest('.about-figure').remove();">
           </picture>
         </figure>
       </div>
@@ -2928,7 +3085,7 @@
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Premiere Pro" data-skill-mark="Pr" data-skill-color="#EA77FF" data-skill-icon="images/tools/premiere.svg" data-skill-desc="Edição de vídeo — corte, cor e finalização da maior parte do meu material audiovisual."><span class="mark">Pr</span><p>Premiere Pro</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="DaVinci Resolve" data-skill-mark="Dv" data-skill-color="#3F5CDB" data-skill-icon="images/tools/davinciresolve.svg" data-skill-icon-mono="1" data-skill-desc="Edição e correção de cor quando o projeto pede um grading mais fino."><span class="mark">Dv</span><p>DaVinci Resolve</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="After Effects" data-skill-mark="Ae" data-skill-color="#9999FF" data-skill-icon="images/tools/aftereffects.svg" data-skill-desc="Motion graphics e animação para vinhetas, títulos e peças de anúncio."><span class="mark">Ae</span><p>After Effects</p></div>
-        <div class="skill-box" tabindex="0" role="button" data-skill-name="vMix" data-skill-mark="vM" data-skill-color="#00A9E0" data-skill-desc="Produção e switching ao vivo — eventos, cultos e podcasts, incluindo o vídeo com Libras."><span class="mark">vM</span><p>vMix</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="vMix" data-skill-mark="vM" data-skill-color="#2C7BC0" data-skill-icon="images/tools/vmix.png" data-skill-icon-wide="1" data-skill-desc="Produção e switching ao vivo — eventos, cultos e podcasts, incluindo o vídeo com Libras."><span class="mark">vM</span><p>vMix</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Blackmagic ATEM" data-skill-mark="At" data-skill-color="#E4141A" data-skill-icon="images/tools/blackmagic.svg" data-skill-icon-mono="1" data-skill-desc="Mesa de corte física para operação de câmeras em transmissão ao vivo."><span class="mark">At</span><p>Blackmagic ATEM</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Soundcraft Ui24R" data-skill-mark="Ui" data-skill-color="#00B2A9" data-skill-desc="Mesa de som digital — mixagem ao vivo e monitor individual por músico."><span class="mark">Ui</span><p>Soundcraft UI24R</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Stream Deck" data-skill-mark="Sd" data-skill-color="#F5A623" data-skill-icon="images/tools/elgato.svg" data-skill-icon-mono="1" data-skill-desc="Automação de cenas e atalhos durante a operação ao vivo."><span class="mark">Sd</span><p>Stream Deck</p></div>
@@ -2954,7 +3111,7 @@
         <article class="work-card" data-case="automacao-transmissao" data-cursor-label="Ver case" data-modal-title="Automação de transmissão multi-PC" data-modal-desc="Sistema local que inicia uma transmissão ao vivo com um clique, abrindo Holyrics, Lumikit e vMix simultaneamente em 3 computadores pela rede local. Backend em Python/Flask com um painel web instalável como PWA — nasceu direto da experiência operando transmissões ao vivo." data-modal-meta="2026 · Projeto pessoal">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/automacao-transmissao.jpg" alt="Automação de transmissão multi-PC" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <picture><source type="image/webp" srcset="images/automacao-transmissao-sm.webp 1x, images/automacao-transmissao-md.webp 2x"><source type="image/jpeg" srcset="images/automacao-transmissao-sm.jpg 1x, images/automacao-transmissao-md.jpg 2x"><img class="cover-photo" loading="lazy" decoding="async" src="images/automacao-transmissao-sm.jpg" alt="Automação de transmissão multi-PC" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();"></picture>
               <span class="badge">Automação</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="9" y="14" width="7" height="6" rx="1"/><rect x="15" y="4" width="6" height="6" rx="1"/><path d="M6 10v4h9M18 10v4"/></svg>
@@ -2978,7 +3135,7 @@
         <article class="work-card" data-case="mix-de-fone" data-cursor-label="Ver case" data-modal-title="Mix de Fone — controle individual via Ui24R" data-modal-desc="Interface web que permite músicos controlarem seus próprios fones (aux) em uma mesa Soundcraft Ui24R, sem expor os controles completos da mesa. Servidor Node.js mantém conexão única com a mesa via WebSocket, com monitor em tempo real e chat integrado para o operador de House Mix." data-modal-meta="2026 · Projeto pessoal">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/mix-de-fone-ui24r.jpg" alt="Mix de Fone — controle via Ui24R" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <picture><source type="image/webp" srcset="images/mix-de-fone-ui24r-sm.webp 1x, images/mix-de-fone-ui24r-md.webp 2x"><source type="image/jpeg" srcset="images/mix-de-fone-ui24r-sm.jpg 1x, images/mix-de-fone-ui24r-md.jpg 2x"><img class="cover-photo" loading="lazy" decoding="async" src="images/mix-de-fone-ui24r-sm.jpg" alt="Mix de Fone — controle via Ui24R" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();"></picture>
               <span class="badge">Web app</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
@@ -3002,7 +3159,7 @@
         <article class="work-card" data-case="elo-ecosystem" data-cursor-label="Ver case" data-modal-title="Sistema ELO Ecosystem" data-modal-desc="O sistema que roda por trás de tudo na ELO Editora e na PeraBook: o painel que a equipe usa para cadastrar e gerenciar livros, o app onde os leitores compram e leem os livros digitais, e os sites das duas marcas. Desenvolvido em equipe com Dalila Rodrigues e Vander Loto — atuo no desenvolvimento e na manutenção, corrigindo problemas e construindo novas telas e funcionalidades." data-modal-meta="2026 — atual · ELO Editora">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/elo-ecosystem.jpg" alt="Sistema ELO Ecosystem" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <picture><source type="image/webp" srcset="images/elo-ecosystem-sm.webp 1x, images/elo-ecosystem-md.webp 2x"><source type="image/jpeg" srcset="images/elo-ecosystem-sm.jpg 1x, images/elo-ecosystem-md.jpg 2x"><img class="cover-photo" loading="lazy" decoding="async" src="images/elo-ecosystem-sm.jpg" alt="Sistema ELO Ecosystem" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();"></picture>
               <span class="badge">Sistema</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4M17.5 11v4M6.5 11v4"/></svg>
@@ -3064,7 +3221,7 @@
         <div class="av-pilares">
           <article class="av-pilar">
             <div class="av-arte">
-              <img loading="lazy" decoding="async" width="4" height="3" src="images/av-libras.jpg" alt="">
+              <picture><source type="image/webp" srcset="images/av-libras-sm.webp 1x, images/av-libras-md.webp 2x"><source type="image/jpeg" srcset="images/av-libras-sm.jpg 1x, images/av-libras-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/av-libras-sm.jpg" alt=""></picture>
             </div>
             <div class="av-txt">
               <p class="av-tag">Acessibilidade</p>
@@ -3077,7 +3234,7 @@
 
           <article class="av-pilar">
             <div class="av-arte">
-              <img loading="lazy" decoding="async" width="4" height="3" src="images/av-radionovela.jpg" alt="">
+              <picture><source type="image/webp" srcset="images/av-radionovela-sm.webp 1x, images/av-radionovela-md.webp 2x"><source type="image/jpeg" srcset="images/av-radionovela-sm.jpg 1x, images/av-radionovela-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/av-radionovela-sm.jpg" alt=""></picture>
             </div>
             <div class="av-txt">
               <p class="av-tag">Design sonoro</p>
@@ -3090,7 +3247,7 @@
 
           <article class="av-pilar">
             <div class="av-arte">
-              <img loading="lazy" decoding="async" width="4" height="3" src="images/av-aovivo.jpg" alt="">
+              <picture><source type="image/webp" srcset="images/av-aovivo-sm.webp 1x, images/av-aovivo-md.webp 2x"><source type="image/jpeg" srcset="images/av-aovivo-sm.jpg 1x, images/av-aovivo-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/av-aovivo-sm.jpg" alt=""></picture>
             </div>
             <div class="av-txt">
               <p class="av-tag">Ao vivo</p>
@@ -3730,8 +3887,22 @@
         <p>Onde as duas frentes se encontram: uso inteligência artificial como ferramenta de produção real, não como novidade.</p>
       </div>
 
+      <!-- A foto e exibida a ~300x400, mas o arquivo original tem 1126x2000
+           (19x mais pixels que o necessario). Decodificar 2,2 megapixels no
+           exato momento em que a secao entra na tela era o que travava o
+           scroll aqui. As variantes abaixo (-sm 1x, -md 2x retina) cortam de
+           247 KB para 27 KB no caso comum. O original fica no repo como
+           master, mas nao e mais servido.
+           Ao trocar esta foto: gerar as 4 variantes de novo, nao apontar
+           direto para o arquivo grande. -->
       <figure class="section-figure">
-        <img loading="lazy" decoding="async" src="images/robo-ia-v2.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="1126" height="2000" onerror="this.closest('.section-figure').remove();">
+        <picture>
+          <source type="image/webp"
+                  srcset="images/robo-ia-v2-sm.webp 1x, images/robo-ia-v2-md.webp 2x">
+          <source type="image/jpeg"
+                  srcset="images/robo-ia-v2-sm.jpg 1x, images/robo-ia-v2-md.jpg 2x">
+          <img loading="lazy" decoding="async" src="images/robo-ia-v2-sm.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="338" height="600" onerror="this.closest('.section-figure').remove();">
+        </picture>
         <figcaption>Uso IA como ferramenta de produção — audiodescrição, narração e tratamento visual entram no fluxo real de trabalho, não como demonstração.</figcaption>
       </figure>
 
@@ -3740,7 +3911,7 @@
       <div class="av-resumo reveal">
         <div class="av-pilares">
           <article class="av-pilar">
-            <div class="av-arte"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-audiodescricao.jpg" alt=""></div>
+            <div class="av-arte"><picture><source type="image/webp" srcset="images/ia-audiodescricao-sm.webp 1x, images/ia-audiodescricao-md.webp 2x"><source type="image/jpeg" srcset="images/ia-audiodescricao-sm.jpg 1x, images/ia-audiodescricao-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-audiodescricao-sm.jpg" alt=""></picture></div>
             <div class="av-txt">
               <p class="av-tag">Acessibilidade</p>
               <h4>Audiodescrição com IA</h4>
@@ -3751,7 +3922,7 @@
           </article>
 
           <article class="av-pilar">
-            <div class="av-arte"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-voz.jpg" alt=""></div>
+            <div class="av-arte"><picture><source type="image/webp" srcset="images/ia-voz-sm.webp 1x, images/ia-voz-md.webp 2x"><source type="image/jpeg" srcset="images/ia-voz-sm.jpg 1x, images/ia-voz-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-voz-sm.jpg" alt=""></picture></div>
             <div class="av-txt">
               <p class="av-tag">Voz sintética</p>
               <h4>Narração e tratamento de voz</h4>
@@ -3762,7 +3933,7 @@
           </article>
 
           <article class="av-pilar">
-            <div class="av-arte"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-roteiro.jpg" alt=""></div>
+            <div class="av-arte"><picture><source type="image/webp" srcset="images/ia-roteiro-sm.webp 1x, images/ia-roteiro-md.webp 2x"><source type="image/jpeg" srcset="images/ia-roteiro-sm.jpg 1x, images/ia-roteiro-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-roteiro-sm.jpg" alt=""></picture></div>
             <div class="av-txt">
               <p class="av-tag">Produção</p>
               <h4>Roteiro e tratamento visual</h4>
@@ -3792,7 +3963,13 @@
             Ver foto do time
           </button>
           <figure class="tl-figure" id="tlFotoEquipe"><div>
-            <img loading="lazy" src="images/equipe-v2.jpg" alt="Equipe de tecnologia reunida no escritório" width="720" height="1280" onerror="this.closest('.tl-figure').remove();">
+            <!-- mesmo motivo da foto do robo acima: exibida a ~220x391, o
+                 original tinha 720x1280. Variantes -sm/-md, 138 KB -> 18 KB -->
+            <picture>
+              <source type="image/webp" srcset="images/equipe-v2-sm.webp 1x, images/equipe-v2-md.webp 2x">
+              <source type="image/jpeg" srcset="images/equipe-v2-sm.jpg 1x, images/equipe-v2-md.jpg 2x">
+              <img loading="lazy" decoding="async" src="images/equipe-v2-sm.jpg" alt="Equipe de tecnologia reunida no escritório" width="247" height="440" onerror="this.closest('.tl-figure').remove();">
+            </picture>
             <figcaption>Time de tecnologia da ELO Editora — onde a transição para desenvolvimento deixou de ser plano e virou prática diária.</figcaption>
           </div></figure>
         </div>
@@ -4254,6 +4431,50 @@
       update();
     })();
 
+    /* ---------- Header que some descendo e volta subindo ----------
+       Padrao de leitura: enquanto o usuario desce, a barra sai da frente;
+       no primeiro gesto para cima ela reaparece, entao o menu e o botao de
+       tema estao sempre a um movimento de distancia. */
+
+    (function () {
+      var header = document.querySelector('header.site');
+      if (!header) return;
+
+      /* margem de tolerancia: rolagem menor que isso nao troca o estado,
+         senao a barra fica piscando com o tranco do trackpad / do "scroll
+         elastico" do celular */
+      var LIMIAR = 6;
+      /* enquanto o topo esta a menos disso, a barra nunca se esconde */
+      var ZONA_TOPO = 90;
+
+      var ultimoY = window.scrollY;
+      var ticking = false;
+
+      var update = function () {
+        var y = window.scrollY;
+        var delta = y - ultimoY;
+
+        if (Math.abs(delta) > LIMIAR) {
+          if (y <= ZONA_TOPO || delta < 0) {
+            header.classList.remove('header-oculto');
+          } else {
+            header.classList.add('header-oculto');
+          }
+          ultimoY = y;
+        }
+        ticking = false;
+      };
+
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      }, { passive: true });
+
+      /* teclado e links de ancora tambem devem trazer a barra de volta */
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Home' || e.key === 'Escape') header.classList.remove('header-oculto');
+      });
+    })();
+
     /* ---------- Motor de animacao de scroll (GSAP + ScrollTrigger) ----------
 
        Regra de ouro depois do bug do IntersectionObserver: NADA aqui pode
@@ -4636,9 +4857,13 @@
     function openSkillModal(box) {
       var iconSrc = box.getAttribute('data-skill-icon');
       var isMono = box.getAttribute('data-skill-icon-mono') === '1';
+      var isWide = box.getAttribute('data-skill-icon-wide') === '1';
+      var isPhoto = box.getAttribute('data-skill-icon-photo') === '1';
       skillModalBadge.style.setProperty('--skill-color', box.getAttribute('data-skill-color') || '');
       skillModalBadge.classList.toggle('has-icon', !!iconSrc);
       skillModalBadge.classList.toggle('icon-mono', !!iconSrc && isMono);
+      skillModalBadge.classList.toggle('icon-wide', !!iconSrc && isWide);
+      skillModalBadge.classList.toggle('icon-photo', !!iconSrc && isPhoto);
       skillModalBadge.innerHTML = iconSrc
         ? '<img src="' + iconSrc + '" alt="" loading="lazy">'
         : '<span id="skillModalMark"></span>';
@@ -4695,6 +4920,8 @@
         'uniform vec3  uCorA;',   /* turquesa da identidade */
         'uniform vec3  uCorB;',   /* azul da identidade */
         'uniform float uForca;',  /* quanto a cor cobre o fundo */
+        'uniform float uCircuito;', /* 0 = so o fluido; 1 = trilhas no auge */
+        'uniform vec3  uTrilha;',  /* cor das trilhas de circuito */
 
         /* ruido de valor + fBm — base da textura organica */
         'float hash(vec2 v){ return fract(sin(dot(v, vec2(127.1, 311.7))) * 43758.5453123); }',
@@ -4713,6 +4940,80 @@
         '    amp *= 0.5;',
         '  }',
         '  return s;',
+        '}',
+
+        /* ---------- Trilhas de circuito ----------
+           Desenho tecnico que emerge conforme o fundo escurece: uma grade de
+           celulas onde cada celula sorteia UMA trilha (horizontal, vertical
+           ou uma quina) e, as vezes, um no soldado no ponto de encontro.
+           E o mesmo vocabulario visual de uma placa / diagrama de arquitetura
+           — nao "chuva de Matrix", que seria o clichê obvio de programacao.
+
+           Tudo sai do `hash` da celula: mesmo lugar, mesmo desenho sempre, o
+           que evita cintilar entre quadros. So o pulso que corre pela trilha
+           usa uTime. */
+        'float trilhas(vec2 uv, float aspecto, float t){',
+        /* Densidade e espessura calibradas para a resolucao REAL do canvas,
+           que e menor que a tela: o buffer roda a ESCALA (0.4) e depois e
+           esticado por CSS. Com grade fina (9.0) e trilha de 0.018 o desenho
+           caia abaixo de 1 pixel no buffer e virava borrao ao esticar —
+           invisivel no uso real, mesmo "existindo" no shader.
+           Ao mexer aqui: conferir no CELULAR, nao so no desktop, porque e la
+           que o buffer e menor (canvas ~156px de largura num viewport 390). */
+        '  vec2 g = uv * vec2(aspecto, 1.0) * 5.0;',   /* grade mais larga */
+        '  vec2 cel = floor(g);',
+        '  vec2 f = fract(g) - 0.5;',                  /* -0.5..0.5 dentro da celula */
+        '  float r = hash(cel);',
+        '  float linha = 0.0;',
+        '  float esp = 0.055;',                        /* espessura da trilha */
+
+        /* ~35% das celulas ficam vazias: respiro, senao vira textura cheia */
+        '  if (r < 0.35) return 0.0;',
+
+        /* Fade nas duas extremidades da celula. Sem isso a trilha termina em
+           corte reto na borda da celula — o traco "acaba do nada", com a
+           ponta dura. Com o fade ela se dissolve, e o encontro entre celulas
+           vizinhas tambem deixa de mostrar a emenda. A janela (0.5 -> 0.36)
+           e curta de proposito: dissolve so a pontinha, sem afinar o traco
+           inteiro. */
+        '  float fadeX = smoothstep(0.5, 0.36, abs(f.x));',
+        '  float fadeY = smoothstep(0.5, 0.36, abs(f.y));',
+
+        '  if (r < 0.55) {',
+        /* trilha horizontal — desvanece nas pontas esquerda/direita */
+        '    linha = smoothstep(esp, 0.0, abs(f.y)) * fadeX;',
+        '  } else if (r < 0.72) {',
+        /* trilha vertical — desvanece nas pontas de cima/baixo */
+        '    linha = smoothstep(esp, 0.0, abs(f.x)) * fadeY;',
+        '  } else {',
+        /* quina: dois bracos que se encontram no centro. O sentido da quina
+           vem de outro hash, entao as viradas nao ficam todas iguais.
+
+           O recorte de cada braco usa smoothstep, NAO step: o step corta de
+           0 para 1 num pixel so, sem antialiasing, e a ponta do braco saia
+           com a borda dura/serrilhada (a lateral era suave e a ponta nao —
+           o contraste entre as duas era o que chamava atencao). A janela de
+           `pta` faz a ponta desvanecer na mesma escala da espessura, entao
+           o traco termina com o mesmo acabamento que tem de lado. */
+        '    float s = hash(cel + 7.3) < 0.5 ? 1.0 : -1.0;',
+        '    float pta = esp * 0.9;',
+        /* cada braco recebe DOIS fades: `pta` dissolve a ponta interna (onde
+           o braco morre no centro) e fadeX/fadeY dissolvem a externa (onde
+           ele encosta na borda da celula) */
+        '    float bx = smoothstep(esp, 0.0, abs(f.y)) * smoothstep(pta, -pta, f.x * s) * fadeX;',
+        '    float by = smoothstep(esp, 0.0, abs(f.x)) * smoothstep(-pta, pta, f.y * s) * fadeY;',
+        '    linha = max(bx, by);',
+        /* no soldado na junta — cresce junto com a espessura da trilha */
+        '    float no = smoothstep(0.135, 0.075, length(f));',
+        '    linha = max(linha, no);',
+        '  }',
+
+        /* pulso: um brilho percorre a trilha, como sinal passando. Fase
+           propria por celula para nao piscarem todas juntas. */
+        '  float fase = hash(cel + 3.1) * 6.28;',
+        '  float pulso = 0.55 + 0.45 * sin(t * 1.6 + fase + (f.x + f.y) * 3.0);',
+
+        '  return linha * pulso;',
         '}',
 
         'void main(){',
@@ -4734,6 +5035,18 @@
         '  vec3 cor = uBase;',
         '  cor = mix(cor, uCorA, clamp(mA * uForca, 0.0, 1.0));',
         '  cor = mix(cor, uCorB, clamp(mB * uForca * 0.9, 0.0, 1.0));',
+
+        /* circuito por cima do fluido, so quando uCircuito sobe (ou seja, a
+           medida que a pagina escurece). O proprio ruido `n` modula a
+           intensidade: as trilhas somem dentro das massas de cor e aparecem
+           nas areas calmas, o que evita a leitura de "grade colada por cima"
+           e faz o desenho parecer parte do mesmo material. */
+        '  float c = trilhas(uv, uRes.x / uRes.y, uTime);',
+        /* a modulacao pelo ruido continua, mas com piso alto (0.7): antes ia
+           a 0.35 e apagava o desenho justamente nas areas de cor, que e onde
+           o olho estava procurando */
+        '  c *= uCircuito * (0.7 + 0.3 * smoothstep(0.75, 0.25, n));',
+        '  cor += uTrilha * c;',
 
         /* grao: tira o aspecto plastico do degrade */
         '  float g = hash(gl_FragCoord.xy + uTime) - 0.5;',
@@ -4776,8 +5089,16 @@
       var uCorA  = gl.getUniformLocation(prog, 'uCorA');
       var uCorB  = gl.getUniformLocation(prog, 'uCorB');
       var uForca = gl.getUniformLocation(prog, 'uForca');
+      var uCircuito = gl.getUniformLocation(prog, 'uCircuito');
+      var uTrilha = gl.getUniformLocation(prog, 'uTrilha');
 
-      var ESCALA = 0.4;
+      /* O canvas roda numa fracao da tela e e esticado por CSS (o fluido e
+         suave, entao ninguem nota). 0.4 bastava quando o fundo era so
+         degrade, mas as trilhas de circuito sao linhas finas: nessa escala
+         elas caiam abaixo de 1px no buffer e sumiam ao esticar. 0.6 e o
+         meio-termo — desenho legivel sem devolver o custo cheio de pintar
+         a tela inteira a cada quadro. */
+      var ESCALA = 0.6;
       function medir() {
         canvas.width  = Math.max(1, Math.round(window.innerWidth  * ESCALA));
         canvas.height = Math.max(1, Math.round(window.innerHeight * ESCALA));
@@ -4796,24 +5117,136 @@
       var t0 = Date.now();
       var timer = null;
 
+      /* ---------- Escurecimento progressivo no scroll ----------
+         A cor nao muda: e sempre a turquesa/azul da identidade. O que muda e
+         a LUZ — a pagina fecha um pouco conforme a pessoa desce.
+
+         Historico, para nao refazer o que ja foi descartado:
+         1. Paleta por secao (violeta na IA, ambar no audiovisual) — o fundo
+            mudava de cor e competia com o conteudo. Descartado.
+         2. Primeira versao deste escurecimento — ia longe demais (o rodape
+            do tema claro virava cinza medio) e derrubava o contraste do
+            texto. Descartado por isso.
+
+         Esta versao existe porque o efeito em si e bom; o problema era a
+         DOSE. O teto de cada tema abaixo foi definido medindo o contraste do
+         rodape (o ponto mais escuro da pagina, com o texto mais fraco), nao
+         a olho. */
+
+      /* Cores da identidade — as mesmas que o site sempre teve. */
+      var COR_CLARO  = { a: [0.106,0.780,0.690], b: [0.145,0.420,0.900], f: 0.62 };
+      var COR_ESCURO = { a: [0.184,0.878,0.784], b: [0.231,0.510,0.965], f: 0.55 };
+
+      /* Base de cada tema — o #F3F5F4 / #08090B do CSS. */
+      var BASE_CLARO  = [0.953, 0.961, 0.957];
+      var BASE_ESCURO = [0.031, 0.035, 0.043];
+
+      /* Para onde a base caminha ao escurecer. NAO e preto: no tema claro o
+         alvo e um cinza-azulado ainda claro, senao o texto escuro do site
+         perde apoio (foi o erro da primeira versao). No escuro pode ir mais
+         fundo, porque la o texto e claro e ganha contraste ao escurecer. */
+      var ALVO_CLARO  = [0.780, 0.800, 0.812];
+      var ALVO_ESCURO = [0.012, 0.014, 0.019];
+
+      /* Teto do escurecimento, por tema — quanto da distancia ate o alvo a
+         pagina percorre do topo ao rodape. Medido, nao estimado: com o valor
+         do tema claro acima de ~0.55 o contraste do rodape cai abaixo dos
+         4.5:1 exigidos por WCAG AA. Ao mexer, medir de novo. */
+      var ESCURECE_MAX_CLARO  = 0.5;
+      var ESCURECE_MAX_ESCURO = 0.85;
+
+      /* Intensidade do circuito NO AUGE — no rodape, com a pagina ja fechada.
+         As trilhas acompanham o escurecimento (ver uCircuito em quadro()):
+         a pagina abre limpa, so com o fluido, e o desenho vai surgindo
+         conforme a pessoa desce. Acima de ~0.75 as trilhas comecam a
+         disputar atencao com o texto em vez de ficarem no fundo. */
+      var CIRCUITO_MAX = 0.62;
+
+      /* progresso do scroll: 0 no topo da pagina, 1 no fim */
+      function progressoScroll() {
+        var alcance = document.documentElement.scrollHeight - window.innerHeight;
+        if (alcance <= 0) return 0;
+        var p = window.scrollY / alcance;
+        return p < 0 ? 0 : (p > 1 ? 1 : p);
+      }
+
+      var escuroAtual = 0, escuroAlvo = 0;
+
+      function lerAlvo() {
+        /* curva suave: o topo segura a luz por mais tempo e o fechamento
+           acontece no miolo, em vez de escurecer desde o primeiro pixel */
+        var p = progressoScroll();
+        escuroAlvo = p * p * (3.0 - 2.0 * p);
+      }
+      lerAlvo();
+      escuroAtual = escuroAlvo;   /* sem fade no load: ja comeca no lugar */
+
+      /* aproxima o valor atual do alvo a cada quadro — e isso que faz a
+         mudanca ser um fade percebido, e nao o fundo colado no scroll */
+      function misturar() {
+        escuroAtual += (escuroAlvo - escuroAtual) * 0.06;
+      }
+
+      window.addEventListener('scroll', lerAlvo, { passive: true });
+      window.addEventListener('resize', lerAlvo, { passive: true });
+
       function quadro() {
         gl.uniform2f(uRes, canvas.width, canvas.height);
         gl.uniform1f(uTime, (Date.now() - t0) / 1000);
 
+        misturar();
+
+        var paleta = claro ? COR_CLARO : COR_ESCURO;
+        var base   = claro ? BASE_CLARO : BASE_ESCURO;
+        var alvo   = claro ? ALVO_CLARO : ALVO_ESCURO;
+        var k = escuroAtual * (claro ? ESCURECE_MAX_CLARO : ESCURECE_MAX_ESCURO);
+
+        /* a base caminha em direcao ao alvo escuro do tema */
+        gl.uniform3f(uBase,
+          base[0] + (alvo[0] - base[0]) * k,
+          base[1] + (alvo[1] - base[1]) * k,
+          base[2] + (alvo[2] - base[2]) * k);
+
+        /* As cores acompanham, senao ficariam boiando acesas sobre um fundo
+           apagado (vira neon, nao anoitecer).
+
+           O fator e maior no tema escuro por causa do `mix-blend-mode:
+           screen` do canvas: sob screen o resultado final e dominado pela
+           COR (a base quase preta contribui pouco), entao baixar so a base
+           nao escurece nada — chegava a clarear, porque as manchas de cor
+           continuavam fortes sobre um fundo que ja era escuro. Puxar a cor
+           para baixo e o que de fato fecha a tela nesse tema. */
+        var kc = 1.0 - k * (claro ? 0.42 : 0.72);
+        gl.uniform3f(uCorA, paleta.a[0] * kc, paleta.a[1] * kc, paleta.a[2] * kc);
+        gl.uniform3f(uCorB, paleta.b[0] * kc, paleta.b[1] * kc, paleta.b[2] * kc);
+        gl.uniform1f(uForca, paleta.f);
+
+        /* As trilhas surgem junto com o escurecimento: invisiveis no topo
+           (a pagina abre limpa) e no auge la embaixo, onde o fundo ja esta
+           fechado e aguenta o desenho sem competir com o texto. Usa
+           `escuroAtual` — e nao o progresso cru do scroll — para o circuito
+           entrar no mesmo fade suave do resto, em vez de colar no scroll. */
+        gl.uniform1f(uCircuito, escuroAtual * CIRCUITO_MAX);
+
+        /* A trilha SEMPRE escurece (valor negativo), nos dois temas.
+
+           No tema escuro o canvas usa `mix-blend-mode: screen` (ver o CSS de
+           #bgCanvas). O screen clareia — resultado = 1-(1-a)(1-b) — entao
+           trilha clara sobre fundo que ja tem cor e matematicamente engolida:
+           o desenho rodava, os uniforms chegavam certos, e nada aparecia na
+           tela. Escurecer cria contraste que o screen preserva, e o resultado
+           le como trilha vazada no material (que e o que se quer de uma
+           placa de circuito). */
         if (claro) {
-          /* base: a cor de fundo do tema claro (#F3F5F4) */
-          gl.uniform3f(uBase, 0.953, 0.961, 0.957);
-          /* turquesa e azul da identidade. Sobre fundo claro a cor precisa
-             ser saturada para aparecer, mas o texto preto corre por cima —
-             por isso uForca segura a cobertura em vez de clarear a cor. */
-          gl.uniform3f(uCorA, 0.106, 0.780, 0.690);
-          gl.uniform3f(uCorB, 0.145, 0.420, 0.900);
-          gl.uniform1f(uForca, 0.62);
+          gl.uniform3f(uTrilha, -0.42, -0.36, -0.38);
         } else {
-          gl.uniform3f(uBase, 0.031, 0.035, 0.043);
-          gl.uniform3f(uCorA, 0.184, 0.878, 0.784);
-          gl.uniform3f(uCorB, 0.231, 0.510, 0.965);
-          gl.uniform1f(uForca, 0.55);
+          /* No escuro a trilha precisa de reforco a medida que a pagina
+             fecha: o `kc` acima derruba as cores em ate 72%, e a trilha
+             escura fica sem material de onde "vazar" — o desenho sumia
+             justamente no rodape, que e onde deveria estar no auge. O ganho
+             abaixo devolve o contraste na mesma proporcao em que a cor cai. */
+          var reforco = 1.0 + k * 1.9;
+          gl.uniform3f(uTrilha, -0.10 * reforco, -0.26 * reforco, -0.24 * reforco);
         }
 
         gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -4826,7 +5259,9 @@
       document.addEventListener('visibilitychange', function () {
         if (document.hidden) desligar(); else ligar();
       });
-      var obs = new MutationObserver(function () { lerTema(); quadro(); });
+      /* trocar o tema troca paleta, teto de escurecimento e cor da trilha —
+         o quadro() aqui repinta na hora, sem esperar o proximo tick */
+      var obs = new MutationObserver(function () { lerTema(); lerAlvo(); quadro(); });
       obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
       quadro();
