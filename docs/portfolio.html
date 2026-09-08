@@ -970,35 +970,26 @@
     background: transparent;
   }
 
+  /* mancha de luz radial nas cores de acento do site, sem imagem. O raio
+     do gradiente e FIXO e sempre maior que a diagonal da tela (260vmax —
+     a diagonal maxima possivel e ~141vmax), entao o stop final nunca cabe
+     dentro da viewport e a borda nunca aparece, em nenhum tamanho. O que
+     anima com o scroll (ver JS) e so a opacidade da mancha inteira — "a
+     luz acende" em vez de "a luz cresce", o que evita por construcao o
+     problema de escalar um circulo pra dentro da tela e reexpor a borda. */
   .site-plane-art {
     position: absolute;
     inset: 0;
     opacity: 0;
-  }
-
-  /* faixa vertical fina inicial — so entra quando o JS assume; sem ele fica aberto */
-  html.js-plane #planeArt1 {
-    clip-path: inset(0 49% 0 49%);
-  }
-
-  .site-plane-art img {
-    width: 100%;
-    height: 100%;
-    /* contain: a arte aparece INTEIRA, sem corte e sem zoom */
-    object-fit: contain;
-    object-position: center center;
-    filter: saturate(0.95) contrast(1.02);
-  }
-
-  /* Veu forte: a arte e clara e o titulo do hero (preto/accent) fica por
-     cima dela nesse breve momento — precisa de contraste solido, nao um
-     "toque" de escurecimento. */
-  .site-plane::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    background-image:
+      radial-gradient(circle at center,
+        color-mix(in srgb, var(--accent) 42%, transparent) 0%,
+        color-mix(in srgb, var(--accent-2) 26%, transparent) 22%,
+        color-mix(in srgb, var(--accent-2) 8%, transparent) 45%,
+        transparent 78%);
+    background-size: 260vmax 260vmax;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   /* todo o conteudo do site fica acima da camada de fundo.
@@ -1007,13 +998,6 @@
      especificidade, mas declarado depois — anulava o sticky e fazia a
      barra rolar junto com a pagina em vez de grudar no topo. */
   main, footer, .marquee { position: relative; z-index: 2; }
-
-  @media (max-width: 819px) {
-    /* no celular a arte panoramica fica minuscula com contain — cover
-       preenche melhor, e o veu sobe pro texto continuar legivel */
-    .site-plane-art img { object-fit: cover; }
-    .site-plane::after { background: color-mix(in srgb, var(--bg) 88%, transparent); }
-  }
 
   /* A faixa fica acima do hero na pilha e ganha fundo solido: se algo do
      hero (retrato/parallax) avancar, passa por tras dela, nunca por cima.
@@ -2945,12 +2929,7 @@
 <canvas id="bgCanvas" aria-hidden="true"></canvas>
 
 <div class="site-plane" id="sitePlane" aria-hidden="true">
-  <div class="site-plane-art" id="planeArt1">
-    <picture>
-      <source srcset="images/hero-bg-arte.webp" type="image/webp">
-      <img src="images/hero-bg-arte.jpg" alt="" width="2000" height="1063" loading="eager">
-    </picture>
-  </div>
+  <div class="site-plane-art" id="planeArt1"></div>
 </div>
 
 <div id="scrollProgress" aria-hidden="true"><i></i></div>
@@ -4587,55 +4566,48 @@
           });
         });
 
-        /* 8b. CORTINA DO HERO: a arte e um efeito de ENTRADA, restrito a
-               primeira tela. Ela abre como cortina de teatro (faixa vertical
-               no centro, expande pros dois lados) e some assim que o usuario
-               comeca a rolar de verdade — dali em diante o site inteiro
-               usa o fundo solido do tema, sem imagem nenhuma atras do
-               conteudo. Legibilidade de texto vence efeito visual: uma
-               ilustracao cheia de detalhe atras de paragrafos e cards
-               tornava boa parte do site dificil de ler. */
+        /* 8b. LUZ DO HERO: a mancha radial e um efeito de ENTRADA, restrito a
+               primeira tela. Ela nasce como um ponto no centro e cresce ate
+               cobrir a tela, some em fade assim que o usuario comeca a rolar
+               de verdade — dali em diante o site inteiro usa o fundo solido
+               do tema, sem nada atras do conteudo. Legibilidade de texto
+               vence efeito visual. */
         var plane = document.getElementById('sitePlane');
         var art1 = document.getElementById('planeArt1');
         if (plane && art1) {
           document.documentElement.classList.add('js-plane');
 
           /* ease-out cubico: comeca rapido e desacelera ate o fim — sem isso
-             a cortina abre na mesma velocidade do scroll o tempo todo, o que
+             a mancha cresce na mesma velocidade do scroll o tempo todo, o que
              lia como abrupto. Aplicada em cima do `t` linear (0-1), nao no
              tempo de execucao — continua 100% dirigida pelo scrollY, sem
              rAF/GSAP no meio (ver nota abaixo). */
           var easeOutCubic = function (t) { return 1 - Math.pow(1 - t, 3); };
 
-          var clipDaCortina = function (t) {
-            /* t=0 faixa fina no centro, t=1 tela cheia — inset(topo direita baixo esquerda) */
-            var suave = easeOutCubic(t);
-            var lado = 50 - 50 * suave; /* 50% -> 0%: corta simetrico dos dois lados */
-            return 'inset(0 ' + lado + '% 0 ' + lado + '%)';
-          };
-
+          /* PICO_OPACIDADE: a mancha nunca vai a 100% de opacidade propria —
+             mesmo no pico ela fica translucida, senao encobre o titulo/CTA
+             do hero por baixo. */
+          var PICO_OPACIDADE = 0.9;
           var estado = { open: 0, fade: 1 };
           var aplicar = function () {
-            art1.style.clipPath = clipDaCortina(estado.open);
-            art1.style.opacity = estado.fade;
-            /* o veu (::after) e o proprio ::after do .site-plane, que so
-               precisa existir enquanto a arte estiver visivel */
+            var intensidade = easeOutCubic(estado.open) * PICO_OPACIDADE;
+            art1.style.opacity = intensidade * estado.fade;
             plane.style.opacity = estado.fade;
           };
 
           /* A cortina e dirigida direto pelo scroll, sem GSAP.
              O `scrub` do ScrollTrigger interpola via requestAnimationFrame, e
              quando o rAF e estrangulado (aba sem composicao, economia de
-             energia) o fade nao acontece: a cortina pula de opaca para sumida
+             energia) o fade nao acontece: a mancha pula de opaca para sumida
              de uma vez. Lendo `scrollY` no proprio evento de scroll, o estado
              e sempre exato para a posicao atual, com ou sem rAF. */
           var atualizarCortina = function () {
             var h = window.innerHeight || 1;
             var p = window.scrollY / h;          /* 0 = topo, 1 = uma tela */
 
-            /* 0 -> 0.75 de tela: o losango abre */
+            /* 0 -> 0.75 de tela: a mancha cresce */
             var abertura = Math.min(1, Math.max(0, p / 0.75));
-            /* 0.85 -> 1.35 de tela: a cortina some em fade */
+            /* 0.85 -> 1.35 de tela: a mancha some em fade */
             var saida = Math.min(1, Math.max(0, (p - 0.85) / 0.5));
 
             estado.open = abertura;
@@ -4653,11 +4625,11 @@
           window.addEventListener('resize', atualizarCortina);
           atualizarCortina();
 
-          /* A cortina e um efeito de ENTRADA e so faz sentido a partir do topo.
+          /* A mancha e um efeito de ENTRADA e so faz sentido a partir do topo.
              Quando a pagina abre ja rolada — link direto para #secao, F5 no meio,
-             ou o navegador restaurando a posicao anterior — o losango ficava
-             congelado no estado fechado por cima do conteudo. Nesse caso ele e
-             descartado de uma vez, em vez de tentar animar do meio. */
+             ou o navegador restaurando a posicao anterior — ela ficava
+             congelada no estado fechado por cima do conteudo. Nesse caso ela e
+             descartada de uma vez, em vez de tentar animar do meio. */
           /* A pagina pode abrir ja rolada (link com #ancora, F5 no meio).
              `atualizarCortina` ja resolve o estado certo para qualquer
              posicao, entao basta reavaliar quando a intro liberar o scroll. */
