@@ -50,6 +50,14 @@
     --overlay: rgba(3,4,5,0.82);
     --depth-1: #0B0D0F;
     --depth-2: #050607;
+    /* Separacao de card em relacao ao fundo. O #bgCanvas anima atras de
+       tudo, entao a cor do fundo real muda o tempo todo — uma borda
+       calibrada contra --bg some quando a onda passa. A sombra resolve por
+       PROFUNDIDADE (independe da cor que estiver atras) e a borda entra so
+       como reforco. No tema escuro o card ja e mais escuro que o fundo
+       vivo, entao a sombra aqui e discreta. */
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.30), 0 4px 12px rgba(0,0,0,0.22);
+    --shadow-card-hover: 0 2px 6px rgba(0,0,0,0.34), 0 14px 32px rgba(0,0,0,0.30);
     --sans: 'Manrope', -apple-system, 'Segoe UI', sans-serif;
     --display: 'Space Grotesk', 'Manrope', -apple-system, sans-serif;
     /* display gigante e condensada (papel da Tusker Grotesk na referencia) */
@@ -82,11 +90,24 @@
          Precisa de um tom mais escuro so no tema claro (no dark, o mesmo
          vermelho ja passa contra --card escuro). */
       --danger: #C0392B;
-      --border: #DCE2DF;
-      --rule: #C3CBC6;
+      /* #DCE2DF foi calibrada contra --bg solido (#F3F5F4), mas o que fica
+         atras dos cards e o #bgCanvas animado — em turquesa claro medido em
+         rgb(207,237,233) essa borda dava 1.06:1, ou seja, invisivel. Medido
+         contra a faixa de cores que o canvas percorre no tema claro, este
+         tom da 3.18:1 no pior caso (fundo mais claro) e 3.54:1 contra o
+         card branco — acima do minimo de 3:1 para limite de componente. */
+      --border: #7F8B85;
+      /* mesma razao do --border: usado em divisores e na borda do
+         .btn.secondary, que fica direto sobre o fundo animado */
+      --rule: #6E7A74;
       --overlay: rgba(20,26,24,0.55);
       --depth-1: #DDE2DF;
       --depth-2: #C9D0CC;
+      /* No claro a sombra e quem de fato separa o card: o branco do card
+         contra o fundo vivo dava 1.24:1 (o minimo pra limite de componente
+         e 3:1) e nao havia box-shadow nenhuma no site. */
+      --shadow-card: 0 1px 2px rgba(16,32,28,0.10), 0 4px 14px rgba(16,32,28,0.10);
+      --shadow-card-hover: 0 2px 6px rgba(16,32,28,0.14), 0 16px 36px rgba(16,32,28,0.16);
       color-scheme: light;
     }
   }
@@ -103,11 +124,13 @@
     --accent-ink: #EAFBF6;
     --danger: #C0392B;
     --accent-wash: rgba(11,140,125,0.10);
-    --border: #DCE2DF;
-    --rule: #C3CBC6;
+    --border: #7F8B85;
+    --rule: #6E7A74;
     --overlay: rgba(20,26,24,0.55);
     --depth-1: #DDE2DF;
     --depth-2: #C9D0CC;
+    --shadow-card: 0 1px 2px rgba(16,32,28,0.10), 0 4px 14px rgba(16,32,28,0.10);
+    --shadow-card-hover: 0 2px 6px rgba(16,32,28,0.14), 0 16px 36px rgba(16,32,28,0.16);
     color-scheme: light;
   }
 
@@ -133,6 +156,10 @@
     --overlay: rgba(3,4,5,0.82);
     --depth-1: #0B0D0F;
     --depth-2: #050607;
+    /* mesmo motivo de cascata do --accent acima: com o SO em light, a media
+       query empata em especificidade com [data-theme="dark"] e venceria */
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.30), 0 4px 12px rgba(0,0,0,0.22);
+    --shadow-card-hover: 0 2px 6px rgba(0,0,0,0.34), 0 14px 32px rgba(0,0,0,0.30);
     color-scheme: dark;
   }
 
@@ -1352,10 +1379,12 @@
   }
 
   .btn:active { transform: translateY(1px); }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); }
-  .btn.primary:hover { background: var(--text); color: var(--bg); }
-  .btn.secondary { border: 1px solid var(--rule); color: var(--text); }
-  .btn.secondary:hover { border-color: var(--text); background: var(--text); color: var(--bg); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow-card); }
+  .btn.primary:hover { background: var(--text); color: var(--bg); box-shadow: var(--shadow-card-hover); }
+  /* fundo solido (era transparente): sobre o #bgCanvas animado a borda
+     sozinha sumia, e o botao ficava sem limite legivel */
+  .btn.secondary { border: 1px solid var(--rule); color: var(--text); background: var(--card); box-shadow: var(--shadow-card); }
+  .btn.secondary:hover { border-color: var(--text); background: var(--text); color: var(--bg); box-shadow: var(--shadow-card-hover); }
 
   /* ---------- Cena 3D (camera/monitor) — vive na secao 04 ---------- */
 
@@ -1555,7 +1584,8 @@
     justify-content: center;
     gap: 12px;
     cursor: none;
-    transition: transform 0.3s cubic-bezier(.2,.8,.2,1), background 0.25s ease;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.3s cubic-bezier(.2,.8,.2,1), background 0.25s ease, box-shadow 0.3s ease;
     overflow: hidden;
     transform-style: preserve-3d;
   }
@@ -1568,7 +1598,7 @@
     background: var(--accent-grad);
   }
 
-  .skill-box:hover { transform: translateZ(24px) scale(1.06); background: var(--card-hover); }
+  .skill-box:hover { transform: translateZ(24px) scale(1.06); background: var(--card-hover); box-shadow: var(--shadow-card-hover); }
 
   .skill-box .mark { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--accent); }
   .skill-box p { font-size: 0.82rem; font-weight: 500; color: var(--text); margin: 0; text-align: center; padding: 0 8px; }
@@ -1602,6 +1632,7 @@
     overflow: hidden;
     background: linear-gradient(150deg, var(--card), var(--bg-raised));
     border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1754,6 +1785,7 @@
     gap: 18px;
     align-items: flex-start;
     margin-top: 56px;
+    box-shadow: var(--shadow-card);
   }
 
   .note svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
@@ -2370,9 +2402,10 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: border-color 0.25s ease, transform 0.25s ease;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
-  .av-pilar:hover { border-color: var(--rule); transform: translateY(-3px); }
+  .av-pilar:hover { border-color: var(--rule); transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
 
   .av-arte {
     aspect-ratio: 4 / 3;
