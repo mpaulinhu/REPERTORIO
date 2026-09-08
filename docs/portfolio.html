@@ -4600,9 +4600,17 @@
         if (plane && art1) {
           document.documentElement.classList.add('js-plane');
 
+          /* ease-out cubico: comeca rapido e desacelera ate o fim — sem isso
+             a cortina abre na mesma velocidade do scroll o tempo todo, o que
+             lia como abrupto. Aplicada em cima do `t` linear (0-1), nao no
+             tempo de execucao — continua 100% dirigida pelo scrollY, sem
+             rAF/GSAP no meio (ver nota abaixo). */
+          var easeOutCubic = function (t) { return 1 - Math.pow(1 - t, 3); };
+
           var clipDaCortina = function (t) {
             /* t=0 faixa fina no centro, t=1 tela cheia — inset(topo direita baixo esquerda) */
-            var lado = 50 - 50 * t; /* 50% -> 0%: corta simetrico dos dois lados */
+            var suave = easeOutCubic(t);
+            var lado = 50 - 50 * suave; /* 50% -> 0%: corta simetrico dos dois lados */
             return 'inset(0 ' + lado + '% 0 ' + lado + '%)';
           };
 
