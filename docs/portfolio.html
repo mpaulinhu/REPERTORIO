@@ -40,6 +40,11 @@
     --accent-2: #3B82F6;
     --accent-grad: linear-gradient(115deg, #2FE0C8 0%, #3B82F6 100%);
     --accent-wash: rgba(47,224,200,0.10);
+    /* cor de texto/icone sobre fundo var(--accent) (botao primario, cursor
+       label, toast etc.) — precisa ser redefinida por tema porque --accent
+       muda de claro (dark theme) pra escuro (light theme); ver os outros
+       3 blocos de tema abaixo. */
+    --accent-ink: #041210;
     --border: #1D2126;
     --rule: #2A2F36;
     --overlay: rgba(3,4,5,0.82);
@@ -62,7 +67,21 @@
       --text: #0D1417;
       --text-dim: #515A5F;
       --text-faint: #8B939A;
+      /* #2FE0C8 (turquesa de --accent no dark) cai pra ~1.5:1 de contraste
+         sobre os fundos claros — bem abaixo do 4.5:1 exigido pra texto. Este
+         tom mais escuro do mesmo matiz garante >=4.5:1 em todos os fundos
+         claros do tema (--bg, --bg-raised, --card-hover). */
+      --accent: #097263;
+      /* texto/icone sobre --accent: no dark theme --accent e claro entao
+         texto quase-preto funciona; aqui --accent virou escuro (#097263),
+         entao o texto precisa ser quase-branco pra manter >=4.5:1. */
+      --accent-ink: #EAFBF6;
       --accent-wash: rgba(11,140,125,0.10);
+      /* #F04848 (fallback de --danger, usado sem override em nenhum tema)
+         sobre --card branco cai pra ~3.7:1 — abaixo do minimo de texto.
+         Precisa de um tom mais escuro so no tema claro (no dark, o mesmo
+         vermelho ja passa contra --card escuro). */
+      --danger: #C0392B;
       --border: #DCE2DF;
       --rule: #C3CBC6;
       --overlay: rgba(20,26,24,0.55);
@@ -80,6 +99,9 @@
     --text: #0D1417;
     --text-dim: #515A5F;
     --text-faint: #8B939A;
+    --accent: #097263;
+    --accent-ink: #EAFBF6;
+    --danger: #C0392B;
     --accent-wash: rgba(11,140,125,0.10);
     --border: #DCE2DF;
     --rule: #C3CBC6;
@@ -97,6 +119,14 @@
     --text: #F2F3F5;
     --text-dim: #8A9099;
     --text-faint: #565C64;
+    /* precisa declarar --accent aqui (mesmo igual ao :root base) porque
+       com o SO em light mode, @media (prefers-color-scheme: light) e
+       [data-theme="dark"] tem a mesma especificidade em :root — sem esta
+       linha, a media query vencia a cascata pra --accent (mas nao pras
+       outras variaveis, que ja eram redefinidas nos dois lugares). */
+    --accent: #2FE0C8;
+    --accent-ink: #041210;
+    --danger: #F04848;
     --accent-wash: rgba(47,224,200,0.10);
     --border: #1D2126;
     --rule: #2A2F36;
@@ -246,7 +276,7 @@
     .bg-glow span { animation: none; }
   }
 
-  ::selection { background: var(--accent); color: #041210; }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
   ::-webkit-scrollbar { width: 12px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 6px; }
@@ -319,7 +349,7 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #041210;
+    color: var(--accent-ink);
     opacity: 0;
     transition: opacity 0.2s ease;
     padding: 0 8px;
@@ -742,7 +772,7 @@
     transform: translateX(-50%);
     z-index: 600;
     background: var(--accent);
-    color: #041210;
+    color: var(--accent-ink);
     font-family: var(--display);
     font-size: 0.72rem;
     font-weight: 600;
@@ -944,20 +974,18 @@
     position: absolute;
     inset: 0;
     opacity: 0;
+    /* padrao geometrico proprio (sem imagem/foto): linhas diagonais finas
+       na cor de acento sobre o fundo do tema, ecoando o grid de video/audio
+       do trabalho sem parecer arte gerada. */
+    background-color: #0A0C0E;
+    background-image:
+      repeating-linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, transparent) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(45deg, color-mix(in srgb, var(--accent-2) 40%, transparent) 0 1px, transparent 1px 48px);
   }
 
   /* losango inicial — so entra quando o JS assume; sem ele fica aberto */
   html.js-plane #planeArt1 {
     clip-path: polygon(50% 10%, 60% 50%, 50% 90%, 40% 50%);
-  }
-
-  .site-plane-art img {
-    width: 100%;
-    height: 100%;
-    /* contain: a arte aparece INTEIRA, sem corte e sem zoom */
-    object-fit: contain;
-    object-position: center center;
-    filter: saturate(0.95) contrast(1.02);
   }
 
   /* Veu forte: a arte e clara e o titulo do hero (preto/accent) fica por
@@ -979,9 +1007,6 @@
   main, footer, .marquee { position: relative; z-index: 2; }
 
   @media (max-width: 819px) {
-    /* no celular a arte panoramica fica minuscula com contain — cover
-       preenche melhor, e o veu sobe pro texto continuar legivel */
-    .site-plane-art img { object-fit: cover; }
     .site-plane::after { background: color-mix(in srgb, var(--bg) 88%, transparent); }
   }
 
@@ -1171,48 +1196,23 @@
     overflow-x: clip;
     color: #F2F3F5;
   }
-  /* camada de fundo em <img> real (nao background-image): so uma tag <img>
-     aceita loading="lazy" + decoding="async", que tira o decode da imagem
-     grande do caminho sincrono e evita o engasgo no primeiro scroll ate
-     aqui. background-image e sempre decodificado de forma sincrona pelo
-     compositor assim que o elemento entra em uso. */
-  .about-bg-img {
+  /* padrao geometrico proprio, sem imagem/foto — mesma textura da cortina
+     do hero, so que estatica e mais discreta atras do texto da secao. */
+  .about-bg-art {
     position: absolute;
     inset: 0;
     z-index: -2;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 30%;
-    /* a arte e o ponto da secao: satura de volta em vez de lavar */
-    filter: saturate(1.05) contrast(1.02);
+    background-color: #0A0C0E;
+    background-image:
+      repeating-linear-gradient(135deg, color-mix(in srgb, var(--accent) 45%, transparent) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(45deg, color-mix(in srgb, var(--accent-2) 32%, transparent) 0 1px, transparent 1px 48px);
   }
-  /* Veu leve o suficiente para a pintura aparecer. O contraste do texto NAO
-     vem daqui (isso exigiria cobrir a arte toda) — vem do gradiente lateral
-     abaixo, que escurece so a faixa onde a coluna de texto mora. */
   section.block.about::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, rgba(6,7,9,0.34) 0%, rgba(6,7,9,0.42) 55%, rgba(6,7,9,0.58) 100%);
-  }
-  /* Reforco localizado: escuro na borda esquerda (titulo + paragrafo),
-     dissolvendo ate transparente antes da metade — a direita, onde fica a
-     foto do estudio, a pintura passa quase limpa. */
-  section.block.about::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(100deg, rgba(4,5,7,0.92) 0%, rgba(4,5,7,0.88) 38%, rgba(4,5,7,0.74) 52%, rgba(4,5,7,0.3) 62%, transparent 72%);
-  }
-  @media (max-width: 820px) {
-    /* coluna unica: o texto ocupa a largura toda, entao o reforco tem que
-       ser vertical (de cima para baixo), nao lateral */
-    section.block.about::before {
-      background: linear-gradient(180deg, rgba(4,5,7,0.82) 0%, rgba(4,5,7,0.74) 46%, rgba(4,5,7,0.6) 100%);
-    }
+    background: linear-gradient(180deg, rgba(6,7,9,0.15) 0%, rgba(6,7,9,0.2) 55%, rgba(6,7,9,0.35) 100%);
   }
   section.block.about .section-head { border-top-color: rgba(242,243,245,0.25); }
   /* a etiqueta ja tem fundo escuro proprio (ver .section-head .eyebrow), entao
@@ -1226,30 +1226,9 @@
 
   .about-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
-    gap: clamp(28px, 4vw, 56px);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 72ch;
   }
-
-  @media (max-width: 820px) {
-    .about-grid { grid-template-columns: 1fr; }
-  }
-
-  .about-figure { margin: 0; }
-
-  .about-figure img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    filter: grayscale(1) contrast(1.05);
-    transition: filter 0.55s ease;
-  }
-
-  .about-figure:hover img { filter: grayscale(0) contrast(1); }
 
   /* fotos verticais: em vez de cortar numa faixa larga, ficam contidas
      numa coluna estreita com a legenda ao lado */
@@ -1376,7 +1355,7 @@
   }
 
   .btn:active { transform: translateY(1px); }
-  .btn.primary { background: var(--accent); color: #05100E; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
   .btn.primary:hover { background: var(--text); color: var(--bg); }
   .btn.secondary { border: 1px solid var(--rule); color: var(--text); }
   .btn.secondary:hover { border-color: var(--text); background: var(--text); color: var(--bg); }
@@ -2101,7 +2080,7 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   }
   #editToggle svg { width: 20px; height: 20px; }
-  #editToggle.active { background: var(--accent); color: #06110F; }
+  #editToggle.active { background: var(--accent); color: var(--accent-ink); }
 
   body.edit-mode [contenteditable="true"] {
     outline: 1.5px dashed var(--accent-2);
@@ -2207,7 +2186,7 @@
     padding: 8px 12px;
     cursor: pointer;
   }
-  #editPanel button.primary { background: var(--accent); color: #06110F; border-color: var(--accent); }
+  #editPanel button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   #editPanel .status-msg { font-size: 0.76rem; min-height: 1.2em; }
   #editPanel .status-msg.ok { color: var(--accent); }
   #editPanel .status-msg.err { color: var(--danger, #F04848); }
@@ -2953,12 +2932,7 @@
 <canvas id="bgCanvas" aria-hidden="true"></canvas>
 
 <div class="site-plane" id="sitePlane" aria-hidden="true">
-  <div class="site-plane-art" id="planeArt1">
-    <picture>
-      <source srcset="images/hero-bg-arte.webp" type="image/webp">
-      <img src="images/hero-bg-arte.jpg" alt="" width="2000" height="1063" loading="eager">
-    </picture>
-  </div>
+  <div class="site-plane-art" id="planeArt1"></div>
 </div>
 
 <div id="scrollProgress" aria-hidden="true"><i></i></div>
@@ -3028,7 +3002,7 @@
             <source type="image/webp" srcset="images/retrato-recorte-sm.webp 1x, images/retrato-recorte-md.webp 2x">
             <img src="images/retrato-recorte-sm.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="520" height="765" fetchpriority="high" decoding="async">
           </picture>
-          <figcaption><i class="live-dot"></i>disponível para novos projetos</figcaption>
+          <figcaption><i class="live-dot"></i>aberto a boas conversas</figcaption>
         </figure>
       </div>
     </div>
@@ -3042,10 +3016,7 @@
   </div>
 
   <section class="block about reveal">
-    <picture>
-      <source srcset="images/hero-bg-arte-v2.webp" type="image/webp">
-      <img class="about-bg-img" src="images/hero-bg-arte-v2.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="low" width="2000" height="1063">
-    </picture>
+    <div class="about-bg-art" aria-hidden="true"></div>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow"><b>01</b>Sobre mim</p>
@@ -3063,14 +3034,6 @@
             áudio e vídeo ao vivo.
           </p>
         </div>
-
-        <figure class="about-figure">
-          <picture>
-            <source type="image/webp" srcset="images/estudio-sm.webp 1x, images/estudio-md.webp 2x">
-            <source type="image/jpeg" srcset="images/estudio-sm.jpg 1x, images/estudio-md.jpg 2x">
-            <img loading="lazy" decoding="async" src="images/estudio-sm.jpg" alt="Marcos Paulo em seu estúdio, com telas de código, timeline de vídeo, mesa de som e câmera" width="540" height="360" onerror="this.closest('.about-figure').remove();">
-          </picture>
-        </figure>
       </div>
     </div>
   </section>
@@ -3087,7 +3050,7 @@
         <div class="skill-box" tabindex="0" role="button" data-skill-name="After Effects" data-skill-mark="Ae" data-skill-color="#9999FF" data-skill-icon="images/tools/aftereffects.svg" data-skill-desc="Motion graphics e animação para vinhetas, títulos e peças de anúncio."><span class="mark">Ae</span><p>After Effects</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="vMix" data-skill-mark="vM" data-skill-color="#2C7BC0" data-skill-icon="images/tools/vmix.png" data-skill-icon-wide="1" data-skill-desc="Produção e switching ao vivo — eventos, cultos e podcasts, incluindo o vídeo com Libras."><span class="mark">vM</span><p>vMix</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Blackmagic ATEM" data-skill-mark="At" data-skill-color="#E4141A" data-skill-icon="images/tools/blackmagic.svg" data-skill-icon-mono="1" data-skill-desc="Mesa de corte física para operação de câmeras em transmissão ao vivo."><span class="mark">At</span><p>Blackmagic ATEM</p></div>
-        <div class="skill-box" tabindex="0" role="button" data-skill-name="Soundcraft Ui24R" data-skill-mark="Ui" data-skill-color="#00B2A9" data-skill-desc="Mesa de som digital — mixagem ao vivo e monitor individual por músico."><span class="mark">Ui</span><p>Soundcraft UI24R</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Soundcraft Ui24R" data-skill-mark="Ui" data-skill-color="#00847D" data-skill-desc="Mesa de som digital — mixagem ao vivo e monitor individual por músico."><span class="mark">Ui</span><p>Soundcraft UI24R</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Stream Deck" data-skill-mark="Sd" data-skill-color="#F5A623" data-skill-icon="images/tools/elgato.svg" data-skill-icon-mono="1" data-skill-desc="Automação de cenas e atalhos durante a operação ao vivo."><span class="mark">Sd</span><p>Stream Deck</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Photoshop" data-skill-mark="Ps" data-skill-color="#31A8FF" data-skill-icon="images/tools/photoshop.svg" data-skill-desc="Tratamento de imagem e apoio visual pro fluxo editorial, com IA acelerando a parte repetitiva."><span class="mark">Ps</span><p>Photoshop</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="InDesign" data-skill-mark="Id" data-skill-color="#FF3366" data-skill-icon="images/tools/indesign.svg" data-skill-desc="Diagramação de peças editoriais."><span class="mark">Id</span><p>InDesign</p></div>
@@ -4595,14 +4558,6 @@
           }
         });
 
-        /* 6. Foto do "sobre": mesma revelacao por mascara */
-        gsap.utils.toArray('.about-figure').forEach(function (fig) {
-          gsap.from(fig.querySelector('img'), {
-            scrollTrigger: { trigger: fig, start: 'top 82%', once: true },
-            clipPath: 'inset(0 0 100% 0)', scale: 1.14, duration: 1.1, ease: 'power4.out'
-          });
-        });
-
         /* 7. Texto do "sobre" e itens da timeline entram por bloco */
         gsap.utils.toArray('.about-text p, .tl-item').forEach(function (el) {
           gsap.from(el, {
@@ -4721,7 +4676,7 @@
             '.about-text p, .tl-item, .section-head .eyebrow, .section-head p,' +
             '.section-head h2 .word > i, .hero-title .hl > i, .cards-grid > *,' +
             '.skills-cards > *, .section-figure img, .section-figure figcaption,' +
-            '.about-figure img, .contacts-icons > *'
+            '.contacts-icons > *'
           );
           var vh = window.innerHeight;
           var presos = 0;
