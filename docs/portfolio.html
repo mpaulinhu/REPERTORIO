@@ -974,18 +974,20 @@
     position: absolute;
     inset: 0;
     opacity: 0;
-    /* padrao geometrico proprio (sem imagem/foto): linhas diagonais finas
-       na cor de acento sobre o fundo do tema, ecoando o grid de video/audio
-       do trabalho sem parecer arte gerada. */
-    background-color: #0A0C0E;
-    background-image:
-      repeating-linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, transparent) 0 1px, transparent 1px 48px),
-      repeating-linear-gradient(45deg, color-mix(in srgb, var(--accent-2) 40%, transparent) 0 1px, transparent 1px 48px);
   }
 
-  /* losango inicial — so entra quando o JS assume; sem ele fica aberto */
+  /* faixa vertical fina inicial — so entra quando o JS assume; sem ele fica aberto */
   html.js-plane #planeArt1 {
-    clip-path: polygon(50% 10%, 60% 50%, 50% 90%, 40% 50%);
+    clip-path: inset(0 49% 0 49%);
+  }
+
+  .site-plane-art img {
+    width: 100%;
+    height: 100%;
+    /* contain: a arte aparece INTEIRA, sem corte e sem zoom */
+    object-fit: contain;
+    object-position: center center;
+    filter: saturate(0.95) contrast(1.02);
   }
 
   /* Veu forte: a arte e clara e o titulo do hero (preto/accent) fica por
@@ -1007,6 +1009,9 @@
   main, footer, .marquee { position: relative; z-index: 2; }
 
   @media (max-width: 819px) {
+    /* no celular a arte panoramica fica minuscula com contain — cover
+       preenche melhor, e o veu sobe pro texto continuar legivel */
+    .site-plane-art img { object-fit: cover; }
     .site-plane::after { background: color-mix(in srgb, var(--bg) 88%, transparent); }
   }
 
@@ -1196,23 +1201,31 @@
     overflow-x: clip;
     color: #F2F3F5;
   }
-  /* padrao geometrico proprio, sem imagem/foto — mesma textura da cortina
-     do hero, so que estatica e mais discreta atras do texto da secao. */
-  .about-bg-art {
+  /* camada de fundo em <img> real (nao background-image): so uma tag <img>
+     aceita loading="lazy" + decoding="async", que tira o decode da imagem
+     grande do caminho sincrono e evita o engasgo no primeiro scroll ate
+     aqui. background-image e sempre decodificado de forma sincrona pelo
+     compositor assim que o elemento entra em uso. */
+  .about-bg-img {
     position: absolute;
     inset: 0;
     z-index: -2;
-    background-color: #0A0C0E;
-    background-image:
-      repeating-linear-gradient(135deg, color-mix(in srgb, var(--accent) 45%, transparent) 0 1px, transparent 1px 48px),
-      repeating-linear-gradient(45deg, color-mix(in srgb, var(--accent-2) 32%, transparent) 0 1px, transparent 1px 48px);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    /* a arte e o ponto da secao: satura de volta em vez de lavar */
+    filter: saturate(1.05) contrast(1.02);
   }
+  /* Veu solido: sem a foto de estudio ao lado, o texto ocupa a secao
+     inteira — o veu cobre por igual em vez do gradiente lateral que
+     existia so pra abrir espaco pra aquela foto. */
   section.block.about::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, rgba(6,7,9,0.15) 0%, rgba(6,7,9,0.2) 55%, rgba(6,7,9,0.35) 100%);
+    background: linear-gradient(180deg, rgba(6,7,9,0.55) 0%, rgba(6,7,9,0.62) 55%, rgba(6,7,9,0.7) 100%);
   }
   section.block.about .section-head { border-top-color: rgba(242,243,245,0.25); }
   /* a etiqueta ja tem fundo escuro proprio (ver .section-head .eyebrow), entao
@@ -2932,7 +2945,12 @@
 <canvas id="bgCanvas" aria-hidden="true"></canvas>
 
 <div class="site-plane" id="sitePlane" aria-hidden="true">
-  <div class="site-plane-art" id="planeArt1"></div>
+  <div class="site-plane-art" id="planeArt1">
+    <picture>
+      <source srcset="images/hero-bg-arte.webp" type="image/webp">
+      <img src="images/hero-bg-arte.jpg" alt="" width="2000" height="1063" loading="eager">
+    </picture>
+  </div>
 </div>
 
 <div id="scrollProgress" aria-hidden="true"><i></i></div>
@@ -3016,7 +3034,10 @@
   </div>
 
   <section class="block about reveal">
-    <div class="about-bg-art" aria-hidden="true"></div>
+    <picture>
+      <source srcset="images/hero-bg-arte-v2.webp" type="image/webp">
+      <img class="about-bg-img" src="images/hero-bg-arte-v2.jpg" alt="" aria-hidden="true" decoding="async" fetchpriority="low" width="2000" height="1063">
+    </picture>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow"><b>01</b>Sobre mim</p>
@@ -4567,7 +4588,8 @@
         });
 
         /* 8b. CORTINA DO HERO: a arte e um efeito de ENTRADA, restrito a
-               primeira tela. Ela abre em losango e some assim que o usuario
+               primeira tela. Ela abre como cortina de teatro (faixa vertical
+               no centro, expande pros dois lados) e some assim que o usuario
                comeca a rolar de verdade — dali em diante o site inteiro
                usa o fundo solido do tema, sem imagem nenhuma atras do
                conteudo. Legibilidade de texto vence efeito visual: uma
@@ -4578,19 +4600,15 @@
         if (plane && art1) {
           document.documentElement.classList.add('js-plane');
 
-          var clipDoLosango = function (t) {
-            /* t=0 losango fechado, t=1 tela cheia — interpola os 4 pontos */
-            var topoY = 10 + (0 - 10) * t;
-            var dirX = 60 + (100 - 60) * t, dirY = 50 + (0 - 50) * t;
-            var baseY = 90 + (100 - 90) * t;
-            var esqX = 40 + (0 - 40) * t, esqY = 50 + (100 - 50) * t;
-            return 'polygon(50% ' + topoY + '%, ' + dirX + '% ' + dirY + '%, ' +
-                   '50% ' + baseY + '%, ' + esqX + '% ' + esqY + '%)';
+          var clipDaCortina = function (t) {
+            /* t=0 faixa fina no centro, t=1 tela cheia — inset(topo direita baixo esquerda) */
+            var lado = 50 - 50 * t; /* 50% -> 0%: corta simetrico dos dois lados */
+            return 'inset(0 ' + lado + '% 0 ' + lado + '%)';
           };
 
           var estado = { open: 0, fade: 1 };
           var aplicar = function () {
-            art1.style.clipPath = clipDoLosango(estado.open);
+            art1.style.clipPath = clipDaCortina(estado.open);
             art1.style.opacity = estado.fade;
             /* o veu (::after) e o proprio ::after do .site-plane, que so
                precisa existir enquanto a arte estiver visivel */
