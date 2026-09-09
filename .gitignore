@@ -1,5 +1,8 @@
 # Mídia pesada — guarde em HD/drive e registre o link no README do trabalho
 *.mp4
+# Exceção: vídeo publicado no site, sem embed externo — servido direto
+# pelo GitHub Pages (já comprimido para web antes de subir).
+!docs/videos/a-vida.mp4
 *.mov
 *.avi
 *.mkv

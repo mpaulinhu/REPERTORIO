@@ -3337,6 +3337,24 @@
 
       <div class="cards-grid" id="audiovisualGrid">
 
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="videos/a-vida.mp4" data-modal-title="A Vida">
+          <div class="tilt-wrap">
+            <div class="work-cover has-photo">
+              <img class="cover-photo" loading="lazy" src="images/a-vida.jpg" alt="A Vida" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <span class="badge">Vídeo</span>
+              <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
+              <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
+              <div class="reveal-label">
+                <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+                <span class="format">Ver detalhes</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-info">
+            <h4>A Vida</h4>
+          </div>
+        </article>
+
         <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/47v8aHfvyIn/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Entre o Propósito — Animação Histórica com IA | Sound" data-modal-desc="Produção audiovisual para um congresso da igreja, contando de forma cinematográfica a história de Daniel Berg e Gunnar Vingren, da Suécia até o Brasil. Combina animação gerada com inteligência artificial e desenho sonoro autoral." data-modal-meta="set/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
@@ -4936,14 +4954,24 @@
       modalFrame.innerHTML = '';
       var frameBox = document.createElement('div');
       frameBox.className = 'embed-box';
-      var iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.border = '0';
-      iframe.allow = 'autoplay; fullscreen';
-      iframe.allowFullscreen = true;
-      frameBox.appendChild(iframe);
+      if (/\.mp4($|\?)/i.test(url)) {
+        var video = document.createElement('video');
+        video.src = url;
+        video.controls = true;
+        video.playsInline = true;
+        video.style.width = '100%';
+        video.style.height = '100%';
+        frameBox.appendChild(video);
+      } else {
+        var iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.allow = 'autoplay; fullscreen';
+        iframe.allowFullscreen = true;
+        frameBox.appendChild(iframe);
+      }
       modalFrame.appendChild(frameBox);
     }
 
