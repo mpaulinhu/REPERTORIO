@@ -1565,6 +1565,17 @@
 
   /* ---------- Skills ---------- */
 
+  .skills-subhead {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-align: center;
+    margin: 0 0 20px;
+  }
+  .skills-cards + .skills-subhead { margin-top: 44px; }
+
   .skills-cards { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 24px; perspective: 900px; }
 
   .skill-box {
@@ -3077,6 +3088,7 @@
         <p class="eyebrow"><b>02</b>Inventário</p>
         <h2>Ferramentas</h2>
       </div>
+      <p class="skills-subhead">Produção audiovisual</p>
       <div class="skills-cards">
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Premiere Pro" data-skill-mark="Pr" data-skill-color="#EA77FF" data-skill-icon="images/tools/premiere.svg" data-skill-desc="Edição de vídeo — corte, cor e finalização da maior parte do meu material audiovisual."><span class="mark">Pr</span><p>Premiere Pro</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="DaVinci Resolve" data-skill-mark="Dv" data-skill-color="#3F5CDB" data-skill-icon="images/tools/davinciresolve.svg" data-skill-icon-mono="1" data-skill-desc="Edição e correção de cor quando o projeto pede um grading mais fino."><span class="mark">Dv</span><p>DaVinci Resolve</p></div>
@@ -3087,9 +3099,20 @@
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Stream Deck" data-skill-mark="Sd" data-skill-color="#F5A623" data-skill-icon="images/tools/elgato.svg" data-skill-icon-mono="1" data-skill-desc="Automação de cenas e atalhos durante a operação ao vivo."><span class="mark">Sd</span><p>Stream Deck</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Photoshop" data-skill-mark="Ps" data-skill-color="#31A8FF" data-skill-icon="images/tools/photoshop.svg" data-skill-desc="Tratamento de imagem e apoio visual pro fluxo editorial, com IA acelerando a parte repetitiva."><span class="mark">Ps</span><p>Photoshop</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="InDesign" data-skill-mark="Id" data-skill-color="#FF3366" data-skill-icon="images/tools/indesign.svg" data-skill-desc="Diagramação de peças editoriais."><span class="mark">Id</span><p>InDesign</p></div>
-        <div class="skill-box" tabindex="0" role="button" data-skill-name="Python / Flask" data-skill-mark="Py" data-skill-color="#3776AB" data-skill-icon="images/tools/python.svg" data-skill-desc="Backend dos meus projetos pessoais — como o painel de automação de transmissão multi-PC."><span class="mark">Py</span><p>Python / Flask</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="ElevenLabs" data-skill-mark="11" data-skill-color="#5A4FCF" data-skill-icon="images/tools/elevenlabs.svg" data-skill-icon-mono="1" data-skill-desc="Vozes geradas por IA para audiodescrição e narração assistida."><span class="mark">11</span><p>ElevenLabs</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="ClickUp / Trello" data-skill-mark="Cu" data-skill-color="#7B68EE" data-skill-icon="images/tools/trello.svg" data-skill-desc="Organização de tarefas e acompanhamento de projeto no dia a dia."><span class="mark">Cu</span><p>ClickUp / Trello</p></div>
+      </div>
+
+      <p class="skills-subhead">Tecnologia</p>
+      <div class="skills-cards">
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Cloud Functions" data-skill-mark="Cf" data-skill-color="#4285F4" data-skill-icon="images/tools/googlecloud.svg" data-skill-desc="Backend serverless — funções que mantenho no pipeline editorial da ELO, do parecer com IA à revisão de prova."><span class="mark">Cf</span><p>Cloud Functions</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Firebase / Firestore" data-skill-mark="Fb" data-skill-color="#FFA000" data-skill-icon="images/tools/firebase.svg" data-skill-desc="Banco de dados, autenticação e storage do sistema ELO Ecosystem."><span class="mark">Fb</span><p>Firebase / Firestore</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Vertex AI / Gemini" data-skill-mark="Ge" data-skill-color="#8E75FF" data-skill-icon="images/tools/gemini.svg" data-skill-icon-mono="1" data-skill-desc="IA generativa por trás do parecer editorial, da revisão de prova e da triagem de currículos no ZELO."><span class="mark">Ge</span><p>Vertex AI / Gemini</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="React / TypeScript" data-skill-mark="Rt" data-skill-color="#61DAFB" data-skill-icon="images/tools/react.svg" data-skill-desc="Frontend do CoreHub e de outras frentes do sistema interno da ELO."><span class="mark">Rt</span><p>React / TypeScript</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Node.js" data-skill-mark="Nd" data-skill-color="#83CD29" data-skill-icon="images/tools/nodejs.svg" data-skill-desc="Runtime das Cloud Functions e dos backends dos meus projetos pessoais, como o Mix de Fone."><span class="mark">Nd</span><p>Node.js</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Python / Flask" data-skill-mark="Py" data-skill-color="#3776AB" data-skill-icon="images/tools/python.svg" data-skill-desc="Backend dos meus projetos pessoais — como o painel de automação de transmissão multi-PC."><span class="mark">Py</span><p>Python / Flask</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="APIs REST" data-skill-mark="Ap" data-skill-color="#0EA5A5" data-skill-desc="Integração e consumo de APIs externas nos sistemas que desenvolvo e mantenho."><span class="mark">Ap</span><p>APIs REST</p></div>
+        <div class="skill-box" tabindex="0" role="button" data-skill-name="Git / GitHub" data-skill-mark="Gh" data-skill-color="#F34F29" data-skill-icon="images/tools/git.svg" data-skill-desc="Controle de versão, branches e revisão de código no fluxo diário de desenvolvimento."><span class="mark">Gh</span><p>Git / GitHub</p></div>
       </div>
     </div>
   </section>
