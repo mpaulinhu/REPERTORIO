@@ -910,8 +910,8 @@
 
   .menu-overlay nav a:hover { color: var(--accent); transform: translateZ(40px) scale(1.06); }
 
-  /* trava o scroll do fundo enquanto o menu esta aberto */
-  body.menu-open { overflow: hidden; }
+  /* trava o scroll do fundo enquanto o menu ou um modal esta aberto */
+  body.menu-open, body.modal-open { overflow: hidden; }
   /* o header e sticky e leva z-index 2 (regra do empilhamento geral), entao
      ficava ATRAS do menu (z 200) — o botao de fechar sumia junto. Com o menu
      aberto ele sobe e fica fixo no topo da viewport. */
@@ -3412,7 +3412,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KyIoZw2y5dp/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Edição de Vídeo — Projetos Freelance" data-modal-desc="Compilado de trabalhos avulsos de edição de vídeo, feitos como prática e como freelancer." data-modal-meta="mai/2026 · Behance">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/KyIoZw2y5dp/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/SKiSIQ8FxX5/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/V7hAmWcFIgD/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Edição de Vídeo — Projetos Freelance" data-modal-desc="Compilado de trabalhos avulsos de edição de vídeo, feitos como prática e como freelancer." data-modal-meta="mai/2026 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/freelas-parte-01.jpg" alt="Edição de Vídeo — Projetos Freelance" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/projects/max_808/4b8a96250011627.Y3JvcCwxMzgwLDEwODAsMjcwLDA.png'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
@@ -3500,7 +3500,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/8UA8v8ff9Cy/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 1" data-modal-desc="Mixagem e masterização de áudio de dois louvores de igreja, feitas no Reaper com plugins gratuitos." data-modal-meta="out/2025 · Behance">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/8UA8v8ff9Cy/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/BQKNps2Kapx/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagens de louvor — vol. 1" data-modal-desc="Mixagem e masterização de áudio de dois louvores de igreja, feitas no Reaper com plugins gratuitos." data-modal-meta="out/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/mix-louvor-vol1.jpg" alt="Mixagens de louvor — vol. 1" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/5fd608236140457.68e656a19a90a.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
@@ -3522,7 +3522,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M7iStDQqR9G/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/TPWiNiVGbFL/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/LQSsKjHkpBZ/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagem e Masterização — Ensaio Geral de Jovens" data-modal-desc="Mixagem de áudio de louvores de igreja no Reaper, explorando plugins gratuitos de mixagem." data-modal-meta="set/2025 · Behance">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/M7iStDQqR9G/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/TPWiNiVGbFL/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/LQSsKjHkpBZ/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/7Lv4_XL9INu/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/L5FBjbGkjjb/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Mixagem e Masterização — Ensaio Geral de Jovens" data-modal-desc="Mixagem de áudio de louvores de igreja no Reaper, explorando plugins gratuitos de mixagem." data-modal-meta="set/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/mix-louvor-vol2.jpg" alt="Mixagem e Masterização — Ensaio Geral de Jovens" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/hd/8e4833234839499.68cb129ce4e67.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
@@ -3566,7 +3566,7 @@
           </div>
         </article>
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/9v99pL_L7x4/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Direção Criativa e Audiovisual — Chá de Revelação" data-modal-desc="Cobertura em vídeo de um chá de revelação, com edição e efeitos de animação." data-modal-meta="ago/2025 · Behance">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="https://www-ccv.adobe.io/v1/player/ccv/9v99pL_L7x4/embed?api_key=behance1&amp;bgcolor=%23191919|https://www-ccv.adobe.io/v1/player/ccv/34EbibZMmDt/embed?api_key=behance1&amp;bgcolor=%23191919" data-modal-title="Direção Criativa e Audiovisual — Chá de Revelação" data-modal-desc="Cobertura em vídeo de um chá de revelação, com edição e efeitos de animação." data-modal-meta="ago/2025 · Behance">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
               <img class="cover-photo" loading="lazy" src="images/cha-de-revelacao.jpg" alt="Direção Criativa e Audiovisual — Chá de Revelação" onerror="if (!this.dataset.fallback) { this.dataset.fallback = '1'; this.src = 'https://mir-s3-cdn-cf.behance.net/project_modules/1400/6c9e84232188231.68974d95ccead.jpg'; } else { this.closest('.work-cover').classList.remove('has-photo'); this.remove(); }">
@@ -4837,6 +4837,7 @@
       modalFrame.innerHTML = '';
       modalVideoList.innerHTML = '';
       modalBackdrop.classList.remove('open');
+      document.body.classList.remove('modal-open');
     }
 
     document.querySelectorAll('.work-card').forEach(function (card) {
@@ -4867,6 +4868,7 @@
           modalFrame.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
         }
         modalBackdrop.classList.add('open');
+        document.body.classList.add('modal-open');
       });
     });
     modalClose.addEventListener('click', closeModal);
@@ -4901,8 +4903,12 @@
       skillModalName.textContent = box.getAttribute('data-skill-name') || '';
       skillModalDesc.textContent = box.getAttribute('data-skill-desc') || '';
       skillModalBackdrop.classList.add('open');
+      document.body.classList.add('modal-open');
     }
-    function closeSkillModal() { skillModalBackdrop.classList.remove('open'); }
+    function closeSkillModal() {
+      skillModalBackdrop.classList.remove('open');
+      document.body.classList.remove('modal-open');
+    }
 
     document.querySelectorAll('.skill-box').forEach(function (box) {
       box.addEventListener('click', function () { openSkillModal(box); });
@@ -5653,6 +5659,7 @@
           if (document.body.classList.contains('edit-mode')) return;
           e.stopPropagation();
           modalBackdrop.classList.remove('open');
+          document.body.classList.remove('modal-open');
           abrir(chave);
         }, true);
       });
@@ -5895,6 +5902,7 @@
             modalFrame.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
           }
           modalBackdrop.classList.add('open');
+          document.body.classList.add('modal-open');
         });
 
         addCardControls(article);
