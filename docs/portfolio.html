@@ -1820,9 +1820,9 @@
   .work-info h4 { font-family: var(--display); font-weight: 600; font-size: 1.05rem; margin: 0 0 8px; line-height: 1.3; }
   .work-info p.desc { font-size: 0.85rem; color: var(--text-dim); margin: 0 0 12px; line-height: 1.55; }
 
-  /* Destaque pontual pro card "A Vida" — video fora do padrao dos demais
-     (pessoal, sem vinculo com trabalho/Behance), sinalizado por uma fonte
-     manuscrita so nessa palavra, nao no titulo inteiro. */
+  /* Destaque pontual pro card "Passa tao rapido" — video fora do padrao dos
+     demais (pessoal, sem vinculo com trabalho/Behance), sinalizado por uma
+     fonte manuscrita no titulo inteiro. */
   .work-info h4 .handwritten {
     font-family: 'Caveat', cursive;
     font-weight: 700;
@@ -2061,6 +2061,15 @@
   .modal-close { cursor: none; color: var(--text-dim); background: none; border: none; }
   .modal-close svg { width: 22px; height: 22px; }
   .modal-box p { font-size: 0.88rem; color: var(--text-dim); margin: 0; line-height: 1.6; }
+
+  /* No mobile o padding fixo do backdrop + box comia boa parte da largura
+     da tela, deixando o video (16:9 dentro do modal-frame) bem menor do
+     que precisava. Reduz os dois pra sobrar mais espaco pro video. */
+  @media (max-width: 640px) {
+    .modal-backdrop { padding: 8px; }
+    .modal-box { padding: 16px; gap: 14px; border-radius: 10px; }
+    .modal-head h3 { font-size: 1.1rem; }
+  }
 
   /* ---------- Skill modal (badge da ferramenta ao clicar) ---------- */
 
@@ -3371,10 +3380,10 @@
 
       <div class="cards-grid" id="audiovisualGrid">
 
-        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="videos/a-vida.mp4" data-modal-title="A Vida">
+        <article class="work-card" data-cursor-label="Ver detalhes" data-modal-embed="videos/a-vida.mp4" data-modal-title="Passa tão rápido">
           <div class="tilt-wrap">
             <div class="work-cover has-photo">
-              <img class="cover-photo" loading="lazy" src="images/a-vida.jpg" alt="A Vida" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
+              <img class="cover-photo" loading="lazy" src="images/a-vida.jpg" alt="Passa tão rápido" onerror="this.closest('.work-cover').classList.remove('has-photo'); this.remove();">
               <span class="badge">Vídeo</span>
               <span class="depth-edge-r"></span><span class="depth-edge-b"></span>
               <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 6h16v12H4zM10 9l5 3-5 3z"/></svg>
@@ -3385,7 +3394,7 @@
             </div>
           </div>
           <div class="work-info">
-            <h4>A <span class="handwritten">Vida</span></h4>
+            <h4><span class="handwritten">Passa tão rápido</span></h4>
           </div>
         </article>
 
