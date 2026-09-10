@@ -5,6 +5,20 @@
 
 <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
 
+<script>
+  /* Detecta hardware fraco (poucos nucleos / pouca RAM, tipico de PCs de
+     igreja/escritorio/kiosk) antes do primeiro paint, pra desligar a
+     animacao do glow ambiente sem flash. Sinal aproximado: navegador nao
+     expoe GPU real pra JS, entao usamos os dois proxies disponiveis. */
+  (function () {
+    var cores = navigator.hardwareConcurrency || 8;
+    var mem = navigator.deviceMemory || 8;
+    if (cores <= 4 || mem <= 4) {
+      document.documentElement.classList.add('low-power');
+    }
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
@@ -260,9 +274,11 @@
     max-width: 640px;
     max-height: 640px;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(48px);
     opacity: 0.22;
     animation: glowDrift 18s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .bg-glow span:nth-child(1) {
@@ -303,6 +319,13 @@
     .bg-glow span { animation: none; }
   }
 
+  /* Hardware fraco (ver deteccao no <script> do head): mancha parada e com
+     blur mais leve — sem a GPU recalculando drift + blur o tempo todo. */
+  html.low-power .bg-glow span {
+    animation: none;
+    filter: blur(32px);
+  }
+
   ::selection { background: var(--accent); color: var(--accent-ink); }
   ::-webkit-scrollbar { width: 12px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -330,6 +353,7 @@
     z-index: 999;
     pointer-events: none;
     border-radius: 50%;
+    will-change: transform;
     transition: opacity 0.2s ease, width 0.25s cubic-bezier(.2,.8,.2,1), height 0.25s cubic-bezier(.2,.8,.2,1), background 0.25s ease, border-color 0.25s ease;
   }
 
@@ -776,7 +800,7 @@
   body.party .bg-glow span {
     opacity: 0.5;
     animation-duration: 5s !important;
-    filter: blur(60px);
+    filter: blur(40px);
   }
 
   body.party .marquee-track { animation-duration: 9s; }
