@@ -203,7 +203,10 @@
   .assinatura {
     display: flex; align-items: center; gap: 13px;
     margin: 0 0 22px; font-size: 0.74rem;
-    letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    /* --text-faint (3.46:1) nao alcanca o minimo sobre a massa de cor da
+       capa, que e clara e muda enquanto a pessoa le */
+    color: var(--text-dim);
   }
   .assinatura i { width: 40px; height: 1px; background: var(--line); display: block; }
 
@@ -253,7 +256,15 @@
     border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
     margin-top: 34px;
   }
-  .numeros > div { background: var(--bg-2); padding: 28px 24px; }
+  /* Fundo SOLIDO e opaco: o degrade da secao passava por tras e cada
+     celula saia de uma cor, como se fossem cards diferentes. */
+  .numeros > div {
+    background: var(--bg-2);
+    padding: 28px 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .numeros { position: relative; z-index: 1; background: var(--line); }
   .numeros b {
     display: block; font-family: var(--mega); font-weight: 400;
     font-size: clamp(2.2rem, 5.5vw, 3.4rem); line-height: 1;
@@ -367,13 +378,29 @@
   .fim .wrap { display: flex; flex-direction: column; align-items: center; }
   .fim .lede { margin-left: auto; margin-right: auto; }
   .contatos { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; margin-top: 32px; }
+  /* Pastilha clara e solida, como no portfolio.html: o icone vive num
+     circulo proprio em vez de flutuar sobre o fundo. Isso garante o
+     contraste mesmo quando a massa de cor da capa passa por tras. */
   .contatos a {
-    width: 46px; height: 46px; display: grid; place-items: center;
-    border: 1px solid var(--line); border-radius: 50%; color: var(--text-dim);
-    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    width: 48px; height: 48px; display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    color: var(--accent);
+    box-shadow: var(--sombra);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .contatos a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-3px); }
+  .contatos a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-alta);
+  }
+  /* na faixa invertida a pastilha continua clara — e o que a destaca */
+  .cena.invertida .contatos a { background: #FFFFFF; border-color: transparent; color: #0A7767; }
   .contatos svg { width: 19px; height: 19px; }
+  /* na abertura seguem o alinhamento do texto, nao o centro do rodape */
+  .abertura-contatos { justify-content: flex-start; margin-top: 30px; }
 
   footer { padding: 38px 0 54px; text-align: center; color: var(--text-faint); font-size: 0.8rem; border-top: 1px solid var(--line); margin-top: 30px; }
 
@@ -870,6 +897,9 @@
     margin-top: 18px; font-size: 0.86rem; font-weight: 600;
     color: var(--accent);
   }
+  /* Na secao invertida o verde escuro do tema claro cai para ~3.4:1 sobre
+     o fundo escuro. Tom claro da mesma familia devolve o contraste. */
+  .cena.invertida .abrir-case { color: #4FE3CD; }
   .abrir-case svg { width: 15px; height: 15px; }
   .projeto[data-case]:hover .abrir-case svg { transform: translateX(3px); }
   .abrir-case svg { transition: transform 0.25s ease; }
@@ -969,7 +999,7 @@
   .modal-backdrop.open { opacity: 1; visibility: visible; }
   .modal-box {
     position: relative;
-    width: min(420px, 100%);
+    width: min(460px, 100%);
     background: var(--bg-2);
     border: 1px solid var(--line);
     border-radius: 20px;
@@ -996,31 +1026,67 @@
   .modal-close svg { width: 17px; height: 17px; }
 
   /* O distintivo recebe a cor da marca e o logo em <img>, escrito pelo JS. */
+  /* Badge da ferramenta — igual ao do portfolio.html.
+     `has-icon` tira o fundo quando existe logo colorido (o ícone fica
+     sozinho, com sombra na cor da marca); `icon-mono` devolve o fundo
+     em gradiente para logos de contorno, que ficam brancos por cima. */
   .skill-modal-badge {
-    width: 78px; height: 78px;
-    margin: 0 auto 18px;
-    display: grid; place-items: center;
-    border-radius: 20px;
-    background: var(--skill-color, var(--accent));
-    box-shadow: var(--sombra);
+    width: 132px;
+    aspect-ratio: 1;
+    border-radius: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(155deg, color-mix(in srgb, var(--skill-color, var(--accent)) 92%, white 8%), color-mix(in srgb, var(--skill-color, var(--accent)) 68%, black 32%));
+    box-shadow: 0 18px 42px -12px color-mix(in srgb, var(--skill-color, var(--accent)) 65%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
+    margin: 0 auto;
   }
-  .skill-modal-badge img { width: 42px; height: 42px; object-fit: contain; }
-  /* As classes vem no BADGE (icon-mono/icon-wide), escritas pelo JS
-     migrado — nao na propria <img>. */
-  .skill-modal-badge.icon-mono img { filter: brightness(0) invert(1); }
-  .skill-modal-badge.icon-wide img { width: 58px; }
-  .skill-modal-badge.icon-photo img { width: 100%; height: 100%; border-radius: 20px; }
   .skill-modal-badge span {
     font-family: var(--display);
     font-weight: 700;
-    font-size: 1.6rem;
+    font-size: 2.4rem;
+    letter-spacing: -0.02em;
     color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.25);
   }
+  .skill-modal-badge.has-icon { background: none; box-shadow: none; }
+  .skill-modal-badge.has-icon.icon-mono {
+    background: linear-gradient(155deg, color-mix(in srgb, var(--skill-color, var(--accent)) 92%, white 8%), color-mix(in srgb, var(--skill-color, var(--accent)) 68%, black 32%));
+    box-shadow: 0 18px 42px -12px color-mix(in srgb, var(--skill-color, var(--accent)) 65%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+  .skill-modal-badge img { width: 100%; height: 100%; object-fit: contain; }
+  .skill-modal-badge.icon-mono img {
+    width: 56%;
+    height: 56%;
+    filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+  }
+  .skill-modal-badge.has-icon:not(.icon-mono):not(.icon-wide):not(.icon-photo) {
+    filter: drop-shadow(0 14px 30px color-mix(in srgb, var(--skill-color, var(--accent)) 45%, transparent));
+  }
+  /* logo horizontal (ex. vMix): não cabe num quadrado, vira faixa larga */
+  .skill-modal-badge.icon-wide {
+    width: 100%;
+    max-width: 260px;
+    aspect-ratio: 16 / 7;
+    border-radius: 18px;
+    padding: 0 22px;
+    background: linear-gradient(155deg, color-mix(in srgb, var(--skill-color, var(--accent)) 92%, white 8%), color-mix(in srgb, var(--skill-color, var(--accent)) 68%, black 32%));
+    box-shadow: 0 18px 42px -12px color-mix(in srgb, var(--skill-color, var(--accent)) 65%, transparent), inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+  .skill-modal-badge.icon-wide img { object-fit: contain; }
+  .skill-modal-badge.icon-photo {
+    background: none;
+    box-shadow: 0 18px 42px -14px rgba(0,0,0,0.45);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .skill-modal-badge.icon-photo img { object-fit: cover; }
+
   #skillModalName {
     font-family: var(--display);
-    font-size: 1.22rem;
+    font-size: 1.4rem;
     font-weight: 600;
-    margin: 0 0 10px;
+    margin: 22px 0 10px;
   }
   #skillModalDesc {
     margin: 0 auto;
@@ -1028,6 +1094,73 @@
     color: var(--text-dim);
     font-size: 0.93rem;
     line-height: 1.6;
+  }
+
+
+  /* ================= Cor por seção =================
+     O branco puro de ponta a ponta achatava a leitura. Cada seção ganha
+     um tom próprio, em degradê suave, e duas delas invertem para escuro
+     — o contraste é o que marca a virada de capítulo.
+
+     Os tons saem do tema: no claro são lavados; no escuro, profundos.
+     A camada é `::before` pintada uma vez, sem custo por quadro. */
+  .cena { isolation: isolate; }
+  .cena::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--tom-secao, transparent);
+    pointer-events: none;
+  }
+
+  /* --- tema claro --- */
+  #sobre           { --tom-secao: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 7%, transparent)); }
+  #trajetoria      { --tom-secao: linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, transparent), color-mix(in srgb, var(--accent-2) 6%, transparent)); }
+  #ferramentas     { --tom-secao: linear-gradient(180deg, color-mix(in srgb, var(--accent-2) 6%, transparent), transparent); }
+  #audiovisual     { --tom-secao: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent-2) 8%, transparent) 55%, transparent); }
+  #contato         { --tom-secao: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 10%, transparent)); }
+
+  /* --- seções invertidas: a virada de capítulo ---
+     Sangram até a borda da tela. O `overflow-x: clip` é obrigatório: sem
+     ele o 50vw conta a barra de rolagem, a seção estoura alguns px de
+     cada lado e o <html> rola na horizontal. */
+  .cena.invertida {
+    margin: 0 calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+    overflow-x: clip;
+    background: var(--fundo-invertido);
+    color: var(--texto-invertido);
+  }
+  .cena.invertida::before { display: none; }
+  .cena.invertida .corpo,
+  .cena.invertida .lede,
+  .cena.invertida .rotulo,
+  .cena.invertida .linha-tempo p,
+  .cena.invertida .galeria-info p { color: var(--texto-invertido-dim); }
+  .cena.invertida h2,
+  .cena.invertida h3,
+  .cena.invertida .titulo-projeto { color: var(--texto-invertido); }
+  /* cards têm fundo próprio e não acompanham a inversão: sem isto o
+     título deles fica claro sobre o branco do card */
+  .cena.invertida .galeria-item,
+  .cena.invertida .mini,
+  .cena.invertida .numeros > div { color: var(--text); }
+  .cena.invertida .galeria-item h3,
+  .cena.invertida .mini h3 { color: var(--text); }
+  .cena.invertida .galeria-item p,
+  .cena.invertida .mini p { color: var(--text-dim); }
+
+  :root, [data-tema="claro"] {
+    --fundo-invertido: #0E1317;
+    --texto-invertido: #F3F5F7;
+    --texto-invertido-dim: #A7AFB7;
+  }
+  [data-tema="escuro"] {
+    /* no escuro a inversão é para CLARO — a virada continua existindo */
+    --fundo-invertido: #14181D;
+    --texto-invertido: #F3F5F7;
+    --texto-invertido-dim: #A7AFB7;
   }
 
 </style>
@@ -1076,6 +1209,14 @@
           <div class="acoes" data-cena>
             <a href="#contato" class="btn principal">Vamos conversar</a>
             <a href="#desenvolvimento" class="btn vazado">Ver trabalhos</a>
+          </div>
+
+          <div class="contatos abertura-contatos" data-cascata>
+<a href="mailto:mp030606@gmail.com" aria-label="E-mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></a>
+        <a href="https://www.linkedin.com/in/marcos-paulo-tavares-garcia-dos-santos-b22580221/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <a href="https://github.com/mpaulinhu" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 00-6.2 0C6.6 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a>
+        <a href="https://www.behance.net/mpaulin" target="_blank" rel="noopener" aria-label="Behance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h6a3 3 0 010 6H4zM4 12h6.5a3.2 3.2 0 010 6.4H4zM15 4h5M14.5 12a4 4 0 117.8 1.4h-6.2"/></svg></a>
+        <a href="https://www.instagram.com/mpaulinhu" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg></a>
           </div>
         </div>
 
@@ -1163,7 +1304,7 @@
     </div>
   </section>
 
-  <section class="cena" id="desenvolvimento">
+  <section class="cena invertida" id="desenvolvimento">
     <div class="wrap">
       <p class="rotulo" data-cena><b>04</b>Desenvolvimento</p>
       <h2 class="grande" data-titulo>O que eu construí</h2>
@@ -1473,7 +1614,7 @@
     </div>
   </section>
 
-  <section class="cena" id="ia">
+  <section class="cena invertida" id="ia">
     <div class="wrap">
       <p class="rotulo" data-cena><b>06</b>IA aplicada</p>
       <h2 class="grande" data-titulo>Ferramenta de produção, não novidade</h2>
