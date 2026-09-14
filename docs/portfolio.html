@@ -267,6 +267,13 @@
     pointer-events: none;
   }
 
+  /* O desfoque é PINTADO, não filtrado.
+     `filter: blur(48px)` numa bolha de 46vw obriga o navegador a recalcular
+     ~880px de desfoque a cada quadro — e com `scale` na animação o cache da
+     GPU é invalidado junto, então isso acontecia 60 vezes por segundo. Num
+     monitor grande era o que travava a página inteira, placa boa ou não.
+     Um `radial-gradient` com paradas suaves dá o mesmo resultado visual e é
+     desenhado uma vez só: a animação depois só desloca a textura pronta. */
   .bg-glow span {
     position: absolute;
     width: 46vw;
@@ -274,7 +281,6 @@
     max-width: 640px;
     max-height: 640px;
     border-radius: 50%;
-    filter: blur(48px);
     opacity: 0.22;
     animation: glowDrift 18s ease-in-out infinite;
     will-change: transform;
@@ -284,14 +290,24 @@
   .bg-glow span:nth-child(1) {
     top: -10%;
     left: -8%;
-    background: var(--accent);
+    background: radial-gradient(
+      circle closest-side,
+      var(--accent) 0%,
+      color-mix(in srgb, var(--accent) 55%, transparent) 42%,
+      transparent 72%
+    );
     animation-duration: 16s;
   }
 
   .bg-glow span:nth-child(2) {
     bottom: -14%;
     right: -10%;
-    background: var(--accent-2);
+    background: radial-gradient(
+      circle closest-side,
+      var(--accent-2) 0%,
+      color-mix(in srgb, var(--accent-2) 55%, transparent) 42%,
+      transparent 72%
+    );
     animation-duration: 20s;
     animation-delay: -6s;
   }
@@ -303,16 +319,26 @@
     height: 30vw;
     max-width: 420px;
     max-height: 420px;
-    background: var(--accent);
+    background: radial-gradient(
+      circle closest-side,
+      var(--accent) 0%,
+      color-mix(in srgb, var(--accent) 55%, transparent) 42%,
+      transparent 72%
+    );
     opacity: 0.14;
     animation-duration: 22s;
     animation-delay: -12s;
   }
 
+  /* Sem `scale`: mudar o tamanho força o navegador a redesenhar a bolha a
+     cada quadro, enquanto `translate3d` sozinho é só reposicionar uma
+     textura que já existe — a diferença entre repintar e mover. O
+     deslocamento foi um pouco maior para compensar a amplitude que o
+     scale dava ao efeito. */
   @keyframes glowDrift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(9vw, 6vh) scale(1.15); }
-    66% { transform: translate(-6vw, 9vh) scale(0.9); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    33% { transform: translate3d(11vw, 7vh, 0); }
+    66% { transform: translate3d(-8vw, 11vh, 0); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -798,16 +824,22 @@
   /* ---------- Easter egg: type "mix" to turn the glow up ---------- */
 
   body.party .bg-glow span {
+    /* Sem `filter: blur` aqui pelo mesmo motivo do fundo normal — o glow
+       agora é pintado como gradiente, não filtrado; o easter egg só
+       intensifica opacidade e velocidade, sem reintroduzir o custo. */
     opacity: 0.5;
     animation-duration: 5s !important;
-    filter: blur(40px);
   }
 
   body.party .marquee-track { animation-duration: 9s; }
 
+  /* hue-rotate aqui é barato: só 2 elementos de texto, não o fundo inteiro —
+     por isso, ao contrário do glow, não precisou de reescrita, só o
+     will-change para o compositor não redescobrir a camada a cada quadro. */
   body.party .grad-text,
   body.party .brand {
     animation: partyHue 3.5s linear infinite;
+    will-change: filter;
   }
 
   @keyframes partyHue {
