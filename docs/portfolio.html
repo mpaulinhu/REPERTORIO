@@ -1811,8 +1811,67 @@
       repeating-linear-gradient(-45deg, color-mix(in srgb, var(--accent-2) 14%, transparent) 0 1px, transparent 1px 34px);
   }
 
+  /* ---------- As seções também são cenas 3D ----------
+     Mesma mecânica da capa: o JS escreve --mx/--my na seção que está sob o
+     ponteiro, e cada camada dentro dela responde com seu próprio peso.
+     Aqui os valores são menores que os da capa de propósito — isto é área de
+     leitura, e movimento demais atrás de um parágrafo cansa. */
+  /* Sem `transform-style: preserve-3d` aqui de propósito: ele isola o
+     conteúdo em camadas 3D próprias, e o `backdrop-filter` do header sticky
+     deixa de enxergar a página atrás — a barra vira um retângulo cinza
+     chapado sobre o conteúdo. As camadas abaixo só se deslocam (translate),
+     não precisam de 3D aninhado; o `perspective` basta para dar o --z. */
+  section.block.chapter-dark,
+  section.block.chapter-light {
+    perspective: 1100px;
+  }
+
+  .chapter-dark .section-head,
+  .chapter-light .section-head,
+  .chapter-dark .cards-grid,
+  .chapter-light .cards-grid,
+  .chapter-dark .skills-cards,
+  .chapter-light .skills-cards {
+    transform: translate3d(
+      calc(var(--mx, 0) * var(--peso, 1) * 12px),
+      calc(var(--my, 0) * var(--peso, 1) * 8px),
+      var(--z, 0px)
+    );
+    will-change: transform;
+  }
+
+  /* O cabeçalho fica à frente e se move mais que a grade de cards: separa o
+     título do conteúdo sem precisar de mais espaço em branco. */
+  .chapter-dark .section-head,
+  .chapter-light .section-head { --peso: 1.4; --z: 40px; }
+  .chapter-dark .cards-grid,
+  .chapter-light .cards-grid,
+  .chapter-dark .skills-cards,
+  .chapter-light .skills-cards { --peso: 0.6; --z: 14px; }
+
+  /* A textura de fundo continua com o parallax de scroll (--par) e ganha o
+     desvio de mouse por cima — os dois no mesmo transform, senão um
+     sobrescreve o outro. Vai no sentido contrário, como o fundo da capa. */
+  .chapter-tex {
+    transform:
+      translate3d(
+        calc(var(--mx, 0) * -16px),
+        calc(var(--par, 0px) + var(--my, 0) * -10px),
+        0
+      );
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .chapter-dark .section-head, .chapter-light .section-head,
+    .chapter-dark .cards-grid, .chapter-light .cards-grid,
+    .chapter-dark .skills-cards, .chapter-light .skills-cards { transform: none; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .chapter-tex { transform: none; }
+    .chapter-dark .section-head, .chapter-light .section-head,
+    .chapter-dark .cards-grid, .chapter-light .cards-grid,
+    .chapter-dark .skills-cards, .chapter-light .skills-cards { transform: none; }
   }
 
   /* Telas pequenas: a textura fina vira ruído e disputa com o texto. */
@@ -6735,31 +6794,39 @@
        scroll). Só as camadas internas se movem. */
 
     (function () {
-      var hero = document.querySelector('.hero');
-      if (!hero) return;
       if (isCoarse) return;   /* toque: sem ponteiro, sem cena */
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      var alvoX = 0, alvoY = 0;   /* para onde o ponteiro pede */
-      var atualX = 0, atualY = 0; /* onde a cena está de fato */
+      /* Toda cena usa o mesmo motor: a capa e cada seção-capítulo. */
+      var cenas = [].slice.call(
+        document.querySelectorAll('.hero, section.block.chapter-dark, section.block.chapter-light')
+      ).map(function (el) {
+        return { el: el, alvoX: 0, alvoY: 0, x: 0, y: 0 };
+      });
+      if (!cenas.length) return;
+
       var rodando = false;
-      var dentro = false;
 
       function quadro() {
-        /* 0.08 = quão rápido persegue o alvo. Mais baixo, mais preguiçoso. */
-        atualX += (alvoX - atualX) * 0.08;
-        atualY += (alvoY - atualY) * 0.08;
+        var vivo = false;
 
-        hero.style.setProperty('--mx', atualX.toFixed(4));
-        hero.style.setProperty('--my', atualY.toFixed(4));
+        for (var i = 0; i < cenas.length; i++) {
+          var c = cenas[i];
+          /* 0.08 = quão rápido persegue o alvo. Mais baixo, mais preguiçoso.
+             É essa perseguição que dá peso de objeto físico: sem ela a cena
+             gruda no cursor e o movimento fica seco. */
+          c.x += (c.alvoX - c.x) * 0.08;
+          c.y += (c.alvoY - c.y) * 0.08;
 
-        /* Para o loop quando a cena praticamente alcançou o alvo — sem isso
-           o rAF rodaria para sempre depois do primeiro movimento do mouse. */
-        if (Math.abs(alvoX - atualX) > 0.001 || Math.abs(alvoY - atualY) > 0.001) {
-          requestAnimationFrame(quadro);
-        } else {
-          rodando = false;
+          c.el.style.setProperty('--mx', c.x.toFixed(4));
+          c.el.style.setProperty('--my', c.y.toFixed(4));
+
+          if (Math.abs(c.alvoX - c.x) > 0.001 || Math.abs(c.alvoY - c.y) > 0.001) vivo = true;
         }
+
+        /* Para o loop quando todas alcançaram o alvo — sem isso o rAF rodaria
+           para sempre depois do primeiro movimento do mouse. */
+        if (vivo) requestAnimationFrame(quadro); else rodando = false;
       }
 
       function acordar() {
@@ -6767,23 +6834,49 @@
       }
 
       window.addEventListener('mousemove', function (e) {
-        /* só calcula enquanto a capa está em cena: rolou para o conteúdo,
-           não há o que mover */
-        var r = hero.getBoundingClientRect();
-        dentro = r.bottom > 0 && r.top < window.innerHeight;
-        if (!dentro) return;
+        var alturaTela = window.innerHeight;
 
-        alvoX = (e.clientX / window.innerWidth) * 2 - 1;
-        alvoY = (e.clientY / window.innerHeight) * 2 - 1;
+        for (var i = 0; i < cenas.length; i++) {
+          var c = cenas[i];
+          var r = c.el.getBoundingClientRect();
+          var visivel = r.bottom > 0 && r.top < alturaTela;
+
+          if (!visivel) {
+            /* fora de vista volta ao repouso, para não reaparecer torta */
+            c.alvoX = 0; c.alvoY = 0;
+            continue;
+          }
+
+          /* Posição do ponteiro DENTRO da seção (-1..1), não da janela: cada
+             cena reage ao mouse em relação a si mesma, então o efeito
+             acontece onde a pessoa está olhando. */
+          c.alvoX = ((e.clientX - r.left) / r.width) * 2 - 1;
+          c.alvoY = ((e.clientY - r.top) / r.height) * 2 - 1;
+          /* uma seção alta dá valores enormes fora da faixa; limita em -1..1 */
+          c.alvoX = Math.max(-1, Math.min(1, c.alvoX));
+          c.alvoY = Math.max(-1, Math.min(1, c.alvoY));
+        }
         acordar();
       }, { passive: true });
 
-      /* Ponteiro saiu da janela: a cena volta ao repouso em vez de congelar
-         torta no último ponto conhecido. */
+      /* Ponteiro saiu da janela: as cenas voltam ao repouso em vez de
+         congelar tortas no último ponto conhecido. */
       document.addEventListener('mouseleave', function () {
-        alvoX = 0; alvoY = 0;
+        for (var i = 0; i < cenas.length; i++) { cenas[i].alvoX = 0; cenas[i].alvoY = 0; }
         acordar();
       });
+
+      /* Rolar muda quais seções estão em cena; sem isto uma seção que entra
+         só reage depois do próximo movimento do mouse. */
+      window.addEventListener('scroll', function () {
+        var alturaTela = window.innerHeight;
+        for (var i = 0; i < cenas.length; i++) {
+          var c = cenas[i];
+          var r = c.el.getBoundingClientRect();
+          if (!(r.bottom > 0 && r.top < alturaTela)) { c.alvoX = 0; c.alvoY = 0; }
+        }
+        acordar();
+      }, { passive: true });
     })();
 
     /* ---------- Hero scene tilt follows mouse ---------- */
