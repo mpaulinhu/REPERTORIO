@@ -974,8 +974,12 @@
 
       var claro = true;
       function lerTema() {
-        var attr = document.documentElement.getAttribute('data-theme');
-        claro = attr ? attr === 'light'
+        /* A landing usa `data-tema` com claro/escuro; o shader veio do
+           portfolio.html, que usava `data-theme` com light/dark. Sem esta
+           tradução o fundo ficava sempre na paleta clara — inclusive no
+           modo escuro, que era o sintoma visível. */
+        var attr = document.documentElement.getAttribute('data-tema');
+        claro = attr ? attr === 'claro'
                      : !window.matchMedia('(prefers-color-scheme: dark)').matches;
       }
       lerTema();
@@ -1159,7 +1163,7 @@
       /* trocar o tema troca paleta, teto de escurecimento e cor da trilha —
          o quadro() aqui repinta na hora, sem esperar o proximo tick */
       var obs = new MutationObserver(function () { lerTema(); lerAlvo(); quadro(); });
-      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema'] });
 
       quadro();
       document.documentElement.classList.add('bg-vivo');
