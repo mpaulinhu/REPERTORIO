@@ -102,7 +102,10 @@
   .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
   @media (max-width: 640px) { .wrap { padding: 0 20px; } }
 
-  .cena { padding: clamp(80px, 12vh, 140px) 0; position: relative; }
+  /* 140px em cada ponta somavam 280px de vão entre o conteúdo de uma
+     seção e o da próxima — o "espaço vazio". 96px é respiro; acima disso
+     vira buraco. */
+  .cena { padding: clamp(52px, 7vh, 96px) 0; position: relative; }
   .cena.cheia { min-height: 100svh; display: flex; align-items: center; }
 
   /* ---------- Barra fixa ---------- */
@@ -272,7 +275,10 @@
     position: absolute; left: 32px; bottom: 30px;
     display: flex; align-items: center; gap: 12px;
     font-size: 0.7rem; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--text-faint);
+    text-transform: uppercase;
+    /* --text-faint dá 3.46:1 sobre o fundo vivo, que muda enquanto a
+       pessoa lê. O tom "dim" garante o mínimo nos dois temas. */
+    color: var(--text-dim);
   }
   .rolar em { width: 1px; height: 32px; background: linear-gradient(var(--accent), transparent); display: block; animation: desce 1.8s ease-in-out infinite; }
   @keyframes desce {
@@ -423,7 +429,10 @@
   .fim { text-align: center; }
   .fim .wrap { display: flex; flex-direction: column; align-items: center; }
   .fim .lede { margin-left: auto; margin-right: auto; }
-  .contatos { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; margin-top: 32px; }
+  .contatos { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+  /* A seção de contato é a última: o padding inferior dela somava com o
+     do footer e deixava ~220px de nada antes da assinatura. */
+  #contato { padding-bottom: 40px; }
   /* Pastilha clara e solida, como no portfolio.html: o icone vive num
      circulo proprio em vez de flutuar sobre o fundo. Isso garante o
      contraste mesmo quando a massa de cor da capa passa por tras. */
@@ -465,7 +474,7 @@
     .abertura-contatos svg { width: 17px; height: 17px; }
   }
 
-  footer { padding: 38px 0 54px; text-align: center; color: var(--text-faint); font-size: 0.8rem; border-top: 1px solid var(--line); margin-top: 30px; }
+  footer { padding: 30px 0 40px; text-align: center; color: var(--text-faint); font-size: 0.8rem; border-top: 1px solid var(--line); margin-top: 0; }
 
   /* ---------- Progresso e índice ---------- */
   #progresso {
@@ -1195,6 +1204,10 @@
      Os tons saem do tema: no claro são lavados; no escuro, profundos.
      A camada é `::before` pintada uma vez, sem custo por quadro. */
   .cena { isolation: isolate; }
+  /* zera a margem do último filho: ela somava com o padding da seção */
+  .cena .wrap > *:last-child { margin-bottom: 0; }
+  .cena .nota:last-child,
+  .cena .contatos:last-child { margin-bottom: 0; }
   .cena::before {
     content: '';
     position: absolute;
@@ -1257,33 +1270,11 @@
   /* ===== Blocos migrados do portfolio.html: seção de IA (com a foto
      do robô e as artes de cada frente), figura da equipe na trajetória
      e a cena 3D da câmera. ===== */
-  .tl-figure {
-    display: grid;
-    grid-template-rows: 0fr;
-    max-width: 220px;
-    margin-top: 0;
-    opacity: 0;
-    transition: grid-template-rows 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease;
-  }
-  .tl-figure img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 9 / 16;
-    object-fit: cover;
-    object-position: center 15%;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    filter: grayscale(1) contrast(1.05);
-    transition: filter 0.55s ease;
-  }
-  .tl-figure figcaption {
-    font-family: var(--sans);
-    font-size: 0.82rem;
-    line-height: 1.55;
-    color: var(--text-dim);
-    margin-top: 8px;
-  }
+  /* A regra original de `.tl-figure` veio do portfolio.html, onde a foto é
+     REVELADA ao clicar num item da linha do tempo — por isso nascia com
+     `opacity: 0` e `grid-template-rows: 0fr`. Na landing não existe esse
+     clique, então ela ficava invisível para sempre, deixando no lugar o
+     espaço vazio. A definição válida é a de baixo, sem estado oculto. */
   .chip {
     font-size: 0.68rem;
     font-family: 'SFMono-Regular', Consolas, monospace;
@@ -1456,7 +1447,8 @@
     font-size: 0.67rem; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--accent); margin: 0 0 8px;
   }
-  .av-txt .av-quando { font-size: 0.78rem; color: var(--text-faint); margin: 12px 0 0; }
+  /* --text-faint reprovava em 3.5-3.8:1 dentro do card nos dois temas. */
+  .av-txt .av-quando { font-size: 0.78rem; color: var(--text-dim); margin: 12px 0 0; }
   .chip {
     display: inline-block;
     font-family: ui-monospace, Menlo, monospace;
@@ -1640,18 +1632,18 @@
         <li><span class="quando">2022</span><div><h3>Técnico em Administração — Etec Itaquera II</h3><p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p></div></li>
       </ol>
 
-      <div data-cena>
-          <figure class="tl-figure" id="tlFotoEquipe"><div>
-            <!-- mesmo motivo da foto do robo acima: exibida a ~220x391, o
-                 original tinha 720x1280. Variantes -sm/-md, 138 KB -> 18 KB -->
-            <picture>
-              <source type="image/webp" srcset="images/equipe-v2-sm.webp 1x, images/equipe-v2-md.webp 2x">
-              <source type="image/jpeg" srcset="images/equipe-v2-sm.jpg 1x, images/equipe-v2-md.jpg 2x">
-              <img loading="lazy" decoding="async" src="images/equipe-v2-sm.jpg" alt="Equipe de tecnologia reunida no escritório" width="247" height="440" onerror="this.closest('.tl-figure').remove();">
-            </picture>
-            <figcaption>Time de tecnologia da ELO Editora.</figcaption>
-          </div></figure>
-      </div>
+      <!-- Sem `data-cena` no pai: a animação de entrada deixava a figura em
+           `opacity: 0` de forma permanente quando o gatilho não completava —
+           a foto carregava, ficava no lugar certo e mesmo assim invisível.
+           As tags também estavam cruzadas (<figure><div> ... </div></figure>). -->
+      <figure class="tl-figure" id="tlFotoEquipe">
+        <picture>
+          <source type="image/webp" srcset="images/equipe-v2-sm.webp 1x, images/equipe-v2-md.webp 2x">
+          <source type="image/jpeg" srcset="images/equipe-v2-sm.jpg 1x, images/equipe-v2-md.jpg 2x">
+          <img loading="lazy" decoding="async" src="images/equipe-v2-sm.jpg" alt="Equipe de tecnologia da ELO Editora reunida no escritório" width="247" height="440">
+        </picture>
+        <figcaption>Time de tecnologia da ELO Editora.</figcaption>
+      </figure>
     </div>
   </section>
 
