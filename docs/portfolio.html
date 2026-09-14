@@ -1038,6 +1038,104 @@
      acima dele. Sem isso a tipografia ficaria atras da arte. */
   .hero > .wrap { position: relative; z-index: 2; }
 
+  /* ================= Capa como cena 3D =================
+     As camadas da capa vivem em profundidades diferentes e respondem ao
+     mouse: quem está "à frente" se move mais que quem está ao fundo, que é
+     o que o olho lê como profundidade real (paralaxe de movimento).
+
+     Duas variáveis alimentam tudo, escritas pelo JS uma vez por quadro:
+       --mx / --my  →  -1..1, a posição do ponteiro a partir do centro
+
+     Cada camada só multiplica essas variáveis pelo seu próprio peso. Assim
+     um único listener move a cena inteira, sem cada elemento fazer conta
+     própria — e são transforms puros, sem tocar em layout. */
+  .hero {
+    /* perspectiva curta = efeito acentuado (o pedido). Valores altos
+       achatam a cena e o 3D vira quase translação. */
+    perspective: 900px;
+    perspective-origin: 50% 45%;
+  }
+
+  /* `preserve-3d` precisa existir em TODA a cadeia entre a perspectiva e a
+     camada — um único ancestral em `flat` (o padrão) achata tudo abaixo dele
+     e o transform 3D das filhas é descartado sem erro nenhum.
+     `.hero-type` é o container do texto: sem ele aqui, meta/lede/ações/social
+     ficavam imóveis enquanto título e retrato se moviam. */
+  .hero .hero-grid,
+  .hero .hero-type { transform-style: preserve-3d; }
+
+  /* Camada genérica: cada uma define --z (profundidade) e --peso (o quanto
+     reage ao mouse). A rotação é comum a todas, então a cena inteira gira
+     junto como um bloco, e o --z separa os planos dentro dela. */
+  .cena-3d {
+    --peso: 1;
+    --z: 0px;
+    /* O deslocamento é calculado em número puro e só no fim vira pixel
+       (`* 1px`). Encadear dois fatores direto num comprimento
+       (`var(--mx) * 26px * var(--peso)`) produz calc inválido — o navegador
+       descarta a declaração inteira em silêncio e o elemento fica parado,
+       mesmo com as variáveis chegando corretas. */
+    transform:
+      translate3d(
+        calc(var(--mx, 0) * var(--peso) * 26px),
+        calc(var(--my, 0) * var(--peso) * 18px),
+        var(--z)
+      )
+      rotateY(calc(var(--mx, 0) * var(--giro, 1) * 6deg))
+      rotateX(calc(var(--my, 0) * var(--giro, 1) * -4deg));
+    /* sem transition: o JS já entrega valor suavizado quadro a quadro; uma
+       transition aqui somaria um segundo atraso e daria sensação de arrasto */
+    will-change: transform;
+  }
+
+  /* `animation: fadeUp ... both` (entrada da capa) fixa
+     `transform: translateY(0)` no elemento para sempre — e animação vence
+     transform de regra normal na cascata. Enquanto ela existisse nestes
+     elementos, o transform da cena 3D era calculado e ignorado: variáveis
+     certas, elemento imóvel.
+     A entrada continua existindo, só que ela agora anima OPACIDADE
+     (`fadeIn`), que não disputa com o transform. O deslocamento de entrada
+     era imperceptível a 14px e não faz falta. */
+  .hero-meta.cena-3d,
+  .hero .lede.cena-3d,
+  .hero-portrait.cena-3d,
+  .hero .actions.cena-3d,
+  .hero-social.cena-3d {
+    animation-name: fadeIn;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Profundidades: o retrato é o plano da frente, o texto fica no meio,
+     os detalhes pequenos flutuam mais porque são leves. */
+  .hero-portrait.cena-3d { --peso: 1.3;  --z: 70px; }
+  .hero-title.cena-3d    { --peso: 0.7;  --z: 34px; }
+  .hero-meta.cena-3d     { --peso: 1.6;  --z: 52px; }
+  .hero .lede.cena-3d    { --peso: 0.5;  --z: 16px; }
+  .hero .actions.cena-3d { --peso: 0.9;  --z: 28px; }
+  .hero-social.cena-3d   { --peso: 1.4;  --z: 44px; }
+
+  /* O fundo vai ao CONTRÁRIO: é o que vende a profundidade, porque o plano
+     distante se desloca no sentido oposto ao olhar.
+     Ele não gira junto (`--giro: 0`) e é ampliado: inclinar uma camada que
+     cobre exatamente o container descobre o canto e aparece uma cunha do
+     fundo da página atrás dela. */
+  .bg-stage.cena-3d {
+    --peso: -0.3;
+    --giro: 0;
+    --z: 0px;
+    inset: -8%;
+  }
+
+  /* Sem mouse não há cena: em toque o transform some e o layout fica reto. */
+  @media (hover: none), (pointer: coarse) {
+    .cena-3d { transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cena-3d { transform: none; }
+  }
+
   /* o hero ocupa a primeira tela — a cortina (losango) abre por tras dele */
   @media (min-width: 820px) {
     .hero {
@@ -3346,7 +3444,7 @@
          hero (antes era fixed atras da pagina inteira) — a capa e expressiva,
          o conteudo abaixo e sobrio. Desliga sozinho em prefers-reduced-motion
          e quando o hero sai da tela. -->
-    <div class="bg-stage" aria-hidden="true">
+    <div class="bg-stage cena-3d" aria-hidden="true">
       <canvas id="bgCanvas"></canvas>
       <div class="bg-glow"><span></span><span></span><span></span></div>
     </div>
@@ -3354,18 +3452,18 @@
     <div class="wrap">
       <div class="hero-grid">
         <div class="hero-type">
-          <p class="hero-meta"><span>Marcos Paulo T. G. dos Santos</span><i></i><span>Brasil</span></p>
-          <h1 class="hero-title">
+          <p class="hero-meta cena-3d"><span>Marcos Paulo T. G. dos Santos</span><i></i><span>Brasil</span></p>
+          <h1 class="hero-title cena-3d">
             <span class="hl"><i>Áudio,</i></span>
             <span class="hl"><i>imagem</i></span>
             <span class="hl"><i>e <em>código</em>.</i></span>
           </h1>
-          <p class="lede">Especialista audiovisual e de acessibilidade na ELO Editora, em transição para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e escrever código — as duas coisas com o mesmo cuidado técnico.</p>
-          <div class="actions">
+          <p class="lede cena-3d">Especialista audiovisual e de acessibilidade na ELO Editora, em transição para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e escrever código — as duas coisas com o mesmo cuidado técnico.</p>
+          <div class="actions cena-3d">
             <a href="#" class="btn primary" data-cursor-label="Baixar">Download CV</a>
             <a href="mailto:mp030606@gmail.com" class="btn secondary" data-cursor-label="E-mail">Entrar em contato</a>
           </div>
-          <div class="hero-social">
+          <div class="hero-social cena-3d">
             <a href="mailto:mp030606@gmail.com" aria-label="E-mail" data-cursor-label="E-mail">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
             </a>
@@ -3384,7 +3482,7 @@
           </div>
         </div>
 
-        <figure class="hero-portrait">
+        <figure class="hero-portrait cena-3d">
           <picture>
             <source type="image/webp" srcset="images/retrato-recorte-sm.webp 1x, images/retrato-recorte-md.webp 2x">
             <img src="images/retrato-recorte-sm.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="520" height="765" fetchpriority="high" decoding="async">
@@ -6613,12 +6711,80 @@
         var r = card.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width - 0.5;
         var py = (e.clientY - r.top) / r.height - 0.5;
-        wrap.style.transform = 'rotateY(' + (px * 14) + 'deg) rotateX(' + (-py * 14) + 'deg) translateZ(6px)';
+        /* 14deg era discreto demais para se notar em uso real; 22deg com o
+           card saltando 26px à frente dá o relevo pedido sem distorcer a
+           imagem a ponto de parecer defeito. */
+        wrap.style.transform = 'rotateY(' + (px * 22) + 'deg) rotateX(' + (-py * 22) + 'deg) translateZ(26px)';
       });
       card.addEventListener('mouseleave', function () {
         wrap.style.transform = 'rotateY(0) rotateX(0) translateZ(0)';
       });
     });
+
+    /* ---------- Capa como cena 3D: camadas seguem o mouse ----------
+       Escreve só `--mx`/`--my` no .hero; todo o resto é CSS (cada camada
+       multiplica pelo seu peso). Um listener move a cena inteira.
+
+       O valor é suavizado com interpolação simples: o alvo salta com o
+       ponteiro, o valor aplicado persegue esse alvo. É isso que dá o peso
+       de objeto físico — sem a suavização a cena gruda no cursor e o
+       movimento fica seco.
+
+       NÃO toca no transform do .hero: ele é pinado pelo ScrollTrigger e
+       mexer ali por fora faz o conteúdo tremer (ver o aviso no motor de
+       scroll). Só as camadas internas se movem. */
+
+    (function () {
+      var hero = document.querySelector('.hero');
+      if (!hero) return;
+      if (isCoarse) return;   /* toque: sem ponteiro, sem cena */
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var alvoX = 0, alvoY = 0;   /* para onde o ponteiro pede */
+      var atualX = 0, atualY = 0; /* onde a cena está de fato */
+      var rodando = false;
+      var dentro = false;
+
+      function quadro() {
+        /* 0.08 = quão rápido persegue o alvo. Mais baixo, mais preguiçoso. */
+        atualX += (alvoX - atualX) * 0.08;
+        atualY += (alvoY - atualY) * 0.08;
+
+        hero.style.setProperty('--mx', atualX.toFixed(4));
+        hero.style.setProperty('--my', atualY.toFixed(4));
+
+        /* Para o loop quando a cena praticamente alcançou o alvo — sem isso
+           o rAF rodaria para sempre depois do primeiro movimento do mouse. */
+        if (Math.abs(alvoX - atualX) > 0.001 || Math.abs(alvoY - atualY) > 0.001) {
+          requestAnimationFrame(quadro);
+        } else {
+          rodando = false;
+        }
+      }
+
+      function acordar() {
+        if (!rodando) { rodando = true; requestAnimationFrame(quadro); }
+      }
+
+      window.addEventListener('mousemove', function (e) {
+        /* só calcula enquanto a capa está em cena: rolou para o conteúdo,
+           não há o que mover */
+        var r = hero.getBoundingClientRect();
+        dentro = r.bottom > 0 && r.top < window.innerHeight;
+        if (!dentro) return;
+
+        alvoX = (e.clientX / window.innerWidth) * 2 - 1;
+        alvoY = (e.clientY / window.innerHeight) * 2 - 1;
+        acordar();
+      }, { passive: true });
+
+      /* Ponteiro saiu da janela: a cena volta ao repouso em vez de congelar
+         torta no último ponto conhecido. */
+      document.addEventListener('mouseleave', function () {
+        alvoX = 0; alvoY = 0;
+        acordar();
+      });
+    })();
 
     /* ---------- Hero scene tilt follows mouse ---------- */
 
