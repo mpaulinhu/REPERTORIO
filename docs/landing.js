@@ -291,10 +291,17 @@
     var arte = proj.querySelector('.projeto-arte');
     var invertido = proj.classList.contains('invertido');
 
+    /* A entrada é VERTICAL, não lateral. Com `x: -90` o bloco ficava a
+       -69px da borda enquanto não entrava — fora da tela em qualquer
+       largura até 1280px. O deslocamento lateral só cabe onde há folga
+       horizontal, e aqui não há. */
+    var lateral = window.innerWidth >= 1280 ? 60 : 0;
+
     if (texto) {
       gsap.from(texto, {
         scrollTrigger: { trigger: proj, start: 'top 90%', end: 'top 45%', scrub: 0.8 },
-        x: invertido ? 90 : -90,
+        x: invertido ? lateral : -lateral,
+        y: 60,
         opacity: 0,
         ease: 'power2.out',
       });
@@ -302,9 +309,10 @@
     if (arte) {
       gsap.from(arte, {
         scrollTrigger: { trigger: proj, start: 'top 90%', end: 'top 45%', scrub: 0.8 },
-        x: invertido ? -90 : 90,
+        x: invertido ? -lateral : lateral,
+        y: 60,
         opacity: 0,
-        scale: 0.92,
+        scale: 0.94,
         ease: 'power2.out',
       });
       gsap.to(arte, {

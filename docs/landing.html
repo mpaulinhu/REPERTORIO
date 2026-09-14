@@ -121,7 +121,11 @@
     transition: border-color 0.3s ease;
   }
   .barra.rolou { border-bottom-color: var(--line); }
-  .marca { font-family: var(--display); font-weight: 700; font-size: 1.02rem; }
+  .marca {
+    font-family: var(--display); font-weight: 700; font-size: 1.02rem;
+    display: inline-flex; align-items: center;
+    min-height: 44px; padding: 0 2px;
+  }
   .marca i { color: var(--accent); font-style: normal; }
   @media (max-width: 640px) { .barra { padding: 14px 20px; } }
 
@@ -210,7 +214,15 @@
   }
   .assinatura i { width: 40px; height: 1px; background: var(--line); display: block; }
 
-  .retrato { margin: 0; position: relative; }
+  /* Abaixo de 900px o grid vira uma coluna e a figura recebia a largura
+     inteira: a foto esticava para ~1200px de altura, muito maior que a
+     tela. O teto em vh e o max-width impedem isso em qualquer largura. */
+  .retrato {
+    margin: 0 auto;
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+  }
   /* O recorte do PNG termina numa linha reta na base — o corte aparece
      como uma borda dura sobre o fundo. A mascara dissolve os ultimos 12%
      da imagem, entao o retrato se funde com a cena em vez de ser colado
@@ -219,8 +231,18 @@
     width: 100%;
     height: auto;
     border-radius: 20px;
-    -webkit-mask-image: linear-gradient(to bottom, #000 78%, rgba(0,0,0,0.55) 90%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 78%, rgba(0,0,0,0.55) 90%, transparent 100%);
+    /* Duas máscaras combinadas: a vertical dissolve a base (onde o corte
+       do PNG é reto) e a horizontal alivia as laterais, que também têm
+       aresta viva. O degradê fica curto (últimos 8%) — mais longo que
+       isso apaga a camiseta preta e vira uma mancha cinza. */
+    -webkit-mask-image:
+      linear-gradient(to bottom, #000 88%, transparent 100%),
+      linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+            mask-image:
+      linear-gradient(to bottom, #000 88%, transparent 100%),
+      linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+    -webkit-mask-composite: source-in;
+            mask-composite: intersect;
   }
   .retrato figcaption {
     position: absolute; left: 50%; bottom: 18px;
@@ -367,7 +389,14 @@
   .galeria-item.oculto { display: none; }
 
   .nota { color: var(--text-dim); font-size: 0.92rem; margin: 26px 0 0; }
-  .nota a { color: var(--accent); border-bottom: 1px solid currentColor; }
+  /* Alvo de toque: 21px de altura é pequeno demais para o dedo. O padding
+     vertical leva o link a ~34px sem mudar o texto de lugar. */
+  .nota a {
+    color: var(--accent);
+    border-bottom: 1px solid currentColor;
+    display: inline-block;
+    padding: 6px 2px;
+  }
 
   /* ---------- Cards menores ---------- */
   .grade-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); gap: 18px; }
@@ -414,8 +443,19 @@
      os 5 icones quebravam um por linha, saindo pela base da tela. */
   .abertura-contatos {
     justify-content: flex-start;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     margin-top: 26px;
+  }
+  /* Em telas largas os 5 cabem numa linha; abaixo de 360px o `nowrap`
+     empurrava o último para fora da tela, então ali eles encolhem e
+     podem quebrar. */
+  @media (min-width: 400px) {
+    .abertura-contatos { flex-wrap: nowrap; }
+  }
+  @media (max-width: 399px) {
+    .abertura-contatos { gap: 8px; }
+    .abertura-contatos a { width: 42px; height: 42px; }
+    .abertura-contatos svg { width: 17px; height: 17px; }
   }
 
   footer { padding: 38px 0 54px; text-align: center; color: var(--text-faint); font-size: 0.8rem; border-top: 1px solid var(--line); margin-top: 30px; }
@@ -989,6 +1029,11 @@
     line-height: 1;
   }
   .skill-box p {
+    /* "ClickUp / Trello" e "React / TypeScript" estouravam a largura do
+       cartao: a quebra precisa ser permitida dentro da palavra. */
+    overflow-wrap: anywhere;
+    hyphens: auto;
+    max-width: 100%;
     font-size: 0.79rem;
     font-weight: 500;
     color: var(--text);
@@ -1607,7 +1652,7 @@
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
-          <img src="images/automacao-transmissao-md.jpg" srcset="images/automacao-transmissao-sm.jpg 400w, images/automacao-transmissao-md.jpg 800w, images/automacao-transmissao.jpg 1200w" sizes="(max-width: 880px) 92vw, 640px" alt="Automação de transmissão multi-PC" loading="lazy" decoding="async">
+          <img src="images/automacao-transmissao.jpg" srcset="images/automacao-transmissao-md.jpg 800w, images/automacao-transmissao.jpg 1200w" sizes="(max-width: 880px) 92vw, 620px" alt="Automação de transmissão multi-PC" loading="lazy" decoding="async">
         </figure>
       </article>
       <article class="projeto invertido" data-cena data-case="mix-de-fone" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
@@ -1618,7 +1663,7 @@
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
-          <img src="images/mix-de-fone-ui24r-md.jpg" srcset="images/mix-de-fone-ui24r-sm.jpg 400w, images/mix-de-fone-ui24r-md.jpg 800w, images/mix-de-fone-ui24r.jpg 1200w" sizes="(max-width: 880px) 92vw, 640px" alt="Mix de Fone — controle via Ui24R" loading="lazy" decoding="async">
+          <img src="images/mix-de-fone-ui24r.jpg" srcset="images/mix-de-fone-ui24r-md.jpg 800w, images/mix-de-fone-ui24r.jpg 1200w" sizes="(max-width: 880px) 92vw, 620px" alt="Mix de Fone — controle via Ui24R" loading="lazy" decoding="async">
         </figure>
       </article>
       <article class="projeto" data-cena data-case="elo-ecosystem" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
@@ -1629,7 +1674,7 @@
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
-          <img src="images/elo-ecosystem-md.jpg" srcset="images/elo-ecosystem-sm.jpg 400w, images/elo-ecosystem-md.jpg 800w, images/elo-ecosystem.jpg 1200w" sizes="(max-width: 880px) 92vw, 640px" alt="Sistema ELO Ecosystem" loading="lazy" decoding="async">
+          <img src="images/elo-ecosystem.jpg" srcset="images/elo-ecosystem-md.jpg 800w, images/elo-ecosystem.jpg 1200w" sizes="(max-width: 880px) 92vw, 620px" alt="Sistema ELO Ecosystem" loading="lazy" decoding="async">
         </figure>
       </article>
     </div>
