@@ -211,7 +211,17 @@
   .assinatura i { width: 40px; height: 1px; background: var(--line); display: block; }
 
   .retrato { margin: 0; position: relative; }
-  .retrato img { width: 100%; height: auto; border-radius: 20px; }
+  /* O recorte do PNG termina numa linha reta na base — o corte aparece
+     como uma borda dura sobre o fundo. A mascara dissolve os ultimos 12%
+     da imagem, entao o retrato se funde com a cena em vez de ser colado
+     por cima dela. */
+  .retrato img {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 78%, rgba(0,0,0,0.55) 90%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 78%, rgba(0,0,0,0.55) 90%, transparent 100%);
+  }
   .retrato figcaption {
     position: absolute; left: 50%; bottom: 18px;
     transform: translateX(-50%);
@@ -400,7 +410,13 @@
   .cena.invertida .contatos a { background: #FFFFFF; border-color: transparent; color: #0A7767; }
   .contatos svg { width: 19px; height: 19px; }
   /* na abertura seguem o alinhamento do texto, nao o centro do rodape */
-  .abertura-contatos { justify-content: flex-start; margin-top: 30px; }
+  /*  e obrigatorio: a coluna da abertura e estreita e
+     os 5 icones quebravam um por linha, saindo pela base da tela. */
+  .abertura-contatos {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    margin-top: 26px;
+  }
 
   footer { padding: 38px 0 54px; text-align: center; color: var(--text-faint); font-size: 0.8rem; border-top: 1px solid var(--line); margin-top: 30px; }
 
@@ -1163,6 +1179,263 @@
     --texto-invertido-dim: #A7AFB7;
   }
 
+
+  /* ===== Blocos migrados do portfolio.html: seção de IA (com a foto
+     do robô e as artes de cada frente), figura da equipe na trajetória
+     e a cena 3D da câmera. ===== */
+  .tl-figure {
+    display: grid;
+    grid-template-rows: 0fr;
+    max-width: 220px;
+    margin-top: 0;
+    opacity: 0;
+    transition: grid-template-rows 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease;
+  }
+  .tl-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    object-fit: cover;
+    object-position: center 15%;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    filter: grayscale(1) contrast(1.05);
+    transition: filter 0.55s ease;
+  }
+  .tl-figure figcaption {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .chip {
+    font-size: 0.68rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    padding: 3px 8px; border-radius: 4px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .av-intro {
+    max-width: 720px;
+    margin-bottom: 30px;
+  }
+  .av-intro .eyebrow-min {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .av-intro p:not(.eyebrow-min) {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+  .av-pilares {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .av-pilar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .av-arte {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-raised);
+  }
+  .av-arte img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .av-txt .av-tag {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 9px;
+  }
+  .av-txt h4 {
+    margin: 0 0 10px;
+    font-family: var(--display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .av-txt > p:not(.av-tag):not(.av-quando) {
+    margin: 0 0 16px;
+    font-size: 0.92rem;
+    line-height: 1.62;
+    color: var(--text-dim);
+  }
+  .av-txt .av-quando {
+    margin: auto 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.76rem;
+    color: var(--text-faint);
+  }
+  .hero-scene {
+    width: 220px;
+    height: 220px;
+    flex-shrink: 0;
+    perspective: 1000px;
+  }
+  .scene-stage {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(14deg) rotateY(-22deg);
+    transition: transform 0.15s ease-out;
+  }
+  .scene-plane {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+  }
+  .scene-plane.back {
+    transform: translateZ(-46px) scale(0.86);
+    background: var(--depth-1);
+    opacity: 0.9;
+  }
+  .scene-plane.mid {
+    transform: translateZ(-16px) scale(0.94);
+    background: var(--bg-raised);
+    opacity: 0.95;
+  }
+  .scene-plane.front {
+    transform: translateZ(20px);
+  }
+  .scene-plane .rec-dot {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #F04848;
+    animation: blink 1.6s ease-in-out infinite;
+    will-change: top, left;
+  }
+  .scene-plane .frame-lines {
+    position: absolute;
+    inset: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  /* Ajustes para o contexto da landing: as artes vêm de um layout com
+     outra grade, então aqui elas respiram dentro da coluna de conteúdo. */
+  .av-resumo { margin-bottom: 46px; }
+  .av-pilares {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 20px;
+  }
+  .av-pilar {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card);
+    box-shadow: var(--sombra);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .av-pilar:hover { transform: translateY(-5px); box-shadow: var(--sombra-alta); }
+  .av-arte { margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: var(--bg-2); }
+  .av-arte img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .av-txt { padding: 20px 22px 24px; }
+  .av-txt h4 {
+    font-family: var(--display);
+    font-size: 1.02rem; font-weight: 600;
+    margin: 0 0 8px; line-height: 1.35;
+  }
+  .av-txt > p:not(.av-tag):not(.av-quando) {
+    margin: 0; color: var(--text-dim); font-size: 0.9rem; line-height: 1.6;
+  }
+  .av-txt .av-tag {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 0.67rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 8px;
+  }
+  .av-txt .av-quando { font-size: 0.78rem; color: var(--text-faint); margin: 12px 0 0; }
+  .chip {
+    display: inline-block;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 0.72rem;
+    padding: 5px 11px; margin: 10px 6px 0 0;
+    border: 1px solid var(--line); border-radius: 7px; color: var(--text-dim);
+  }
+
+  /* A foto grande da seção (o robô) abre o capítulo */
+  .ia-abertura {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(24px, 4vw, 52px);
+    align-items: center;
+    margin-bottom: 44px;
+  }
+  @media (max-width: 860px) { .ia-abertura { grid-template-columns: 1fr; } }
+  .ia-abertura figure {
+    margin: 0; border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--line); box-shadow: var(--sombra-alta);
+  }
+  .ia-abertura img { width: 100%; height: auto; display: block; }
+
+  /* Figura da equipe, dentro da trajetória */
+  .tl-figure {
+    margin: 26px 0 0;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--sombra);
+    max-width: 420px;
+  }
+  .tl-figure img { width: 100%; height: auto; display: block; }
+  .tl-figure figcaption {
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: var(--bg-2);
+  }
+
+
+  /* Foto do robô: abre o capítulo de IA, à esquerda do conteúdo. */
+  .retrato-ia {
+    margin: 0 0 40px;
+    max-width: 340px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--sombra-alta);
+  }
+  .retrato-ia img { width: 100%; height: auto; display: block; }
+  .retrato-ia figure { margin: 0; }
+
 </style>
 </head>
 <body>
@@ -1268,6 +1541,19 @@
         <li><span class="quando">2023</span><div><h3>Início como técnico e operador de som freelance</h3><p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p></div></li>
         <li><span class="quando">2022</span><div><h3>Técnico em Administração — Etec Itaquera II</h3><p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p></div></li>
       </ol>
+
+      <div data-cena>
+          <figure class="tl-figure" id="tlFotoEquipe"><div>
+            <!-- mesmo motivo da foto do robo acima: exibida a ~220x391, o
+                 original tinha 720x1280. Variantes -sm/-md, 138 KB -> 18 KB -->
+            <picture>
+              <source type="image/webp" srcset="images/equipe-v2-sm.webp 1x, images/equipe-v2-md.webp 2x">
+              <source type="image/jpeg" srcset="images/equipe-v2-sm.jpg 1x, images/equipe-v2-md.jpg 2x">
+              <img loading="lazy" decoding="async" src="images/equipe-v2-sm.jpg" alt="Equipe de tecnologia reunida no escritório" width="247" height="440" onerror="this.closest('.tl-figure').remove();">
+            </picture>
+            <figcaption>Time de tecnologia da ELO Editora — onde a transição para desenvolvimento deixou de ser plano e virou prática diária.</figcaption>
+          </div></figure>
+      </div>
     </div>
   </section>
 
@@ -1321,7 +1607,7 @@
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
-          <img src="images/automacao-transmissao-sm.jpg" alt="Automação de transmissão multi-PC" loading="lazy" decoding="async">
+          <img src="images/automacao-transmissao-md.jpg" srcset="images/automacao-transmissao-sm.jpg 400w, images/automacao-transmissao-md.jpg 800w, images/automacao-transmissao.jpg 1200w" sizes="(max-width: 880px) 92vw, 640px" alt="Automação de transmissão multi-PC" loading="lazy" decoding="async">
         </figure>
       </article>
       <article class="projeto invertido" data-cena data-case="mix-de-fone" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
@@ -1332,7 +1618,7 @@
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
-          <img src="images/mix-de-fone-ui24r-sm.jpg" alt="Mix de Fone — controle via Ui24R" loading="lazy" decoding="async">
+          <img src="images/mix-de-fone-ui24r-md.jpg" srcset="images/mix-de-fone-ui24r-sm.jpg 400w, images/mix-de-fone-ui24r-md.jpg 800w, images/mix-de-fone-ui24r.jpg 1200w" sizes="(max-width: 880px) 92vw, 640px" alt="Mix de Fone — controle via Ui24R" loading="lazy" decoding="async">
         </figure>
       </article>
       <article class="projeto" data-cena data-case="elo-ecosystem" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
@@ -1343,7 +1629,7 @@
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
-          <img src="images/elo-ecosystem-sm.jpg" alt="Sistema ELO Ecosystem" loading="lazy" decoding="async">
+          <img src="images/elo-ecosystem-md.jpg" srcset="images/elo-ecosystem-sm.jpg 400w, images/elo-ecosystem-md.jpg 800w, images/elo-ecosystem.jpg 1200w" sizes="(max-width: 880px) 92vw, 640px" alt="Sistema ELO Ecosystem" loading="lazy" decoding="async">
         </figure>
       </article>
     </div>
@@ -1622,22 +1908,89 @@
         Uso inteligência artificial onde ela resolve trabalho real. A saída da
         máquina é começo, não entrega: equalização, ritmo e respiração ainda passam por mim.
       </p>
-      <div class="grade-cards" data-cascata>
-        <article class="mini">
-          <h3>Audiodescrição com IA</h3>
-          <p>Descrevo o que acontece na tela e gero narração com voz sintética — conteúdo infantil da ELO que passa a alcançar quem não enxerga.</p>
-          <div class="tags"><span>ElevenLabs</span><span>NaturalReader</span></div>
-        </article>
-        <article class="mini">
-          <h3>Narração e tratamento de voz</h3>
-          <p>Voz por IA para vídeos, livros e projetos digitais, sempre finalizada no Reaper.</p>
-          <div class="tags"><span>ElevenLabs</span><span>Reaper</span></div>
-        </article>
-        <article class="mini">
-          <h3>Roteiro e tratamento visual</h3>
-          <p>Revisão de roteiro e apoio no tratamento de imagem — acelera a parte repetitiva e me deixa tempo para o que exige decisão.</p>
-          <div class="tags"><span>Photoshop</span><span>ChatGPT</span></div>
-        </article>
+
+      <figure class="retrato-ia" data-cena>
+        <figure class="">
+        <picture>
+          <source type="image/webp"
+                  srcset="images/robo-ia-v2-sm.webp 1x, images/robo-ia-v2-md.webp 2x">
+          <source type="image/jpeg"
+                  srcset="images/robo-ia-v2-sm.jpg 1x, images/robo-ia-v2-md.jpg 2x">
+          <img loading="lazy" decoding="async" src="images/robo-ia-v2-sm.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="338" height="600" onerror="this.closest('.').remove();">
+        </picture>
+        <figcaption>Uso IA como ferramenta de produção — audiodescrição, narração e tratamento visual entram no fluxo real de trabalho, não como demonstração.</figcaption>
+      </figure>
+      </figure>
+      <div data-cascata>
+<div class="av-resumo reveal">
+        <div class="av-pilares">
+          <article class="av-pilar">
+            <div class="av-arte"><picture><source type="image/webp" srcset="images/ia-audiodescricao-sm.webp 1x, images/ia-audiodescricao-md.webp 2x"><source type="image/jpeg" srcset="images/ia-audiodescricao-sm.jpg 1x, images/ia-audiodescricao-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-audiodescricao-sm.jpg" alt=""></picture></div>
+            <div class="av-txt">
+              <p class="av-tag">Acessibilidade</p>
+              <h4>Audiodescrição com IA</h4>
+              <p>Descrevo o que acontece na tela e gero a narração com voz sintética — conteúdo infantil da ELO passa a alcançar quem não enxerga, num volume que gravação humana não daria conta.</p>
+              <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">NaturalReader</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte"><picture><source type="image/webp" srcset="images/ia-voz-sm.webp 1x, images/ia-voz-md.webp 2x"><source type="image/jpeg" srcset="images/ia-voz-sm.jpg 1x, images/ia-voz-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-voz-sm.jpg" alt=""></picture></div>
+            <div class="av-txt">
+              <p class="av-tag">Voz sintética</p>
+              <h4>Narração e tratamento de voz</h4>
+              <p>Gero e trato voz por IA para narração de vídeos, livros e projetos digitais. A saída da máquina é o começo: equalização, ritmo e respiração ainda passam por mim no Reaper.</p>
+              <div class="stack-row"><span class="chip">ElevenLabs</span><span class="chip">Reaper</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte"><picture><source type="image/webp" srcset="images/ia-roteiro-sm.webp 1x, images/ia-roteiro-md.webp 2x"><source type="image/jpeg" srcset="images/ia-roteiro-sm.jpg 1x, images/ia-roteiro-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-roteiro-sm.jpg" alt=""></picture></div>
+            <div class="av-txt">
+              <p class="av-tag">Produção</p>
+              <h4>Roteiro e tratamento visual</h4>
+              <p>Uso IA para revisar roteiro e apoiar tratamento de imagem no Photoshop. Acelera a parte repetitiva do fluxo editorial e me deixa o tempo para o que exige decisão.</p>
+              <div class="stack-row"><span class="chip">Photoshop</span><span class="chip">ChatGPT</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte"><picture><source type="image/jpeg" srcset="images/ia-editorial-sm.jpg 1x, images/ia-editorial-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-editorial-sm.jpg" alt=""></picture></div>
+            <div class="av-txt">
+              <p class="av-tag">Editorial</p>
+              <h4>Parecer e revisão de prova com IA</h4>
+              <p>Atuo no pipeline editorial da ELO onde IA generativa entra em duas pontas: leitura de manuscritos brutos, gerando rascunho de parecer, e revisão de PDFs já diagramados, apontando sugestões de correção de texto. Sempre como apoio — a decisão final é sempre de um revisor humano.</p>
+              <div class="stack-row"><span class="chip">Gemini</span><span class="chip">Vertex AI</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte"><picture><source type="image/jpeg" srcset="images/ia-recrutamento-sm.jpg 1x, images/ia-recrutamento-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-recrutamento-sm.jpg" alt=""></picture></div>
+            <div class="av-txt">
+              <p class="av-tag">RH</p>
+              <h4>Recrutamento assistido por IA</h4>
+              <p>Contribuo no ZELO, sistema de recrutamento da ELO que usa IA para avaliar candidatos contra os requisitos da vaga, com veredito e evidências citadas do currículo — sempre como sugestão, nunca como decisão automática.</p>
+              <div class="stack-row"><span class="chip">Gemini</span><span class="chip">Cloud Functions</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+
+          <article class="av-pilar">
+            <div class="av-arte"><picture><source type="image/jpeg" srcset="images/ia-agentes-sm.jpg 1x, images/ia-agentes-md.jpg 2x"><img loading="lazy" decoding="async" width="4" height="3" src="images/ia-agentes-sm.jpg" alt=""></picture></div>
+            <div class="av-txt">
+              <p class="av-tag">Engenharia</p>
+              <h4>Orquestração de agentes no dia a dia</h4>
+              <p>No desenvolvimento do sistema interno da ELO, uso uma malha de agentes de IA especializados — cada mudança de código nasce de uma issue, passa por agentes de domínio e por gates automáticos de qualidade, acessibilidade e custo antes de ir pro ar.</p>
+              <div class="stack-row"><span class="chip">Claude Code</span><span class="chip">Automação</span></div>
+              <p class="av-quando">ELO Editora</p>
+            </div>
+          </article>
+        </div>
+      </div>
       </div>
     </div>
   </section>
