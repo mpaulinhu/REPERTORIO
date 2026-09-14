@@ -230,14 +230,12 @@
     html.theme-anim * { transition: none !important; }
   }
 
-  /* NENHUM dos dois pinta fundo: quando o <body> e transparente o navegador
-     propaga o fundo do <html> para o canvas de pintura da pagina inteira, o
-     que cobria o #bgCanvas. A cor de base e desenhada pelo proprio canvas
-     (primeiro fillRect), entao aqui os dois ficam transparentes. */
-  /* rede de seguranca: se o canvas nao subir (JS off, reduced-motion, erro),
-     a classe fica ausente e o <html> volta a pintar a cor do tema */
-  html:not(.bg-vivo) { background: var(--bg); }
-  html.bg-vivo { background: transparent; }
+  /* O <html> pinta a cor do tema SEMPRE.
+     Antes ficava transparente quando o canvas estava ativo, porque o canvas
+     cobria a pagina inteira e era ele quem desenhava a cor de base. Agora que
+     o fundo vivo esta contido no hero, transparencia aqui deixaria todo o
+     conteudo abaixo sem fundo nenhum. */
+  html { background: var(--bg); }
 
   body {
     margin: 0;
@@ -259,10 +257,27 @@
 
   /* ---------- Ambient background glow ---------- */
 
-  .bg-glow {
-    position: fixed;
+  /* O fundo vivo é da PRIMEIRA TELA, não da página inteira.
+     Antes era `fixed` e acompanhava o scroll até o rodapé, competindo com o
+     texto de leitura o caminho todo e cobrando GPU em cada quadro. Agora ele
+     ocupa a altura do hero e sai de cena junto com ele: a capa é expressiva,
+     o conteúdo é sóbrio. */
+  .bg-stage {
+    position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* A borda inferior não corta seco: o fundo se dissolve na cor do tema
+       para a passagem da capa para o conteúdo não ter costura visível. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  }
+
+  .bg-glow {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     overflow: hidden;
     pointer-events: none;
   }
@@ -1019,6 +1034,10 @@
   /* sem padding embaixo: o retrato encosta na faixa, sem sobra vazia */
   .hero { padding: 72px 0 0; position: relative; }
 
+  /* O .bg-stage e absoluto dentro do hero e fica no fundo; o conteudo sobe
+     acima dele. Sem isso a tipografia ficaria atras da arte. */
+  .hero > .wrap { position: relative; z-index: 2; }
+
   /* o hero ocupa a primeira tela — a cortina (losango) abre por tras dele */
   @media (min-width: 820px) {
     .hero {
@@ -1092,6 +1111,54 @@
     background: linear-gradient(color-mix(in srgb, var(--accent) 4%, var(--bg)), color-mix(in srgb, var(--accent) 4%, var(--bg)));
   }
   section.block { position: relative; z-index: 2; }
+
+  /* ---------- Fundo do conteúdo (depois da capa) ----------
+     Onde a primeira tela é expressiva, daqui para baixo o fundo trabalha a
+     favor da leitura: a cor sólida do tema com uma vinheta larga e um grão
+     finíssimo. Os dois são pintados UMA vez — gradiente e textura estáticos,
+     nenhum quadro por segundo — então isso não devolve o custo que tirar o
+     shader daqui economizou.
+     `fixed` aqui é de propósito e é barato: o elemento não anima, então o
+     compositor reusa a mesma camada durante todo o scroll; o que era caro no
+     fundo antigo era redesenhar o shader 30x por segundo, não a fixação. */
+  .content-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      /* halo frio no alto, na cor da identidade — presença, não decoração */
+      radial-gradient(
+        120% 70% at 50% -10%,
+        color-mix(in srgb, var(--accent-2) 7%, transparent) 0%,
+        transparent 60%
+      ),
+      /* vinheta: fecha as bordas e empurra o olho para o meio da coluna */
+      radial-gradient(
+        100% 100% at 50% 40%,
+        transparent 55%,
+        color-mix(in srgb, var(--depth-2) 55%, transparent) 100%
+      );
+  }
+
+  /* Grão: quebra o banding do gradiente e dá textura de papel/filme.
+     SVG inline em data-URI para não pedir nenhum arquivo à rede. */
+  .content-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* No tema claro o grão precisa de menos presença: sobre fundo claro o mesmo
+     ruído lê como sujeira, não como textura. */
+  :root[data-theme="light"] .content-bg::after,
+  html:not([data-theme]) .content-bg::after { opacity: 0.02; }
+
+  @media (prefers-color-scheme: light) {
+    html:not([data-theme="dark"]) .content-bg::after { opacity: 0.02; }
+  }
 
   .hero-grid {
     display: grid;
@@ -2388,7 +2455,10 @@
      de tudo e com opacidade baixa: precisa dar profundidade sem competir com
      o texto. A leitura vence o efeito — por isso os valores sao contidos. */
   #bgCanvas {
-    position: fixed;
+    /* `absolute`, nao `fixed`: o canvas vive dentro do .bg-stage, que e a
+       altura do hero. Antes ele cobria o viewport inteiro e seguia o scroll
+       ate o rodape. */
+    position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
@@ -3053,8 +3123,6 @@
   }
 </style>
 
-<div class="bg-glow" aria-hidden="true"><span></span><span></span><span></span></div>
-
 <div id="introOverlay" aria-hidden="true">
   <div class="intro-grid"></div>
   <div class="intro-inner">
@@ -3079,11 +3147,6 @@
 <!-- Cortina de ENTRADA, restrita a primeira tela: abre em losango e some
      assim que o usuario rola de verdade. Dali em diante o site usa o fundo
      solido do tema — a arte nunca briga com a leitura do conteudo. -->
-<!-- Fundo vivo: massa de cor com grao que se move devagar atras de todo o
-     site. Fica abaixo de tudo (z-index -1) e com opacidade baixa para nao
-     atrapalhar a leitura. Desliga sozinho em prefers-reduced-motion. -->
-<canvas id="bgCanvas" aria-hidden="true"></canvas>
-
 <div class="site-plane" id="sitePlane" aria-hidden="true">
   <div class="site-plane-art" id="planeArt1"></div>
 </div>
@@ -3131,9 +3194,22 @@
   </nav>
 </div>
 
+<!-- Fundo do conteúdo: estático, sob toda a página. A capa desenha o dela por
+     cima disto, dentro do próprio hero. -->
+<div class="content-bg" aria-hidden="true"></div>
+
 <main id="top">
 
   <section class="hero" id="sobre">
+    <!-- Fundo vivo: massa de cor com grao que se move devagar. Vive DENTRO do
+         hero (antes era fixed atras da pagina inteira) — a capa e expressiva,
+         o conteudo abaixo e sobrio. Desliga sozinho em prefers-reduced-motion
+         e quando o hero sai da tela. -->
+    <div class="bg-stage" aria-hidden="true">
+      <canvas id="bgCanvas"></canvas>
+      <div class="bg-glow"><span></span><span></span><span></span></div>
+    </div>
+
     <div class="wrap">
       <div class="hero-grid">
         <div class="hero-type">
@@ -5502,13 +5578,44 @@
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
 
-      function ligar()  { if (!timer) timer = window.setInterval(quadro, 1000 / 30); }
-      function desligar(){ if (timer) { window.clearInterval(timer); timer = null; } }
+      /* Dois motivos independentes para o fundo parar: a aba ficou oculta, ou
+         o hero saiu da tela. Guardar cada um em sua propria variavel evita o
+         bug classico de um reativar o que o outro desligou — o loop so roda
+         quando NENHUM dos dois pede pausa. */
+      var pausadoPorAba = false;
+      var pausadoPorScroll = false;
+
+      function sincronizar() {
+        var deveRodar = !pausadoPorAba && !pausadoPorScroll;
+        if (deveRodar && !timer) {
+          timer = window.setInterval(quadro, 1000 / 30);
+        } else if (!deveRodar && timer) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
 
       window.addEventListener('resize', function () { medir(); quadro(); });
       document.addEventListener('visibilitychange', function () {
-        if (document.hidden) desligar(); else ligar();
+        pausadoPorAba = document.hidden;
+        sincronizar();
       });
+
+      /* O fundo agora vive dentro do hero, entao rodar o shader depois que ele
+         saiu da tela e desenhar o que ninguem ve. Este observer e o que de
+         fato devolve a GPU durante a leitura do conteudo.
+         Ele so PAUSA o loop — nunca esconde nada, nem toca no conteudo da
+         pagina (ver a regra de ouro do motor de scroll mais abaixo). Sem
+         IntersectionObserver, o fundo simplesmente segue rodando como antes. */
+      if (window.IntersectionObserver) {
+        var palco = document.querySelector('.bg-stage');
+        if (palco) {
+          new IntersectionObserver(function (entradas) {
+            pausadoPorScroll = !entradas[0].isIntersecting;
+            sincronizar();
+          }).observe(palco);
+        }
+      }
       /* trocar o tema troca paleta, teto de escurecimento e cor da trilha —
          o quadro() aqui repinta na hora, sem esperar o proximo tick */
       var obs = new MutationObserver(function () { lerTema(); lerAlvo(); quadro(); });
@@ -5516,7 +5623,7 @@
 
       quadro();
       document.documentElement.classList.add('bg-vivo');
-      ligar();
+      sincronizar();
     })();
 
     /* ---------- Case imersivo: overlay full-screen por projeto ----------
