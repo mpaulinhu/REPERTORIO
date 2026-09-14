@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,33 +10,66 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<script>
+  /* Tema aplicado ANTES da primeira pintura: ler o localStorage aqui evita
+     o flash de tema errado que haveria se isso rodasse no fim da página. */
+  (function () {
+    try {
+      var t = localStorage.getItem('tema');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+      document.documentElement.dataset.tema = t;
+    } catch (e) { document.documentElement.dataset.tema = 'claro'; }
+  })();
+</script>
+
 <style>
   /* ================================================================
-     Landing narrativa — versão paralela ao portfolio.html
-     O scroll conduz a história: cada cena ocupa a tela, entra, se
-     monta e sai. Um objeto 3D real (Three.js) acompanha o percurso e
-     se transforma a cada capítulo.
+     Landing narrativa — o conteúdo se monta conforme a rolagem.
+     Tema claro por padrão, com alternador. O acervo de imagens entra
+     inteiro; o objeto 3D acompanha o percurso e obedece ao ponteiro.
      ================================================================ */
 
   :root {
-    --bg: #07080A;
-    --bg-2: #0D1013;
-    --card: #12151A;
-    --text: #F4F6F8;
-    --text-dim: #949CA6;
-    --text-faint: #5F6772;
-    --accent: #2FE0C8;
-    --accent-2: #3B82F6;
-    --line: rgba(255,255,255,0.10);
     --sans: 'Manrope', -apple-system, 'Segoe UI', sans-serif;
     --display: 'Space Grotesk', 'Manrope', sans-serif;
     --mega: 'Anton', 'Arial Narrow', sans-serif;
+  }
+
+  :root, [data-tema="claro"] {
+    --bg: #F4F6F5;
+    --bg-2: #FFFFFF;
+    --card: #FFFFFF;
+    --text: #0C1316;
+    --text-dim: #4D565C;
+    --text-faint: #7C858C;
+    --accent: #0A7767;
+    --accent-ink: #EAFBF6;
+    --accent-2: #2563EB;
+    --line: rgba(12,19,22,0.14);
+    --sombra: 0 1px 2px rgba(16,32,28,0.08), 0 8px 26px rgba(16,32,28,0.09);
+    --sombra-alta: 0 2px 6px rgba(16,32,28,0.12), 0 22px 48px rgba(16,32,28,0.16);
+    color-scheme: light;
+  }
+
+  [data-tema="escuro"] {
+    --bg: #08090B;
+    --bg-2: #0E1114;
+    --card: #13161B;
+    --text: #F3F5F7;
+    --text-dim: #99A1AA;
+    --text-faint: #666E77;
+    --accent: #2FE0C8;
+    --accent-ink: #041210;
+    --accent-2: #5B9BFF;
+    --line: rgba(255,255,255,0.12);
+    --sombra: 0 1px 2px rgba(0,0,0,0.4), 0 8px 26px rgba(0,0,0,0.3);
+    --sombra-alta: 0 2px 8px rgba(0,0,0,0.45), 0 22px 48px rgba(0,0,0,0.4);
     color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
 
-  html { background: var(--bg); scroll-behavior: smooth; }
+  html { background: var(--bg); }
 
   body {
     margin: 0;
@@ -47,181 +80,166 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
   }
 
   a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
 
-  /* O canvas 3D vive atrás de tudo, fixo, cobrindo a tela. É a única
-     coisa que atravessa todas as cenas — é ele que costura a narrativa. */
   #cena3d {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    /* Nas cenas de leitura o objeto recua para não disputar com o texto.
-       O JS ajusta este valor por cena (ver roteiro). */
-    opacity: var(--forca3d, 1);
+    opacity: var(--forca3d, 0.85);
     transition: opacity 0.6s ease;
   }
-
-  /* Sem WebGL o site continua completo: o canvas some e as cenas
-     seguem legíveis. Nada de conteúdo depende do 3D. */
   .sem-webgl #cena3d { display: none; }
-
-  /* No celular o objeto não tem para onde sair do caminho: a tela é
-     estreita e ele cruza o texto inteiro. Recua para textura de fundo —
-     presente, mas sem disputar com a leitura. */
-  @media (max-width: 860px) {
-    #cena3d { opacity: calc(var(--forca3d, 1) * 0.3); }
-  }
+  @media (max-width: 860px) { #cena3d { opacity: calc(var(--forca3d, 1) * 0.35); } }
 
   main { position: relative; z-index: 1; }
 
-  .wrap {
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 32px;
-  }
-
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
   @media (max-width: 640px) { .wrap { padding: 0 20px; } }
 
-  /* ---------- Cena: a unidade da narrativa ----------
-     Cada uma ocupa a altura da tela. `min-height` e não `height`:
-     conteúdo que cresce (lista de projetos) não pode ser cortado. */
-  .cena {
-    min-height: 100svh;
+  .cena { padding: clamp(80px, 12vh, 140px) 0; position: relative; }
+  .cena.cheia { min-height: 100svh; display: flex; align-items: center; }
+
+  /* ---------- Barra fixa ---------- */
+  .barra {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 60;
     display: flex;
     align-items: center;
-    padding: 96px 0;
-    position: relative;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
   }
+  .barra.rolou { border-bottom-color: var(--line); }
+  .marca { font-family: var(--display); font-weight: 700; font-size: 1.02rem; }
+  .marca i { color: var(--accent); font-style: normal; }
+  @media (max-width: 640px) { .barra { padding: 14px 20px; } }
 
-  @media (max-width: 720px) {
-    .cena { min-height: auto; padding: 72px 0; }
-    /* a abertura mantém a altura de tela: é a primeira impressão */
-    .cena.abertura { min-height: 100svh; padding-top: 96px; }
+  .btn-tema {
+    width: 42px; height: 42px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.3s ease;
   }
+  .btn-tema:hover { border-color: var(--accent); color: var(--accent); transform: rotate(-20deg); }
+  .btn-tema svg { width: 19px; height: 19px; }
+  [data-tema="claro"] .btn-tema .lua { display: block; }
+  [data-tema="claro"] .btn-tema .sol { display: none; }
+  [data-tema="escuro"] .btn-tema .lua { display: none; }
+  [data-tema="escuro"] .btn-tema .sol { display: block; }
 
   /* ---------- Tipografia ---------- */
   .rotulo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin: 0 0 22px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--text-dim); margin: 0 0 20px;
   }
   .rotulo b { color: var(--accent); font-family: var(--display); }
-  .rotulo::before {
-    content: '';
-    width: 28px;
-    height: 1px;
-    background: var(--accent);
-  }
+  .rotulo::before { content: ''; width: 26px; height: 1px; background: var(--accent); }
+
+  /* O <i> das linhas do titulo e so um envolucro para a animacao de
+     entrada, nunca enfase: sem isto o navegador aplica italico sintetico
+     (a Anton nao tem italico) e a capa inteira sai torta. */
+  h1.mega span > i,
+  h2.grande > i { font-style: normal; }
 
   h1.mega {
-    font-family: var(--mega);
-    font-weight: 400;
-    font-size: clamp(3rem, 11vw, 8.5rem);
-    /* 0.88 cortava os acentos: a Anton tem acentos altos e o
-       `overflow: hidden` das linhas (usado para o texto subir na entrada)
-       aparava o Á e o Ó. Folga vertical suficiente para o acento caber. */
+    font-family: var(--mega); font-weight: 400;
+    font-size: clamp(2.9rem, 9.5vw, 7.6rem);
+    /* folga vertical: a Anton tem acentos altos e o overflow das linhas
+       (usado na entrada) cortava o Á e o Ó */
     line-height: 1.02;
-    letter-spacing: -0.01em;
-    text-transform: uppercase;
-    margin: 0;
+    text-transform: uppercase; margin: 0;
   }
-
   h2.grande {
-    font-family: var(--mega);
-    font-weight: 400;
-    font-size: clamp(2.2rem, 7vw, 5rem);
-    /* mesma folga do h1: sem ela o Ç e o Ã de "AUTOMAÇÃO" eram cortados */
-    line-height: 1.04;
-    text-transform: uppercase;
-    margin: 0 0 24px;
-    max-width: 16ch;
+    font-family: var(--mega); font-weight: 400;
+    font-size: clamp(2.1rem, 6.4vw, 4.6rem);
+    line-height: 1.04; text-transform: uppercase;
+    margin: 0 0 22px; max-width: 18ch;
   }
-
-  .lede {
-    font-size: clamp(1rem, 2.1vw, 1.22rem);
-    line-height: 1.65;
-    color: var(--text-dim);
-    max-width: 54ch;
-    margin: 0 0 34px;
-  }
-
-  .destaque { color: var(--accent); }
+  .corpo { color: var(--text-dim); font-size: 1.02rem; line-height: 1.7; margin: 0 0 18px; max-width: 58ch; }
+  .lede { font-size: clamp(1.02rem, 2vw, 1.2rem); line-height: 1.68; color: var(--text-dim); max-width: 56ch; margin: 0 0 32px; }
+  .destaque { color: var(--accent); font-weight: inherit; }
 
   /* ---------- Botões ---------- */
-  .acoes { display: flex; gap: 14px; flex-wrap: wrap; }
-
+  .acoes { display: flex; gap: 13px; flex-wrap: wrap; }
   .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    font-family: var(--sans);
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 15px 28px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--sans); font-size: 0.9rem; font-weight: 600;
+    padding: 15px 28px; border-radius: 999px;
+    border: 1px solid transparent; cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .btn.principal { background: var(--accent); color: #041210; }
-  .btn.principal:hover { transform: translateY(-2px); }
-  .btn.vazado { border-color: var(--line); color: var(--text); }
+  .btn.principal { background: var(--accent); color: var(--accent-ink); box-shadow: var(--sombra); }
+  .btn.principal:hover { transform: translateY(-2px); box-shadow: var(--sombra-alta); }
+  .btn.vazado { border-color: var(--line); color: var(--text); background: none; }
   .btn.vazado:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
 
-  /* ---------- Cena 1: abertura ---------- */
-  .abertura { text-align: left; }
-
-  .abertura .linhas span {
-    display: block;
-    overflow: hidden;
+  /* ---------- Abertura, com retrato ---------- */
+  .abertura-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(28px, 5vw, 64px);
+    align-items: center;
+    width: 100%;
   }
-  /* cada linha começa deslocada; o JS traz para o lugar. Sem JS o
-     `both` não existe e o texto fica visível normalmente. */
-  .abertura .linhas i {
-    display: block;
-    font-style: normal;
-  }
+  @media (max-width: 900px) { .abertura-grid { grid-template-columns: 1fr; gap: 34px; } }
 
   .assinatura {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 0 0 26px;
-    font-size: 0.78rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-faint);
+    display: flex; align-items: center; gap: 13px;
+    margin: 0 0 22px; font-size: 0.74rem;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint);
   }
-  .assinatura i { width: 44px; height: 1px; background: var(--line); display: block; }
+  .assinatura i { width: 40px; height: 1px; background: var(--line); display: block; }
+
+  .retrato { margin: 0; position: relative; }
+  .retrato img { width: 100%; height: auto; border-radius: 20px; }
+  .retrato figcaption {
+    position: absolute; left: 50%; bottom: 18px;
+    transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--bg-2) 92%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--line);
+    border-radius: 999px; padding: 9px 16px;
+    font-size: 0.78rem; color: var(--text);
+    box-shadow: var(--sombra);
+  }
+  .ponto-vivo {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); display: block;
+    animation: pulsa 2.4s ease-out infinite;
+  }
+  @keyframes pulsa {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+    70%  { box-shadow: 0 0 0 11px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
 
   .rolar {
-    position: absolute;
-    left: 32px;
-    bottom: 36px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.72rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-faint);
+    position: absolute; left: 32px; bottom: 30px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.7rem; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-faint);
   }
-  .rolar em {
-    width: 1px;
-    height: 34px;
-    background: linear-gradient(var(--accent), transparent);
-    display: block;
-    animation: desce 1.8s ease-in-out infinite;
-  }
+  .rolar em { width: 1px; height: 32px; background: linear-gradient(var(--accent), transparent); display: block; animation: desce 1.8s ease-in-out infinite; }
   @keyframes desce {
     0%, 100% { transform: scaleY(0.4); transform-origin: top; opacity: 0.5; }
     50%      { transform: scaleY(1);   transform-origin: top; opacity: 1; }
@@ -230,231 +248,159 @@
 
   /* ---------- Números ---------- */
   .numeros {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 2px;
-    background: var(--line);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    overflow: hidden;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+    margin-top: 34px;
   }
-  .numeros > div { background: var(--bg-2); padding: 30px 26px; }
+  .numeros > div { background: var(--bg-2); padding: 28px 24px; }
   .numeros b {
-    display: block;
-    font-family: var(--mega);
-    font-weight: 400;
-    font-size: clamp(2.4rem, 6vw, 3.6rem);
-    line-height: 1;
-    color: var(--accent);
-    margin-bottom: 8px;
+    display: block; font-family: var(--mega); font-weight: 400;
+    font-size: clamp(2.2rem, 5.5vw, 3.4rem); line-height: 1;
+    color: var(--accent); margin-bottom: 7px;
   }
-  .numeros span { font-size: 0.88rem; color: var(--text-dim); line-height: 1.45; display: block; }
+  .numeros span { font-size: 0.87rem; color: var(--text-dim); line-height: 1.45; display: block; }
 
-  .texto-largo { max-width: 68ch; }
-  .texto-largo .lede { margin-bottom: 20px; }
+  /* ---------- Trajetória ---------- */
+  .linha-tempo { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
+  .linha-tempo li {
+    display: grid; grid-template-columns: 78px 1fr; gap: 18px;
+    padding: 0 0 28px 24px; position: relative;
+  }
+  .linha-tempo li::before {
+    content: ''; position: absolute; left: -5px; top: 7px;
+    width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+  }
+  .linha-tempo .quando { font-family: var(--display); font-size: 0.9rem; font-weight: 600; color: var(--accent); }
+  .linha-tempo h3 { font-family: var(--display); font-size: 1.02rem; font-weight: 600; margin: 0 0 5px; line-height: 1.35; }
+  .linha-tempo p { margin: 0; color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; }
+  @media (max-width: 620px) { .linha-tempo li { grid-template-columns: 1fr; gap: 5px; padding-left: 18px; } }
 
+  /* ---------- Ferramentas ---------- */
   .sub-rotulo {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin: 36px 0 14px;
+    font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin: 34px 0 13px;
   }
+  .grade-tags { display: flex; flex-wrap: wrap; gap: 9px; }
+  .grade-tags span {
+    font-size: 0.85rem; padding: 10px 15px;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--bg-2); box-shadow: var(--sombra);
+  }
+
+  /* ---------- Projeto (desenvolvimento) ---------- */
+  .projeto {
+    display: grid; grid-template-columns: 1fr 1.1fr;
+    gap: clamp(26px, 5vw, 66px); align-items: center;
+    margin-bottom: clamp(70px, 10vh, 130px);
+  }
+  .projeto:last-child { margin-bottom: 0; }
+  .projeto.invertido .projeto-texto { order: 2; }
+  .projeto.invertido .projeto-arte { order: 1; }
+  @media (max-width: 880px) {
+    .projeto { grid-template-columns: 1fr; gap: 24px; }
+    .projeto.invertido .projeto-texto,
+    .projeto.invertido .projeto-arte { order: initial; }
+  }
+  .titulo-projeto {
+    font-family: var(--mega); font-weight: 400;
+    font-size: clamp(1.8rem, 4.4vw, 3.1rem);
+    line-height: 1.05; text-transform: uppercase; margin: 0 0 16px;
+  }
+  .projeto-arte {
+    margin: 0; border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--line); background: var(--card);
+    box-shadow: var(--sombra-alta);
+  }
+  .projeto-arte img { width: 100%; height: auto; }
+
+  /* ---------- Galeria audiovisual ---------- */
+  .galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+    gap: 22px; margin-top: 12px;
+  }
+  .galeria-item {
+    border: 1px solid var(--line); border-radius: 16px;
+    overflow: hidden; background: var(--card);
+    box-shadow: var(--sombra);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .galeria-item:hover { transform: translateY(-5px); box-shadow: var(--sombra-alta); }
+  .galeria-item figure { margin: 0; aspect-ratio: 16 / 10; overflow: hidden; background: var(--bg-2); }
+  .galeria-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+  .galeria-item:hover img { transform: scale(1.05); }
+  .galeria-info { padding: 18px 20px 22px; }
+  .galeria-info .quando {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--accent); display: block; margin-bottom: 7px;
+  }
+  .galeria-info h3 { font-family: var(--display); font-size: 0.98rem; font-weight: 600; margin: 0 0 7px; line-height: 1.35; }
+  .galeria-info p { margin: 0; color: var(--text-dim); font-size: 0.87rem; line-height: 1.55; }
+
+  .mostrar-mais { display: flex; justify-content: center; margin-top: 34px; }
+  /* `.oculto` só é aplicado pelo JS depois que a página carrega: sem JS a
+     galeria aparece inteira, nada some. */
+  .galeria-item.oculto { display: none; }
 
   .nota { color: var(--text-dim); font-size: 0.92rem; margin: 26px 0 0; }
   .nota a { color: var(--accent); border-bottom: 1px solid currentColor; }
 
-  /* ---------- Linha do tempo ---------- */
-  .linha-tempo {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-left: 1px solid var(--line);
-  }
-  .linha-tempo li {
-    display: grid;
-    grid-template-columns: 88px 1fr;
-    gap: 20px;
-    padding: 0 0 30px 26px;
-    position: relative;
-  }
-  .linha-tempo li::before {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: 7px;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .linha-tempo .quando {
-    font-family: var(--display);
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--accent);
-    padding-top: 1px;
-  }
-  .linha-tempo h3 {
-    font-family: var(--display);
-    font-size: 1.04rem;
-    font-weight: 600;
-    margin: 0 0 6px;
-    line-height: 1.35;
-  }
-  .linha-tempo p { margin: 0; color: var(--text-dim); font-size: 0.93rem; line-height: 1.6; }
-
-  @media (max-width: 620px) {
-    .linha-tempo li { grid-template-columns: 1fr; gap: 6px; padding-left: 20px; }
-  }
-
-  /* ---------- Grade de etiquetas (ferramentas) ---------- */
-  .grade-tags { display: flex; flex-wrap: wrap; gap: 10px; }
-  .grade-tags span {
-    font-size: 0.86rem;
-    padding: 10px 16px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg-2);
-    color: var(--text);
-  }
-
-  /* ---------- Cards menores (audiovisual, IA) ---------- */
-  .grade-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-    gap: 18px;
-    margin-top: 12px;
-  }
+  /* ---------- Cards menores ---------- */
+  .grade-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); gap: 18px; }
   .mini {
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    background: var(--bg-2);
-    padding: 26px 24px;
+    border: 1px solid var(--line); border-radius: 16px;
+    background: var(--card); padding: 26px 24px; box-shadow: var(--sombra);
   }
-  .mini h3 {
-    font-family: var(--display);
-    font-size: 1.06rem;
-    font-weight: 600;
-    margin: 0 0 10px;
-    line-height: 1.35;
-  }
-  .mini p { margin: 0; color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; }
-  .mini .tags { margin-top: 16px; }
-
-  /* ---------- Projetos ---------- */
-  .projeto {
-    display: grid;
-    grid-template-columns: 1.05fr 1fr;
-    gap: clamp(28px, 5vw, 72px);
-    align-items: center;
-    width: 100%;
-  }
-  @media (max-width: 860px) {
-    .projeto { grid-template-columns: 1fr; gap: 28px; }
-  }
-
-  .projeto .arte {
-    border-radius: 18px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    background: var(--card);
-    aspect-ratio: 4 / 3;
-  }
-  .projeto .arte img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .mini h3 { font-family: var(--display); font-size: 1.04rem; font-weight: 600; margin: 0 0 10px; line-height: 1.35; }
+  .mini p { margin: 0; color: var(--text-dim); font-size: 0.91rem; line-height: 1.6; }
+  .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 15px; }
   .tags span {
-    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 0.73rem;
-    padding: 6px 12px;
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    color: var(--text-dim);
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem;
+    padding: 5px 11px; border: 1px solid var(--line); border-radius: 7px; color: var(--text-dim);
   }
 
-  /* ---------- Rodapé / chamada ---------- */
-  .fim { text-align: center; flex-direction: column; justify-content: center; }
+  /* ---------- Fim ---------- */
+  .fim { text-align: center; }
   .fim .wrap { display: flex; flex-direction: column; align-items: center; }
   .fim .lede { margin-left: auto; margin-right: auto; }
-
-  .contatos {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 34px;
-  }
+  .contatos { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; margin-top: 32px; }
   .contatos a {
-    width: 46px;
-    height: 46px;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    color: var(--text-dim);
+    width: 46px; height: 46px; display: grid; place-items: center;
+    border: 1px solid var(--line); border-radius: 50%; color: var(--text-dim);
     transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
   .contatos a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-3px); }
   .contatos svg { width: 19px; height: 19px; }
 
-  footer {
-    padding: 40px 0 56px;
-    text-align: center;
-    color: var(--text-faint);
-    font-size: 0.8rem;
-    border-top: 1px solid var(--line);
-    margin-top: 40px;
-  }
+  footer { padding: 38px 0 54px; text-align: center; color: var(--text-faint); font-size: 0.8rem; border-top: 1px solid var(--line); margin-top: 30px; }
 
-  /* ---------- Progresso da narrativa ---------- */
+  /* ---------- Progresso e índice ---------- */
   #progresso {
-    position: fixed;
-    top: 0; left: 0;
-    height: 2px;
-    width: 100%;
-    transform: scaleX(0);
-    transform-origin: 0 50%;
+    position: fixed; top: 0; left: 0; height: 2px; width: 100%;
+    transform: scaleX(0); transform-origin: 0 50%;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    z-index: 50;
+    z-index: 70;
   }
-
-  /* Índice lateral: mostra onde a pessoa está na história. */
   #indice {
-    position: fixed;
-    right: 26px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    z-index: 40;
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 13px; z-index: 40;
   }
   #indice button {
-    width: 9px; height: 9px;
-    padding: 0;
-    border-radius: 50%;
-    border: 1px solid var(--text-faint);
-    background: none;
-    cursor: pointer;
+    width: 9px; height: 9px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--text-faint); background: none; cursor: pointer;
     transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
   }
-  #indice button.ativo { background: var(--accent); border-color: var(--accent); transform: scale(1.35); }
-  @media (max-width: 860px) { #indice { display: none; } }
+  #indice button.ativo { background: var(--accent); border-color: var(--accent); transform: scale(1.4); }
+  @media (max-width: 1100px) { #indice { display: none; } }
 
-  /* ---------- Entrada por scroll ----------
-     Regra de ouro: o CSS deixa tudo VISÍVEL. O JS parte do visível e
-     anima só a entrada. Se a lib não carregar, a página continua
-     legível e completa — nada some para sempre. */
+  /* Regra de ouro: o CSS deixa TUDO visível. O JS parte do visível e anima
+     só a entrada — se a lib não carregar, a página continua completa. */
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .rolar em { animation: none; }
+    .rolar em, .ponto-vivo { animation: none; }
+    .galeria-item, .galeria-item img { transition: none; }
   }
 </style>
 </head>
@@ -463,147 +409,111 @@
 <div id="progresso" aria-hidden="true"></div>
 <canvas id="cena3d" aria-hidden="true"></canvas>
 
+<header class="barra" id="barra">
+  <a href="#topo" class="marca">Marcos<i>.</i>Paulo</a>
+  <button class="btn-tema" id="btnTema" type="button" aria-label="Alternar tema claro e escuro">
+    <svg class="lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    <svg class="sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
+  </button>
+</header>
+
 <nav id="indice" aria-label="Navegar pelas seções">
-  <button type="button" data-ir="abertura" aria-label="Abertura"></button>
-  <button type="button" data-ir="proposta" aria-label="Sobre mim"></button>
+  <button type="button" data-ir="topo" aria-label="Início"></button>
+  <button type="button" data-ir="sobre" aria-label="Sobre mim"></button>
   <button type="button" data-ir="trajetoria" aria-label="Trajetória"></button>
   <button type="button" data-ir="ferramentas" aria-label="Ferramentas"></button>
-  <button type="button" data-ir="trabalho" aria-label="Projetos"></button>
+  <button type="button" data-ir="desenvolvimento" aria-label="Desenvolvimento"></button>
   <button type="button" data-ir="audiovisual" aria-label="Audiovisual"></button>
-  <button type="button" data-ir="ia" aria-label="IA aplicada"></button>
   <button type="button" data-ir="contato" aria-label="Contato"></button>
 </nav>
 
 <main>
 
-  <!-- ============ CENA 1: abertura ============ -->
-  <section class="cena abertura" id="abertura">
+  <section class="cena cheia" id="topo">
     <div class="wrap">
-      <p class="assinatura"><span>Marcos Paulo T. G. dos Santos</span><i></i><span>Brasil</span></p>
+      <div class="abertura-grid">
+        <div>
+          <p class="assinatura" data-cena><span>Marcos Paulo T. G. dos Santos</span><i></i><span>Brasil</span></p>
+          <h1 class="mega" data-titulo>
+            <span><i>Áudio,</i></span>
+            <span><i>imagem</i></span>
+            <span><i>e <b class="destaque">código</b>.</i></span>
+          </h1>
+          <p class="lede" style="margin-top:28px" data-cena>
+            Especialista audiovisual e de acessibilidade na ELO Editora, em transição
+            para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e
+            escrever código — as duas coisas com o mesmo cuidado técnico.
+          </p>
+          <div class="acoes" data-cena>
+            <a href="#contato" class="btn principal">Vamos conversar</a>
+            <a href="#desenvolvimento" class="btn vazado">Ver trabalhos</a>
+          </div>
+        </div>
 
-      <h1 class="mega linhas" data-anim="titulo">
-        <span><i>Áudio,</i></span>
-        <span><i>imagem</i></span>
-        <span><i>e <span class="destaque">código</span>.</i></span>
-      </h1>
-
-      <p class="lede" style="margin-top:32px" data-anim="sobe">
-        Especialista audiovisual e de acessibilidade na ELO Editora, em transição
-        para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e
-        escrever código — as duas coisas com o mesmo cuidado técnico.
-      </p>
-
-      <div class="acoes" data-anim="sobe">
-        <a href="#contato" class="btn principal">Vamos conversar</a>
-        <a href="#trabalho" class="btn vazado">Ver trabalhos</a>
+        <figure class="retrato" data-retrato>
+          <picture>
+            <source type="image/webp" srcset="images/retrato-recorte-sm.webp 1x, images/retrato-recorte-md.webp 2x">
+            <img src="images/retrato-recorte-sm.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="520" height="765" fetchpriority="high">
+          </picture>
+          <figcaption><i class="ponto-vivo"></i>aberto a boas conversas</figcaption>
+        </figure>
       </div>
     </div>
-
     <div class="rolar" aria-hidden="true"><em></em><span>Role</span></div>
   </section>
 
-  <!-- ============ CENA 2: sobre mim ============ -->
-  <section class="cena" id="proposta">
+  <section class="cena" id="sobre">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>01</b>Sobre mim</p>
-      <h2 class="grande" data-anim="titulo">De uma mesa de som para um editor de código</h2>
-      <div class="texto-largo">
-        <p class="lede" data-anim="sobe">
-          Comecei na área de Administração — onde desenvolvi base em organização,
-          processos e gestão — e encontrei no audiovisual e na tecnologia o lugar
-          onde quero atuar. Trabalho com sonorização, edição de vídeo, transmissão
-          ao vivo e acessibilidade, especialmente em eventos, projetos para a igreja
-          e produções colaborativas, incluindo audiodescrição e conteúdo assistido por IA.
-        </p>
-        <p class="lede" data-anim="sobe">
-          Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para
-          desenvolvimento web, levando comigo o mesmo cuidado técnico e a mesma
-          exigência de qualidade que tinha operando áudio e vídeo ao vivo.
-        </p>
-      </div>
+      <p class="rotulo" data-cena><b>01</b>Sobre mim</p>
+      <h2 class="grande" data-titulo>De uma mesa de som para um editor de código</h2>
+      <p class="corpo" data-cena>
+        Comecei na área de Administração — onde desenvolvi base em organização,
+        processos e gestão — e encontrei no audiovisual e na tecnologia o lugar
+        onde quero atuar. Trabalho com sonorização, edição de vídeo, transmissão
+        ao vivo e acessibilidade, especialmente em eventos, projetos para a igreja
+        e produções colaborativas, incluindo audiodescrição e conteúdo assistido por IA.
+      </p>
+      <p class="corpo" data-cena>
+        Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para
+        desenvolvimento web, levando comigo o mesmo cuidado técnico e a mesma
+        exigência de qualidade que tinha operando áudio e vídeo ao vivo.
+      </p>
 
-      <div class="numeros" data-anim="cascata">
-        <div>
-          <b>3+</b>
-          <span>anos com som, vídeo e transmissão ao vivo</span>
-        </div>
-        <div>
-          <b>30+</b>
-          <span>áreas no sistema interno que ajudo a construir</span>
-        </div>
-        <div>
-          <b>ADS</b>
-          <span>cursando Análise e Desenvolvimento de Sistemas</span>
-        </div>
+      <div class="numeros" data-cascata>
+        <div><b>3+</b><span>anos com som, vídeo e transmissão ao vivo</span></div>
+        <div><b>30+</b><span>trabalhos audiovisuais entregues</span></div>
+        <div><b>ADS</b><span>cursando Análise e Desenvolvimento de Sistemas</span></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ CENA 3: trajetória ============ -->
   <section class="cena" id="trajetoria">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>02</b>Trajetória</p>
-      <h2 class="grande" data-anim="titulo">Como cheguei até aqui</h2>
-
-      <ol class="linha-tempo" data-anim="cascata">
-        <li>
-          <span class="quando">2026</span>
-          <div>
-            <h3>Desenvolvedor web na ELO Editora</h3>
-            <p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p>
-          </div>
-        </li>
-        <li>
-          <span class="quando">2025</span>
-          <div>
-            <h3>Início do Tecnólogo em ADS</h3>
-            <p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p>
-          </div>
-        </li>
-        <li>
-          <span class="quando">2025</span>
-          <div>
-            <h3>Audiovisual &amp; Accessibility Specialist na ELO Editora</h3>
-            <p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p>
-          </div>
-        </li>
-        <li>
-          <span class="quando">2023</span>
-          <div>
-            <h3>Início como técnico e operador de som freelance</h3>
-            <p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p>
-          </div>
-        </li>
-        <li>
-          <span class="quando">2022</span>
-          <div>
-            <h3>Técnico em Administração — Etec Itaquera II</h3>
-            <p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p>
-          </div>
-        </li>
+      <p class="rotulo" data-cena><b>02</b>Trajetória</p>
+      <h2 class="grande" data-titulo>Como cheguei até aqui</h2>
+      <ol class="linha-tempo" data-cascata>
+        <li><span class="quando">2026</span><div><h3>Desenvolvedor web na ELO Editora</h3><p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p></div></li>
+        <li><span class="quando">2025</span><div><h3>Início do Tecnólogo em ADS</h3><p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p></div></li>
+        <li><span class="quando">2025</span><div><h3>Audiovisual &amp; Accessibility Specialist na ELO Editora</h3><p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p></div></li>
+        <li><span class="quando">2023</span><div><h3>Início como técnico e operador de som freelance</h3><p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p></div></li>
+        <li><span class="quando">2022</span><div><h3>Técnico em Administração — Etec Itaquera II</h3><p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p></div></li>
       </ol>
     </div>
   </section>
 
-  <!-- ============ CENA 4: ferramentas ============ -->
   <section class="cena" id="ferramentas">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>03</b>Inventário</p>
-      <h2 class="grande" data-anim="titulo">Ferramentas</h2>
-      <p class="lede" data-anim="sobe">
-        O que eu uso no dia a dia, das duas frentes.
-      </p>
-
-      <p class="sub-rotulo" data-anim="sobe">Produção audiovisual</p>
-      <div class="grade-tags" data-anim="cascata">
+      <p class="rotulo" data-cena><b>03</b>Inventário</p>
+      <h2 class="grande" data-titulo>Ferramentas</h2>
+      <p class="sub-rotulo" data-cena>Produção audiovisual</p>
+      <div class="grade-tags" data-cascata>
         <span>Premiere Pro</span><span>DaVinci Resolve</span><span>After Effects</span>
         <span>vMix</span><span>Blackmagic ATEM</span><span>Soundcraft UI24R</span>
         <span>Stream Deck</span><span>Photoshop</span><span>InDesign</span>
         <span>ElevenLabs</span><span>ClickUp / Trello</span>
       </div>
-
-      <p class="sub-rotulo" data-anim="sobe">Tecnologia</p>
-      <div class="grade-tags" data-anim="cascata">
+      <p class="sub-rotulo" data-cena>Tecnologia</p>
+      <div class="grade-tags" data-cascata>
         <span>React / TypeScript</span><span>Node.js</span><span>Python / Flask</span>
         <span>Firebase / Firestore</span><span>Cloud Functions</span><span>Vertex AI / Gemini</span>
         <span>APIs REST</span><span>Git / GitHub</span>
@@ -611,120 +521,306 @@
     </div>
   </section>
 
-  <!-- ============ CENA 4–6: os trabalhos ============ -->
-  <section class="cena" id="trabalho">
+  <section class="cena" id="desenvolvimento">
     <div class="wrap">
-      <div class="projeto">
-        <div data-anim="sobe">
-          <p class="rotulo"><b>04</b>Automação</p>
-          <h2 class="grande">Um clique liga três PCs</h2>
-          <p class="lede">
-            Antes de cada culto, três computadores precisavam ser ligados e
-            configurados à mão. Virou um clique: Holyrics, Lumikit e vMix sobem
-            juntos pela rede local. Nasceu da minha própria rotina de transmissão.
-          </p>
-          <div class="tags"><span>Python</span><span>Flask</span><span>PWA</span></div>
-        </div>
-        <figure class="arte" data-anim="arte" style="margin:0">
-          <picture>
-            <source srcset="images/automacao-transmissao-md.webp" type="image/webp">
-            <img src="images/automacao-transmissao-md.jpg" alt="Painel de automação com os três computadores listados e o botão Iniciar tudo" loading="lazy" decoding="async">
-          </picture>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="cena">
-    <div class="wrap">
-      <div class="projeto">
-        <figure class="arte" data-anim="arte" style="margin:0">
-          <picture>
-            <source srcset="images/mix-de-fone-ui24r-md.webp" type="image/webp">
-            <img src="images/mix-de-fone-ui24r-md.jpg" alt="Interface de mixagem com faders de voz, violão e teclado" loading="lazy" decoding="async">
-          </picture>
-        </figure>
-        <div data-anim="sobe">
-          <p class="rotulo"><b>05</b>Web app</p>
-          <h2 class="grande">Cada músico mixa o próprio fone</h2>
-          <p class="lede">
-            Numa banda, todo mundo quer ouvir algo diferente no retorno — e só
-            uma pessoa alcança a mesa. Aqui cada músico ajusta o próprio fone pelo
-            celular, falando direto com a Soundcraft Ui24R, sem abrir a mesa inteira.
-          </p>
-          <div class="tags"><span>Node.js</span><span>WebSocket</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cena">
-    <div class="wrap">
-      <div class="projeto">
-        <div data-anim="sobe">
-          <p class="rotulo"><b>06</b>Sistema</p>
-          <h2 class="grande">Do cadastro do livro até a venda</h2>
-          <p class="lede">
-            Sistema interno com mais de 30 áreas, integrado a ERP, meios de
-            pagamento e ferramentas de projeto. Trabalho nele em equipe, com
-            Dalila Rodrigues e Vander Loto.
-          </p>
-          <div class="tags"><span>React</span><span>TypeScript</span><span>Firebase</span></div>
-        </div>
-        <figure class="arte" data-anim="arte" style="margin:0">
-          <picture>
-            <source srcset="images/elo-ecosystem-md.webp" type="image/webp">
-            <img src="images/elo-ecosystem-md.jpg" alt="Catálogo de livros do sistema ELO Ecosystem" loading="lazy" decoding="async">
-          </picture>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CENA: audiovisual e acessibilidade ============ -->
-  <section class="cena" id="audiovisual">
-    <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>07</b>Audiovisual &amp; acessibilidade</p>
-      <h2 class="grande" data-anim="titulo">Som e imagem que alcançam todo mundo</h2>
-      <p class="lede" data-anim="sobe">
-        Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora
-        e em projetos próprios. Três frentes se repetem no meu dia.
+      <p class="rotulo" data-cena><b>04</b>Desenvolvimento</p>
+      <h2 class="grande" data-titulo>O que eu construí</h2>
+      <p class="lede" data-cena>
+        Frente nova, em transição desde o audiovisual — cursando ADS, com contrato
+        de desenvolvedor web assinado agora.
       </p>
 
-      <div class="grade-cards" data-anim="cascata">
-        <article class="mini">
-          <h3>Libras e audiodescrição</h3>
-          <p>Conteúdo infantil da ELO que passa a alcançar quem não enxerga e quem não ouve, num volume que gravação humana não daria conta.</p>
-          <div class="tags"><span>Audiodescrição</span><span>Libras</span><span>IA</span></div>
+      <article class="projeto" data-cena>
+        <div class="projeto-texto">
+          <p class="rotulo"><b>01</b>2026</p>
+          <h3 class="titulo-projeto">Automação de transmissão multi-PC</h3>
+          <p class="corpo">Um clique inicia Holyrics, Lumikit e vMix em 3 PCs pela rede local. Nasceu direto da rotina de transmissão ao vivo.</p>
+        </div>
+        <figure class="projeto-arte" data-parallax>
+          <img src="images/automacao-transmissao-sm.jpg" alt="Automação de transmissão multi-PC" loading="lazy" decoding="async">
+        </figure>
+      </article>
+      <article class="projeto invertido" data-cena>
+        <div class="projeto-texto">
+          <p class="rotulo"><b>02</b>2026</p>
+          <h3 class="titulo-projeto">Mix de Fone — controle via Ui24R</h3>
+          <p class="corpo">Músicos ajustam seus próprios fones numa Soundcraft Ui24R pelo celular, sem acesso à mesa completa.</p>
+        </div>
+        <figure class="projeto-arte" data-parallax>
+          <img src="images/mix-de-fone-ui24r-sm.jpg" alt="Mix de Fone — controle via Ui24R" loading="lazy" decoding="async">
+        </figure>
+      </article>
+      <article class="projeto" data-cena>
+        <div class="projeto-texto">
+          <p class="rotulo"><b>03</b>2026 — atual</p>
+          <h3 class="titulo-projeto">Sistema ELO Ecosystem</h3>
+          <p class="corpo">Sistema interno com 30+ áreas — do cadastro do livro à venda, integrado a ERP, meios de pagamento e ferramentas de projeto. Em equipe com Dalila Rodrigues e Vander Loto.</p>
+        </div>
+        <figure class="projeto-arte" data-parallax>
+          <img src="images/elo-ecosystem-sm.jpg" alt="Sistema ELO Ecosystem" loading="lazy" decoding="async">
+        </figure>
+      </article>
+    </div>
+  </section>
+
+  <section class="cena" id="audiovisual">
+    <div class="wrap">
+      <p class="rotulo" data-cena><b>05</b>Audiovisual &amp; acessibilidade</p>
+      <h2 class="grande" data-titulo>Som e imagem que alcançam todo mundo</h2>
+      <p class="lede" data-cena>
+        Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora,
+        em eventos e em projetos próprios.
+      </p>
+
+      <div class="galeria" id="galeria">
+
+        <article class="galeria-item" data-item>
+          <figure><img src="images/a-vida.jpg" alt="Passa tão rápido" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            
+            <h3>Passa tão rápido</h3>
+            
+          </div>
         </article>
-        <article class="mini">
-          <h3>Radionovela e sonorização de livros</h3>
-          <p>Livro que vira experiência sonora: vozes, ambiência e design de som costurados para a história acontecer no ouvido.</p>
-          <div class="tags"><span>Reaper</span><span>Sound design</span></div>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/entre-o-proposito.jpg" alt="Entre o Propósito — Animação Histórica com IA" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">set/2026</span>
+            <h3>Entre o Propósito — Animação Histórica com IA</h3>
+            <p>Animação com IA e desenho sonoro contando a chegada de Daniel Berg e Gunnar Vingren ao Brasil.</p>
+          </div>
         </article>
-        <article class="mini">
-          <h3>Transmissão e switching</h3>
-          <p>Operação ao vivo multi-câmera: corte, áudio e streaming acontecendo junto, sem segunda tentativa.</p>
-          <div class="tags"><span>vMix</span><span>ATEM</span><span>Ui24R</span></div>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/pelo-rei.jpg" alt="Pelo Rei — Direção, Edição &amp; Sound Design" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">set/2026</span>
+            <h3>Pelo Rei — Direção, Edição &amp; Sound Design</h3>
+            <p>Live session captada em FX3, com edição, colorização e pós-produção de áudio.</p>
+          </div>
         </article>
-        <article class="mini">
-          <h3>Direção, edição &amp; sound design</h3>
-          <p>Peças autorais — AVIVA, REINO, Pelo Rei — da direção ao corte final e à trilha.</p>
-          <div class="tags"><span>Premiere</span><span>DaVinci</span></div>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/clipe-aviva.jpg" alt="AVIVA — Direção, Edição &amp; Sound Design" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">dez/2025</span>
+            <h3>AVIVA — Direção, Edição &amp; Sound Design</h3>
+            <p>Sonorização do zero no Reaper e edição de vídeo do clipe oficial do evento.</p>
+          </div>
         </article>
-        <article class="mini">
-          <h3>Animação histórica com IA</h3>
-          <p>“Entre o Propósito”: narrativa histórica construída com apoio de IA na imagem e na voz.</p>
-          <div class="tags"><span>IA</span><span>After Effects</span></div>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/sonorizacao-amazonia.jpg" alt="Sound Design e Imersão Sonora — Amazônia 360" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">dez/2025</span>
+            <h3>Sound Design e Imersão Sonora — Amazônia 360</h3>
+            <p>Paisagem sonora autoral com ambientes imersivos inspirados na Amazônia.</p>
+          </div>
         </article>
-        <article class="mini">
-          <h3>Eventos e institucionais</h3>
-          <p>Aberturas de evento, vídeos de chamada, conferências, documentário e registro fotográfico.</p>
-          <div class="tags"><span>Motion</span><span>Edição</span></div>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/festa-40-anos.jpg" alt="Registro Fotográfico e Audiovisual — Festa de 40 Anos" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">nov/2025</span>
+            <h3>Registro Fotográfico e Audiovisual — Festa de 40 Anos</h3>
+            <p>Cobertura fotográfica e em vídeo de festa de aniversário de 40 anos.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/projeto-jeep.jpg" alt="Projeto Jeep" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">jul/2026</span>
+            <h3>Projeto Jeep</h3>
+            <p>Vídeo com motion graphics e edição de imagem, unindo animação e corte.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/mix-hino-salmos-91.jpg" alt="Mixagem e Sonorização — Salmos 91" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2026</span>
+            <h3>Mixagem e Sonorização — Salmos 91</h3>
+            <p>Mixagem e masterização de áudio de um hino, com edição de vídeo complementar.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/freelas-parte-01.jpg" alt="Edição de Vídeo — Projetos Freelance" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2026</span>
+            <h3>Edição de Vídeo — Projetos Freelance</h3>
+            <p>Compilado de edições de vídeo feitas como freelancer.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/conferencia-mulheres.jpg" alt="Vídeos Institucionais — Conferência de Mulheres" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2026</span>
+            <h3>Vídeos Institucionais — Conferência de Mulheres</h3>
+            <p>Peças de abertura em vídeo para conferência, com animação e áudio.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/mixagem-worship.jpg" alt="REINO — Direção, Edição &amp; Sound Design" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">fev/2026</span>
+            <h3>REINO — Direção, Edição &amp; Sound Design</h3>
+            <p>Mixagem de áudio e edição de vídeo de culto, com tratamento de imagem.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/festa-15-anos.jpg" alt="Pós-produção e Edição de Vídeo — Festa de 15 Anos" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">nov/2025</span>
+            <h3>Pós-produção e Edição de Vídeo — Festa de 15 Anos</h3>
+            <p>Edição de vídeo e decupagem de material captado no evento.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/mix-louvor-vol1.jpg" alt="Mixagens de louvor — vol. 1" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">out/2025</span>
+            <h3>Mixagens de louvor — vol. 1</h3>
+            <p>Mixagem e masterização de dois louvores de igreja no Reaper.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/mix-louvor-vol2.jpg" alt="Mixagem e Masterização — Ensaio Geral de Jovens" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">set/2025</span>
+            <h3>Mixagem e Masterização — Ensaio Geral de Jovens</h3>
+            <p>Mixagem de áudio de louvores de igreja, explorando plugins gratuitos.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/simplesmente-braseiro.jpg" alt="Edição Audiovisual — Brasileiro" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">ago/2025</span>
+            <h3>Edição Audiovisual — Brasileiro</h3>
+            <p>Edição de vídeo com foco em roteiro e narrativa visual.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/cha-de-revelacao.jpg" alt="Direção Criativa e Audiovisual — Chá de Revelação" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">ago/2025</span>
+            <h3>Direção Criativa e Audiovisual — Chá de Revelação</h3>
+            <p>Cobertura em vídeo de evento familiar, com edição e efeitos de animação.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/anuncios-3d.jpg" alt="Countdown 3D — Culto de Jovens" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">jul/2025</span>
+            <h3>Countdown 3D — Culto de Jovens</h3>
+            <p>Peças de vídeo com elementos de animação 3D.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/anunciando-gravidez.jpg" alt="Direção Criativa e Storytelling — Anúncio de Gravidez" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">jul/2025</span>
+            <h3>Direção Criativa e Storytelling — Anúncio de Gravidez</h3>
+            <p>Vídeo cinematográfico de anúncio de gravidez, com alegorias visuais.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/video-batismo.jpg" alt="Vídeo de Chamada — Batismo" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">jun/2025</span>
+            <h3>Vídeo de Chamada — Batismo</h3>
+            <p>Peça de vídeo para divulgação de evento de batismo.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/chamada-parque.jpg" alt="Vídeo de Chamada — Encontro de Exercícios no Parque" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">jun/2025</span>
+            <h3>Vídeo de Chamada — Encontro de Exercícios no Parque</h3>
+            <p>Vídeo curto de chamada para evento, edição ágil e direta.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/radionovela-brincadeira-coco.jpg" alt="Radionovela + Voz IA — Brincadeira de Coco" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Radionovela + Voz IA — Brincadeira de Coco</h3>
+            <p>Produção de áudio infantil com narração gerada por voz sintética.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/radionovela-homem-rio.jpg" alt="Radionovela — Sonorização de Livro (O homem, o rio)" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Radionovela — Sonorização de Livro (O homem, o rio)</h3>
+            <p>Sonorização de obra literária, transformando o livro em experiência de áudio.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/radionovela-bento-passaro.jpg" alt="Radionovela — Sonorização de Livro (Bento Pássaro)" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Radionovela — Sonorização de Livro (Bento Pássaro)</h3>
+            <p>Sonorização de obra literária, transformando o livro em experiência de áudio.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/homenagem-documentario.jpg" alt="Documentário — Homenagem ao Pastor Presidente" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Documentário — Homenagem ao Pastor Presidente</h3>
+            <p>Vídeo documental de homenagem, com edição de imagens e depoimentos.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/pos-retiro.jpg" alt="Pós-produção e Edição — Retiro" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Pós-produção e Edição — Retiro</h3>
+            <p>Vídeo de encerramento de retiro, com edição voltada para o impacto emocional.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/abertura-acampadentro.jpg" alt="Motion Design — Abertura Acampadentro" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Motion Design — Abertura Acampadentro</h3>
+            <p>Vídeo de abertura de evento, com efeito de letreiro em movimento.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/backgrounds-coreografia.jpg" alt="Backgrounds de Coreografia Cristã" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Backgrounds de Coreografia Cristã</h3>
+            <p>Fundos visuais em vídeo produzidos para apresentações de coreografia.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/video-missoes.jpg" alt="Vídeo Impactante — Missões" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Vídeo Impactante — Missões</h3>
+            <p>Vídeo de sensibilização sobre trabalho de missões, com edição de imagens.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/abertura-evento-jovens.jpg" alt="Abertura Impactante de Evento dos Jovens" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Abertura Impactante de Evento dos Jovens</h3>
+            <p>Vídeo de abertura para evento de jovens, edição dinâmica.</p>
+          </div>
+        </article>
+        <article class="galeria-item" data-item>
+          <figure><img src="images/vinheta-adja-news.jpg" alt="Vinheta — Adja News" loading="lazy" decoding="async"></figure>
+          <div class="galeria-info">
+            <span class="quando">mai/2025</span>
+            <h3>Vinheta — Adja News</h3>
+            <p>Vinheta de abertura para um telejornal comunitário.</p>
+          </div>
         </article>
       </div>
 
-      <p class="nota" data-anim="sobe">
+      <div class="mostrar-mais">
+        <button class="btn vazado" id="btnMais" type="button">Ver todos os trabalhos</button>
+      </div>
+
+      <p class="nota" data-cena>
         Acervo completo no
         <a href="https://www.behance.net/mpaulin" target="_blank" rel="noopener">Behance</a> e no
         <a href="https://www.instagram.com/mpaulinhu" target="_blank" rel="noopener">Instagram</a>.
@@ -732,21 +828,18 @@
     </div>
   </section>
 
-  <!-- ============ CENA: IA aplicada ============ -->
   <section class="cena" id="ia">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>08</b>IA aplicada</p>
-      <h2 class="grande" data-anim="titulo">Ferramenta de produção, não novidade</h2>
-      <p class="lede" data-anim="sobe">
-        Uso inteligência artificial onde ela resolve trabalho real — no audiovisual
-        e no desenvolvimento. A saída da máquina é começo, não entrega: equalização,
-        ritmo e respiração ainda passam por mim.
+      <p class="rotulo" data-cena><b>06</b>IA aplicada</p>
+      <h2 class="grande" data-titulo>Ferramenta de produção, não novidade</h2>
+      <p class="lede" data-cena>
+        Uso inteligência artificial onde ela resolve trabalho real. A saída da
+        máquina é começo, não entrega: equalização, ritmo e respiração ainda passam por mim.
       </p>
-
-      <div class="grade-cards" data-anim="cascata">
+      <div class="grade-cards" data-cascata>
         <article class="mini">
           <h3>Audiodescrição com IA</h3>
-          <p>Descrevo o que acontece na tela e gero narração com voz sintética — conteúdo infantil que passa a alcançar quem não enxerga.</p>
+          <p>Descrevo o que acontece na tela e gero narração com voz sintética — conteúdo infantil da ELO que passa a alcançar quem não enxerga.</p>
           <div class="tags"><span>ElevenLabs</span><span>NaturalReader</span></div>
         </article>
         <article class="mini">
@@ -763,364 +856,36 @@
     </div>
   </section>
 
-  <!-- ============ CENA 7: chamada final ============ -->
   <section class="cena fim" id="contato">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe" style="align-self:center"><b>09</b>Contato</p>
-      <h2 class="grande" data-anim="titulo" style="max-width:20ch">Vamos construir algo juntos</h2>
-      <p class="lede" data-anim="sobe">
+      <p class="rotulo" data-cena><b>07</b>Contato</p>
+      <h2 class="grande" data-titulo>Vamos construir algo juntos</h2>
+      <p class="lede" data-cena>
         Estou aberto a boas conversas — projeto, vaga ou troca de ideia sobre
         áudio, acessibilidade e código.
       </p>
-
-      <div class="acoes" data-anim="sobe" style="justify-content:center">
+      <div class="acoes" data-cena style="justify-content:center">
         <a href="mailto:mp030606@gmail.com" class="btn principal">mp030606@gmail.com</a>
         <a href="portfolio.html" class="btn vazado">Ver o portfólio completo</a>
       </div>
-
-      <div class="contatos" data-anim="cascata">
-        <a href="mailto:mp030606@gmail.com" aria-label="E-mail">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-        </a>
-        <a href="https://www.linkedin.com/in/marcos-paulo-tavares-garcia-dos-santos-b22580221/" target="_blank" rel="noopener" aria-label="LinkedIn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-        </a>
-        <a href="https://github.com/mpaulinhu" target="_blank" rel="noopener" aria-label="GitHub">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 00-6.2 0C6.6 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
-        </a>
-        <a href="https://www.behance.net/mpaulin" target="_blank" rel="noopener" aria-label="Behance">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h6a3 3 0 010 6H4zM4 12h6.5a3.2 3.2 0 010 6.4H4zM15 4h5M14.5 12a4 4 0 117.8 1.4h-6.2"/></svg>
-        </a>
-        <a href="https://www.instagram.com/mpaulinhu" target="_blank" rel="noopener" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg>
-        </a>
+      <div class="contatos" data-cascata>
+        <a href="mailto:mp030606@gmail.com" aria-label="E-mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></a>
+        <a href="https://www.linkedin.com/in/marcos-paulo-tavares-garcia-dos-santos-b22580221/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        <a href="https://github.com/mpaulinhu" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 00-6.2 0C6.6 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a>
+        <a href="https://www.behance.net/mpaulin" target="_blank" rel="noopener" aria-label="Behance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h6a3 3 0 010 6H4zM4 12h6.5a3.2 3.2 0 010 6.4H4zM15 4h5M14.5 12a4 4 0 117.8 1.4h-6.2"/></svg></a>
+        <a href="https://www.instagram.com/mpaulinhu" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg></a>
       </div>
     </div>
   </section>
 
-  <footer>
-    <div class="wrap">Marcos Paulo T. G. dos Santos — Brasil</div>
-  </footer>
+  <footer><div class="wrap">Marcos Paulo T. G. dos Santos — Brasil</div></footer>
 
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-
-<script>
-(function () {
-  'use strict';
-
-  var suave = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ================================================================
-     1. Objeto 3D que atravessa a narrativa
-
-     Uma malha de pontos e linhas — o mesmo objeto o tempo todo, mas
-     ele gira e se reposiciona conforme a cena. É a peça que costura
-     a história: o fundo nunca "corta", ele se transforma.
-
-     Escolha de forma: icosaedro em wireframe + pontos nos vértices.
-     Lê como diagrama/constelação, que conversa com "sinal, rede,
-     sistema" — o vocabulário das duas frentes (áudio e código) —
-     sem virar clichê de "tecnologia" tipo chuva de Matrix.
-     ================================================================ */
-
-  (function tresD() {
-    var canvas = document.getElementById('cena3d');
-    if (!canvas || !window.THREE || suave) {
-      document.body.classList.add('sem-webgl');
-      return;
-    }
-
-    var renderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    } catch (e) {
-      /* sem WebGL o site continua completo — o 3D é ornamento, não conteúdo */
-      document.body.classList.add('sem-webgl');
-      return;
-    }
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    var cena = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 5.2;
-
-    var grupo = new THREE.Group();
-    cena.add(grupo);
-
-    var geo = new THREE.IcosahedronGeometry(1.7, 1);
-
-    var linhas = new THREE.LineSegments(
-      new THREE.WireframeGeometry(geo),
-      new THREE.LineBasicMaterial({ color: 0x2FE0C8, transparent: true, opacity: 0.30 })
-    );
-    grupo.add(linhas);
-
-    var pontos = new THREE.Points(
-      geo,
-      new THREE.PointsMaterial({ color: 0x3B82F6, size: 0.055, transparent: true, opacity: 0.85 })
-    );
-    grupo.add(pontos);
-
-    /* Esfera externa, mais lenta e mais discreta: dá a sensação de
-       camada/atmosfera sem competir com o objeto principal. */
-    var halo = new THREE.LineSegments(
-      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.9, 1)),
-      new THREE.LineBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.10 })
-    );
-    cena.add(halo);
-
-    /* Estado que o ScrollTrigger manipula. O loop só lê daqui — assim
-       o scroll nunca escreve direto no objeto, o que evita tranco. */
-    var estado = { x: 2.1, y: 0, escala: 1, giro: 0 };
-
-    /* --- O objeto obedece ao ponteiro ---
-       `alvo` é para onde o mouse/dedo aponta; `atual` persegue esse alvo
-       um pouco a cada quadro. É a perseguição que faz o movimento
-       acompanhar o gesto: arrasta devagar, o objeto vem devagar; joga
-       rápido, ele corre atrás e desacelera sozinho no fim.
-       Sem isso o objeto grudaria no cursor e o movimento ficaria seco. */
-    var alvoGiroY = 0, alvoGiroX = 0;
-    var giroY = 0, giroX = 0;
-
-    function apontar(clientX, clientY) {
-      var nx = (clientX / window.innerWidth) * 2 - 1;   /* -1..1 */
-      var ny = (clientY / window.innerHeight) * 2 - 1;
-      /* o giro é generoso de propósito: o objeto é o protagonista da
-         cena e precisa responder de forma visível ao gesto */
-      alvoGiroY = nx * 1.15;
-      alvoGiroX = ny * 0.75;
-    }
-
-    window.addEventListener('mousemove', function (e) {
-      apontar(e.clientX, e.clientY);
-    }, { passive: true });
-
-    /* Toque: o dedo arrasta o objeto do mesmo jeito. `touchmove` sem
-       preventDefault para não sequestrar a rolagem da página. */
-    window.addEventListener('touchmove', function (e) {
-      if (!e.touches || !e.touches.length) return;
-      apontar(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-
-    /* Ponteiro saiu da janela: volta ao repouso em vez de congelar torto */
-    document.addEventListener('mouseleave', function () {
-      alvoGiroY = 0; alvoGiroX = 0;
-    });
-
-    var relogio = new THREE.Clock();
-    var visivel = true;
-
-    function loop() {
-      requestAnimationFrame(loop);
-      if (!visivel) return;
-
-      var t = relogio.getElapsedTime();
-
-      /* 0.055 = quanto do caminho até o alvo se percorre por quadro.
-         É este número que dá a sensação de "seguir o movimento": baixo
-         o bastante para ter inércia, alto o bastante para não parecer
-         que o objeto ignorou o gesto. */
-      giroY += (alvoGiroY - giroY) * 0.055;
-      giroX += (alvoGiroX - giroX) * 0.055;
-
-      /* deriva própria lenta (o objeto respira mesmo parado) + o que o
-         ponteiro pede + o giro acumulado que a narrativa define */
-      grupo.rotation.y = t * 0.09 + giroY + estado.giro;
-      grupo.rotation.x = Math.sin(t * 0.1) * 0.12 + giroX;
-
-      /* O halo responde menos e mais devagar: dois planos reagindo com
-         intensidades diferentes é o que dá volume à cena. */
-      halo.rotation.y = -t * 0.05 + giroY * 0.45;
-      halo.rotation.x = giroX * 0.3;
-      halo.rotation.z = t * 0.03;
-
-      /* posição/escala vêm da narrativa, perseguidas suavemente para a
-         troca de cena não dar salto */
-      grupo.position.x += (estado.x - grupo.position.x) * 0.06;
-      grupo.position.y += (estado.y - grupo.position.y) * 0.06;
-      var e = grupo.scale.x + (estado.escala - grupo.scale.x) * 0.06;
-      grupo.scale.set(e, e, e);
-      halo.position.copy(grupo.position);
-
-      renderer.render(cena, camera);
-    }
-    loop();
-
-    /* aba oculta não precisa desenhar */
-    document.addEventListener('visibilitychange', function () {
-      visivel = !document.hidden;
-    });
-
-    window.addEventListener('resize', function () {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      posicionarPorLargura();
-    });
-
-    /* No celular o objeto vai para trás e para cima, atrás do texto:
-       na largura estreita ele brigaria com a leitura se ficasse ao lado. */
-    var estreito = window.matchMedia('(max-width: 860px)');
-    function posicionarPorLargura() {
-      estado.ladoDireito = !estreito.matches;
-    }
-    posicionarPorLargura();
-
-    /* Exposto para a narrativa mexer (ver bloco 2). */
-    window.__cena3d = {
-      ir: function (cfg) {
-        if (typeof cfg.x === 'number') estado.x = estreito.matches ? 0 : cfg.x;
-        if (typeof cfg.y === 'number') estado.y = cfg.y;
-        if (typeof cfg.escala === 'number') estado.escala = cfg.escala;
-        if (typeof cfg.giro === 'number') estado.giro = cfg.giro;
-      },
-    };
-  })();
-
-  /* ================================================================
-     2. Narrativa: o scroll conduz
-
-     Regra de ouro (herdada do portfolio.html, onde um bug de
-     IntersectionObserver já escondeu conteúdo para sempre): NADA aqui
-     pode esconder conteúdo de forma permanente. O CSS deixa tudo
-     visível; o GSAP parte do visível e anima só a ENTRADA (from()).
-     Se a lib não carregar, a página continua legível e completa.
-     ================================================================ */
-
-  if (!window.gsap || !window.ScrollTrigger || suave) return;
-
-  gsap.registerPlugin(ScrollTrigger);
-  var EASE = 'power3.out';
-
-  /* --- entradas --- */
-
-  /* título: cada linha sobe de trás da anterior */
-  gsap.utils.toArray('[data-anim="titulo"]').forEach(function (el) {
-    var linhas = el.querySelectorAll('span > i, span');
-    gsap.from(linhas.length ? linhas : el, {
-      scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-      yPercent: 108, duration: 1, stagger: 0.09, ease: EASE,
-    });
-  });
-
-  gsap.utils.toArray('[data-anim="sobe"]').forEach(function (el) {
-    gsap.from(el, {
-      scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-      y: 30, opacity: 0, duration: 0.8, ease: EASE,
-    });
-  });
-
-  gsap.utils.toArray('[data-anim="cascata"]').forEach(function (el) {
-    gsap.from(el.children, {
-      scrollTrigger: { trigger: el, start: 'top 86%', once: true },
-      y: 28, opacity: 0, duration: 0.7, stagger: 0.09, ease: EASE,
-    });
-  });
-
-  /* arte do projeto: revela por máscara e assenta — o print "chega" */
-  gsap.utils.toArray('[data-anim="arte"]').forEach(function (el) {
-    gsap.from(el, {
-      scrollTrigger: { trigger: el, start: 'top 85%', once: true },
-      clipPath: 'inset(100% 0 0 0)', scale: 1.08, duration: 1.1, ease: 'power4.out',
-    });
-    /* contra-scroll leve: a arte desliza mais devagar que o texto ao lado,
-       o que dá profundidade sem parallax de mouse */
-    gsap.to(el, {
-      scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
-      yPercent: -8, ease: 'none',
-    });
-  });
-
-  /* --- o objeto 3D muda de lugar a cada cena --- */
-  /* `forca` é a presença do objeto na cena: cheio onde ele é o
-     protagonista (abertura e fecho), discreto onde há texto para ler —
-     nas cenas de projeto ele passava por trás do parágrafo e atrapalhava. */
-  var roteiro = [
-    { sel: '#abertura',    cfg: { x: 2.2,  y: 0.1,  escala: 1,    giro: 0   }, forca: 1 },
-    { sel: '#proposta',    cfg: { x: -2.6, y: 0.5,  escala: 0.68, giro: 0.5 }, forca: 0.4 },
-    { sel: '#trajetoria',  cfg: { x: 2.8,  y: -0.3, escala: 0.55, giro: 1.0 }, forca: 0.32 },
-    { sel: '#ferramentas', cfg: { x: -2.9, y: 0.6,  escala: 0.5,  giro: 1.5 }, forca: 0.32 },
-    { sel: '#trabalho',    cfg: { x: -3.1, y: 0.8,  escala: 0.45, giro: 1.8 }, forca: 0.3 },
-    { sel: '#audiovisual', cfg: { x: 3.0,  y: -0.5, escala: 0.5,  giro: 2.1 }, forca: 0.3 },
-    { sel: '#ia',          cfg: { x: -3.0, y: 0.5,  escala: 0.58, giro: 2.4 }, forca: 0.34 },
-    { sel: '#contato',     cfg: { x: 0,    y: 0,    escala: 1.35, giro: 2.9 }, forca: 1 },
-  ];
-
-  var canvas3d = document.getElementById('cena3d');
-
-  function aplicar(passo) {
-    if (window.__cena3d) window.__cena3d.ir(passo.cfg);
-    if (canvas3d) canvas3d.style.setProperty('--forca3d', passo.forca);
-  }
-
-  roteiro.forEach(function (passo) {
-    var el = document.querySelector(passo.sel);
-    if (!el) return;
-    ScrollTrigger.create({
-      trigger: el,
-      start: 'top 60%',
-      end: 'bottom 40%',
-      onEnter: function () { aplicar(passo); },
-      onEnterBack: function () { aplicar(passo); },
-    });
-  });
-
-  /* As cenas de projeto sem id próprio (2ª e 3ª) herdam o mesmo recuo:
-     sem isto o objeto voltava à força cheia entre elas. */
-  gsap.utils.toArray('.cena').forEach(function (cena) {
-    if (!cena.querySelector('.projeto')) return;
-    ScrollTrigger.create({
-      trigger: cena,
-      start: 'top 60%',
-      end: 'bottom 40%',
-      onEnter: function () { if (canvas3d) canvas3d.style.setProperty('--forca3d', 0.3); },
-      onEnterBack: function () { if (canvas3d) canvas3d.style.setProperty('--forca3d', 0.3); },
-    });
-  });
-
-  /* --- barra de progresso --- */
-  var barra = document.getElementById('progresso');
-  if (barra) {
-    gsap.to(barra, {
-      scaleX: 1, ease: 'none',
-      scrollTrigger: { start: 0, end: 'max', scrub: 0.3 },
-    });
-  }
-
-  /* --- índice lateral: marca onde a pessoa está e navega --- */
-  var botoes = [].slice.call(document.querySelectorAll('#indice button'));
-  botoes.forEach(function (b) {
-    b.addEventListener('click', function () {
-      var alvo = document.getElementById(b.dataset.ir);
-      if (alvo) alvo.scrollIntoView({ behavior: suave ? 'auto' : 'smooth', block: 'start' });
-    });
-
-    var alvo = document.getElementById(b.dataset.ir);
-    if (!alvo) return;
-    ScrollTrigger.create({
-      trigger: alvo,
-      start: 'top 55%',
-      end: 'bottom 45%',
-      onToggle: function (self) {
-        if (self.isActive) {
-          botoes.forEach(function (o) { o.classList.remove('ativo'); });
-          b.classList.add('ativo');
-        }
-      },
-    });
-  });
-
-  /* imagens que chegam depois mudam a altura da página; sem isto os
-     gatilhos ficam calculados em cima de medidas velhas */
-  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
-})();
-</script>
+<script src="landing.js" defer></script>
 
 </body>
 </html>
