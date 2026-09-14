@@ -402,6 +402,478 @@
     .rolar em, .ponto-vivo { animation: none; }
     .galeria-item, .galeria-item img { transition: none; }
   }
+
+  /* ================= Case imersivo (overlay de projeto) =================
+     Tela cheia com o print como fundo. O scroll troca de cena: a imagem
+     antiga sai em fade + escala, a nova entra. Fecha no Esc, no X ou
+     arrastando ate o fim. */
+
+  .case-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: #05060a;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s;
+    overscroll-behavior: contain;
+  }
+  .case-overlay.open { opacity: 1; visibility: visible; }
+
+  /* trilho que gera a altura de scroll: 1 tela por cena */
+  .case-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+    /* snap: o scroll assenta na cena mais proxima em vez de parar no meio,
+       eliminando o estado "entre duas cenas" que parecia travamento.
+       `proximity` (e nao `mandatory`) para o gesto do usuario ainda mandar —
+       com mandatory, rolagens curtas eram engolidas e voltavam ao inicio. */
+    scroll-snap-type: y proximity;
+  }
+  .case-scene { scroll-snap-align: start; }
+  .case-scroll::-webkit-scrollbar { width: 0; height: 0; }
+  .case-scroll { scrollbar-width: none; }
+
+  /* camada de fundo fixa: as imagens empilhadas */
+  .case-stage {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    /* perspectiva mais curta que a global (1400px): a placa e grande e ocupa
+       meia tela — de longe demais a inclinacao quase nao aparece. */
+    perspective: 900px;
+    perspective-origin: 72% 50%;
+  }
+  .case-shot {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity;
+  }
+  .case-shot.active { opacity: 1; }
+
+  /* camada 1: a propria imagem borrada preenchendo a tela (ambiente) */
+  .case-shot .blur {
+    position: absolute;
+    inset: -8%;
+    width: 116%;
+    height: 116%;
+    object-fit: cover;
+    filter: blur(52px) saturate(1.5) brightness(0.72);
+    transform: scale(1.06);
+    opacity: 0.9;
+  }
+  /* escurece so o lado do texto — o print fica por cima desta camada */
+  .case-shot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(to right, rgba(5,6,10,0.93) 0%, rgba(5,6,10,0.7) 46%, rgba(5,6,10,0.2) 100%),
+      linear-gradient(to top, rgba(5,6,10,0.8) 0%, rgba(5,6,10,0) 50%);
+  }
+
+  /* camada 2: o print nitido, inteiro, flutuando a direita.
+     .plate cuida do POSICIONAMENTO e da animacao de entrada;
+     .plate-3d cuida da INCLINACAO que segue o mouse — separados para os
+     dois transforms nao brigarem pelo mesmo atributo. */
+  .case-shot .plate {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: clamp(28px, 7vw, 120px);
+    transform: translateY(-50%) translateX(26px) scale(0.97);
+    /* um pouco mais estreita que antes: inclinada, a placa "cresce" para a
+       esquerda e encostaria no texto */
+    width: min(46vw, 720px);
+    max-height: 76vh;
+    opacity: 0;
+    transform-style: preserve-3d;
+    transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .case-shot.active .plate {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+
+  .case-shot .plate-3d {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow:
+      0 40px 90px rgba(0,0,0,0.62),
+      0 0 0 1px rgba(0,0,0,0.5);
+    transform-style: preserve-3d;
+    transform: rotateY(-13deg) rotateX(5deg) translateZ(0);
+    transition: transform 0.16s ease-out, box-shadow 0.4s ease;
+    will-change: transform;
+  }
+  /* brilho que atravessa o vidro conforme a placa inclina */
+  .case-shot .plate-3d::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg,
+      rgba(255,255,255,0.14) 0%,
+      rgba(255,255,255,0.03) 26%,
+      rgba(255,255,255,0) 52%);
+    mix-blend-mode: screen;
+  }
+  .case-shot .plate img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 76vh;
+    object-fit: contain;
+    object-position: top center;
+  }
+  /* print de celular: moldura estreita, retrato */
+  .case-shot.is-phone .plate { width: min(30vw, 310px); }
+  .case-shot.is-phone .plate-3d {
+    border-radius: 26px;
+    border-color: rgba(255,255,255,0.2);
+  }
+  /* leve textura/glow da identidade do site */
+  .case-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(1100px 700px at 78% 18%, var(--accent-wash), transparent 62%);
+    pointer-events: none;
+  }
+
+  /* cada cena = 1 viewport de scroll */
+  .case-scene {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: 0 clamp(20px, 7vw, 110px);
+    pointer-events: none;
+  }
+  .case-copy {
+    position: relative;
+    z-index: 3;
+    max-width: min(44vw, 560px);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .case-scene.in .case-copy { opacity: 1; transform: none; }
+
+  .case-copy .step {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .case-copy .step i {
+    width: 26px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+    opacity: 0.7;
+  }
+  .case-copy h3 {
+    font-family: var(--display);
+    font-size: clamp(1.7rem, 4.2vw, 3rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    color: #F2F3F5;
+    margin: 0 0 16px;
+  }
+  .case-copy p {
+    font-size: clamp(0.95rem, 1.35vw, 1.08rem);
+    line-height: 1.65;
+    color: #B9C0C8;
+    margin: 0;
+  }
+  .case-copy .case-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .case-copy .case-chips span {
+    font-size: 0.76rem;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.05);
+    color: #D6DBE1;
+    backdrop-filter: blur(6px);
+  }
+
+  /* capa da primeira cena: titulo grande do projeto.
+     A largura fica limitada para o texto nunca passar por baixo do print. */
+  .case-scene.cover .case-copy { max-width: min(40vw, 560px); }
+  .case-scene.cover h3 { font-size: clamp(2rem, 4.4vw, 3.6rem); }
+  .case-scene.cover .case-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+  }
+  .case-scene.cover .case-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.25s ease, background 0.25s ease;
+  }
+  .case-scene.cover .case-links a.primary {
+    background: var(--accent-grad);
+    color: #04120F;
+  }
+  .case-scene.cover .case-links a.ghost {
+    border: 1px solid rgba(255,255,255,0.22);
+    color: #E8ECEF;
+  }
+  .case-scene.cover .case-links a:hover { transform: translateY(-2px); }
+
+  /* barra superior: titulo + fechar */
+  .case-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px clamp(16px, 4vw, 36px);
+    background: linear-gradient(to bottom, rgba(5,6,10,0.85), transparent);
+    pointer-events: none;
+  }
+  .case-bar .who {
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9AA3AC;
+    pointer-events: auto;
+    margin-right: auto;
+  }
+  /* Selo obrigatorio nos cases de sistema interno: deixa explicito que as
+     telas foram reconstruidas e que nenhum dado real aparece. */
+  .case-bar .demo-tag {
+    pointer-events: auto;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: #C8D0D6;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    padding: 6px 13px;
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+  }
+  .case-bar .demo-tag[hidden] { display: none; }
+  .case-close {
+    pointer-events: auto;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(10,12,16,0.6);
+    color: #E8ECEF;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .case-close:hover { background: rgba(255,255,255,0.14); transform: rotate(90deg); }
+  .case-close svg { width: 18px; height: 18px; }
+
+  /* indice lateral de cenas */
+  .case-dots {
+    position: fixed;
+    right: clamp(14px, 2.4vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+  }
+  .case-dots button {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .case-dots button i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.28);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .case-dots button.on i { background: var(--accent); transform: scale(1.5); }
+
+  /* dica de scroll na primeira cena */
+  .case-hint {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translateX(-50%);
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8A9099;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .case-hint.show { opacity: 1; }
+  .case-hint i {
+    width: 1px;
+    height: 22px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: caseHintPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes caseHintPulse {
+    0%, 100% { opacity: 0.25; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(5px); }
+  }
+
+  /* barra de progresso do case */
+  .case-progress {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    z-index: 7;
+    background: rgba(255,255,255,0.08);
+  }
+  .case-progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent-grad);
+    transition: width 0.15s linear;
+  }
+
+  body.case-open { overflow: hidden; }
+  /* Dentro do case o cursor custom sai de cena — mas o body do site inteiro
+     usa `cursor: none`, entao e obrigatorio devolver o cursor nativo aqui,
+     senao o mouse simplesmente some. */
+  body.case-open,
+  body.case-open .case-overlay { cursor: auto; }
+  body.case-open .case-close,
+  body.case-open .case-dots button,
+  body.case-open .case-links a { cursor: pointer; }
+  body.case-open #cursorRing, body.case-open #cursorDot { opacity: 0 !important; }
+
+  @media (max-width: 860px) {
+    /* no celular o print sobe e o texto ocupa a parte de baixo, largura cheia */
+    .case-scene { padding: 0 20px 56px; align-items: flex-end; }
+    .case-copy,
+    .case-scene.cover .case-copy { max-width: none; width: 100%; }
+    .case-shot .plate {
+      top: 66px; /* abaixo da barra com o nome do projeto e o X */
+      right: 50%;
+      transform: translateX(50%) translateY(-14px) scale(0.97);
+      width: min(86vw, 460px);
+      max-height: 34vh;
+    }
+    .case-shot.active .plate { transform: translateX(50%) translateY(0) scale(1); }
+    /* sem mouse nao ha tilt: a placa fica reta para nao cortar as bordas */
+    .case-shot .plate-3d { transform: none; }
+    .case-shot .plate img { max-height: 34vh; }
+    .case-shot.is-phone .plate { width: min(40vw, 180px); max-height: 38vh; }
+    .case-shot.is-phone .plate img { max-height: 38vh; }
+    /* na capa o texto e mais longo: o print encolhe para caber os dois */
+    .case-shot:first-child .plate { max-height: 26vh; }
+    .case-shot:first-child .plate img { max-height: 26vh; }
+    .case-shot::after {
+      background:
+        linear-gradient(to top, rgba(5,6,10,0.96) 0%, rgba(5,6,10,0.9) 42%, rgba(5,6,10,0.42) 100%);
+    }
+    /* no celular o indice vira faixa horizontal no rodape,
+       para nao roubar largura do texto */
+    .case-dots {
+      right: auto;
+      left: 50%;
+      top: auto;
+      bottom: 14px;
+      transform: translateX(-50%);
+      flex-direction: row;
+      gap: 6px;
+    }
+    .case-dots button { width: 22px; height: 22px; }
+    .case-copy h3 { font-size: clamp(1.4rem, 6vw, 2rem); }
+    .case-scene.cover h3 { font-size: clamp(1.9rem, 9vw, 2.8rem); }
+    .case-copy p { font-size: 0.94rem; }
+    .case-scene.cover .case-links a { flex: 1 1 auto; justify-content: center; }
+    /* a dica de scroll ocuparia o mesmo lugar dos dots — no celular
+       os proprios dots ja comunicam que ha mais cenas */
+    .case-hint { display: none; }
+    /* o selo de dados ficticios espremia o nome do projeto em 3 linhas:
+       no celular ele vai para baixo da barra, em linha propria */
+    .case-bar { flex-wrap: wrap; row-gap: 8px; padding-bottom: 10px; }
+    .case-bar .who { font-size: 0.62rem; letter-spacing: 0.1em; order: 1; }
+    .case-bar .case-close { order: 2; }
+    .case-bar .demo-tag { order: 3; width: 100%; text-align: center; font-size: 0.62rem; padding: 5px 10px; }
+    .case-shot .plate { top: 96px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .case-shot, .case-copy, .case-overlay { transition-duration: 0.01ms !important; }
+    .case-hint i { animation: none; }
+  }
+
+  /* O projeto inteiro é clicável: abre o case em tela cheia. */
+  .projeto[data-case] { cursor: pointer; }
+  .projeto[data-case] .projeto-arte {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .projeto[data-case]:hover .projeto-arte,
+  .projeto[data-case]:focus-visible .projeto-arte {
+    transform: translateY(-6px);
+    box-shadow: var(--sombra-alta);
+  }
+  .projeto[data-case]:focus-visible { outline: 2px solid var(--accent); outline-offset: 8px; border-radius: 20px; }
+  .abrir-case {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 18px; font-size: 0.86rem; font-weight: 600;
+    color: var(--accent);
+  }
+  .abrir-case svg { width: 15px; height: 15px; }
+  .projeto[data-case]:hover .abrir-case svg { transform: translateX(3px); }
+  .abrir-case svg { transition: transform 0.25s ease; }
+
 </style>
 </head>
 <body>
@@ -530,31 +1002,34 @@
         de desenvolvedor web assinado agora.
       </p>
 
-      <article class="projeto" data-cena>
+      <article class="projeto" data-cena data-case="automacao-transmissao" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
           <p class="rotulo"><b>01</b>2026</p>
           <h3 class="titulo-projeto">Automação de transmissão multi-PC</h3>
           <p class="corpo">Um clique inicia Holyrics, Lumikit e vMix em 3 PCs pela rede local. Nasceu direto da rotina de transmissão ao vivo.</p>
+          <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
           <img src="images/automacao-transmissao-sm.jpg" alt="Automação de transmissão multi-PC" loading="lazy" decoding="async">
         </figure>
       </article>
-      <article class="projeto invertido" data-cena>
+      <article class="projeto invertido" data-cena data-case="mix-de-fone" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
           <p class="rotulo"><b>02</b>2026</p>
           <h3 class="titulo-projeto">Mix de Fone — controle via Ui24R</h3>
           <p class="corpo">Músicos ajustam seus próprios fones numa Soundcraft Ui24R pelo celular, sem acesso à mesa completa.</p>
+          <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
           <img src="images/mix-de-fone-ui24r-sm.jpg" alt="Mix de Fone — controle via Ui24R" loading="lazy" decoding="async">
         </figure>
       </article>
-      <article class="projeto" data-cena>
+      <article class="projeto" data-cena data-case="elo-ecosystem" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
           <p class="rotulo"><b>03</b>2026 — atual</p>
           <h3 class="titulo-projeto">Sistema ELO Ecosystem</h3>
           <p class="corpo">Sistema interno com 30+ áreas — do cadastro do livro à venda, integrado a ERP, meios de pagamento e ferramentas de projeto. Em equipe com Dalila Rodrigues e Vander Loto.</p>
+          <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
         </div>
         <figure class="projeto-arte" data-parallax>
           <img src="images/elo-ecosystem-sm.jpg" alt="Sistema ELO Ecosystem" loading="lazy" decoding="async">
@@ -881,6 +1356,30 @@
   <footer><div class="wrap">Marcos Paulo T. G. dos Santos — Brasil</div></footer>
 
 </main>
+
+<!-- Case imersivo: overlay em tela cheia, aberto ao clicar num projeto.
+     Migrado do portfolio.html — mesma experiência, mesmo conteúdo. -->
+<div class="case-overlay" id="caseOverlay" role="dialog" aria-modal="true" aria-label="Detalhes do projeto" hidden>
+  <div class="case-stage" id="caseStage" aria-hidden="true"></div>
+
+  <div class="case-bar">
+    <span class="who" id="caseWho">Projeto</span>
+    <span class="demo-tag" id="caseDemoTag" hidden>Telas reconstruídas · dados fictícios</span>
+    <button type="button" class="case-close" id="caseClose" aria-label="Fechar projeto (Esc)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="case-dots" id="caseDots" aria-hidden="true"></div>
+
+  <div class="case-scroll" id="caseScroll">
+    <div id="caseScenes"></div>
+  </div>
+
+  <div class="case-hint" id="caseHint"><i></i>role para navegar<i></i></div>
+  <div class="case-progress" aria-hidden="true"><i id="caseProgressBar"></i></div>
+</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
