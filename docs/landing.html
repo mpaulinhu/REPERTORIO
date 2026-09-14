@@ -250,6 +250,99 @@
   }
   .numeros span { font-size: 0.88rem; color: var(--text-dim); line-height: 1.45; display: block; }
 
+  .texto-largo { max-width: 68ch; }
+  .texto-largo .lede { margin-bottom: 20px; }
+
+  .sub-rotulo {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 36px 0 14px;
+  }
+
+  .nota { color: var(--text-dim); font-size: 0.92rem; margin: 26px 0 0; }
+  .nota a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+  /* ---------- Linha do tempo ---------- */
+  .linha-tempo {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--line);
+  }
+  .linha-tempo li {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 20px;
+    padding: 0 0 30px 26px;
+    position: relative;
+  }
+  .linha-tempo li::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 7px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .linha-tempo .quando {
+    font-family: var(--display);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--accent);
+    padding-top: 1px;
+  }
+  .linha-tempo h3 {
+    font-family: var(--display);
+    font-size: 1.04rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    line-height: 1.35;
+  }
+  .linha-tempo p { margin: 0; color: var(--text-dim); font-size: 0.93rem; line-height: 1.6; }
+
+  @media (max-width: 620px) {
+    .linha-tempo li { grid-template-columns: 1fr; gap: 6px; padding-left: 20px; }
+  }
+
+  /* ---------- Grade de etiquetas (ferramentas) ---------- */
+  .grade-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+  .grade-tags span {
+    font-size: 0.86rem;
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg-2);
+    color: var(--text);
+  }
+
+  /* ---------- Cards menores (audiovisual, IA) ---------- */
+  .grade-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 18px;
+    margin-top: 12px;
+  }
+  .mini {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--bg-2);
+    padding: 26px 24px;
+  }
+  .mini h3 {
+    font-family: var(--display);
+    font-size: 1.06rem;
+    font-weight: 600;
+    margin: 0 0 10px;
+    line-height: 1.35;
+  }
+  .mini p { margin: 0; color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; }
+  .mini .tags { margin-top: 16px; }
+
   /* ---------- Projetos ---------- */
   .projeto {
     display: grid;
@@ -372,9 +465,12 @@
 
 <nav id="indice" aria-label="Navegar pelas seções">
   <button type="button" data-ir="abertura" aria-label="Abertura"></button>
-  <button type="button" data-ir="proposta" aria-label="O que eu faço"></button>
-  <button type="button" data-ir="numeros" aria-label="Números"></button>
-  <button type="button" data-ir="trabalho" aria-label="Trabalhos"></button>
+  <button type="button" data-ir="proposta" aria-label="Sobre mim"></button>
+  <button type="button" data-ir="trajetoria" aria-label="Trajetória"></button>
+  <button type="button" data-ir="ferramentas" aria-label="Ferramentas"></button>
+  <button type="button" data-ir="trabalho" aria-label="Projetos"></button>
+  <button type="button" data-ir="audiovisual" aria-label="Audiovisual"></button>
+  <button type="button" data-ir="ia" aria-label="IA aplicada"></button>
   <button type="button" data-ir="contato" aria-label="Contato"></button>
 </nav>
 
@@ -406,16 +502,25 @@
     <div class="rolar" aria-hidden="true"><em></em><span>Role</span></div>
   </section>
 
-  <!-- ============ CENA 2: a proposta ============ -->
+  <!-- ============ CENA 2: sobre mim ============ -->
   <section class="cena" id="proposta">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>01</b>O que eu faço</p>
-      <h2 class="grande" data-anim="titulo">Duas frentes, o mesmo rigor</h2>
-      <p class="lede" data-anim="sobe">
-        Comecei operando som e imagem ao vivo, onde não existe segunda tentativa.
-        Hoje levo esse mesmo cuidado para o código — e a acessibilidade atravessa
-        as duas coisas, porque conteúdo que não alcança todo mundo está pela metade.
-      </p>
+      <p class="rotulo" data-anim="sobe"><b>01</b>Sobre mim</p>
+      <h2 class="grande" data-anim="titulo">De uma mesa de som para um editor de código</h2>
+      <div class="texto-largo">
+        <p class="lede" data-anim="sobe">
+          Comecei na área de Administração — onde desenvolvi base em organização,
+          processos e gestão — e encontrei no audiovisual e na tecnologia o lugar
+          onde quero atuar. Trabalho com sonorização, edição de vídeo, transmissão
+          ao vivo e acessibilidade, especialmente em eventos, projetos para a igreja
+          e produções colaborativas, incluindo audiodescrição e conteúdo assistido por IA.
+        </p>
+        <p class="lede" data-anim="sobe">
+          Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para
+          desenvolvimento web, levando comigo o mesmo cuidado técnico e a mesma
+          exigência de qualidade que tinha operando áudio e vídeo ao vivo.
+        </p>
+      </div>
 
       <div class="numeros" data-anim="cascata">
         <div>
@@ -434,30 +539,74 @@
     </div>
   </section>
 
-  <!-- ============ CENA 3: como trabalho ============ -->
-  <section class="cena" id="numeros">
+  <!-- ============ CENA 3: trajetória ============ -->
+  <section class="cena" id="trajetoria">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe"><b>02</b>Como eu trabalho</p>
-      <h2 class="grande" data-anim="titulo">Ao vivo ensina pressa boa</h2>
+      <p class="rotulo" data-anim="sobe"><b>02</b>Trajetória</p>
+      <h2 class="grande" data-anim="titulo">Como cheguei até aqui</h2>
+
+      <ol class="linha-tempo" data-anim="cascata">
+        <li>
+          <span class="quando">2026</span>
+          <div>
+            <h3>Desenvolvedor web na ELO Editora</h3>
+            <p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p>
+          </div>
+        </li>
+        <li>
+          <span class="quando">2025</span>
+          <div>
+            <h3>Início do Tecnólogo em ADS</h3>
+            <p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p>
+          </div>
+        </li>
+        <li>
+          <span class="quando">2025</span>
+          <div>
+            <h3>Audiovisual &amp; Accessibility Specialist na ELO Editora</h3>
+            <p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p>
+          </div>
+        </li>
+        <li>
+          <span class="quando">2023</span>
+          <div>
+            <h3>Início como técnico e operador de som freelance</h3>
+            <p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p>
+          </div>
+        </li>
+        <li>
+          <span class="quando">2022</span>
+          <div>
+            <h3>Técnico em Administração — Etec Itaquera II</h3>
+            <p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ CENA 4: ferramentas ============ -->
+  <section class="cena" id="ferramentas">
+    <div class="wrap">
+      <p class="rotulo" data-anim="sobe"><b>03</b>Inventário</p>
+      <h2 class="grande" data-anim="titulo">Ferramentas</h2>
       <p class="lede" data-anim="sobe">
-        Numa transmissão o erro aparece na hora, para todo mundo. Isso ensina a
-        testar antes, a ter plano B e a resolver sem drama quando algo quebra.
-        É o que eu levo para cada projeto — no estúdio ou no editor de código.
+        O que eu uso no dia a dia, das duas frentes.
       </p>
 
-      <div class="numeros" data-anim="cascata">
-        <div>
-          <b>Áudio</b>
-          <span>sonorização, mixagem, radionovela e audiodescrição</span>
-        </div>
-        <div>
-          <b>Vídeo</b>
-          <span>edição, switching multi-câmera e transmissão ao vivo</span>
-        </div>
-        <div>
-          <b>Código</b>
-          <span>automação, web apps e sistemas internos</span>
-        </div>
+      <p class="sub-rotulo" data-anim="sobe">Produção audiovisual</p>
+      <div class="grade-tags" data-anim="cascata">
+        <span>Premiere Pro</span><span>DaVinci Resolve</span><span>After Effects</span>
+        <span>vMix</span><span>Blackmagic ATEM</span><span>Soundcraft UI24R</span>
+        <span>Stream Deck</span><span>Photoshop</span><span>InDesign</span>
+        <span>ElevenLabs</span><span>ClickUp / Trello</span>
+      </div>
+
+      <p class="sub-rotulo" data-anim="sobe">Tecnologia</p>
+      <div class="grade-tags" data-anim="cascata">
+        <span>React / TypeScript</span><span>Node.js</span><span>Python / Flask</span>
+        <span>Firebase / Firestore</span><span>Cloud Functions</span><span>Vertex AI / Gemini</span>
+        <span>APIs REST</span><span>Git / GitHub</span>
       </div>
     </div>
   </section>
@@ -467,7 +616,7 @@
     <div class="wrap">
       <div class="projeto">
         <div data-anim="sobe">
-          <p class="rotulo"><b>03</b>Automação</p>
+          <p class="rotulo"><b>04</b>Automação</p>
           <h2 class="grande">Um clique liga três PCs</h2>
           <p class="lede">
             Antes de cada culto, três computadores precisavam ser ligados e
@@ -496,7 +645,7 @@
           </picture>
         </figure>
         <div data-anim="sobe">
-          <p class="rotulo"><b>04</b>Web app</p>
+          <p class="rotulo"><b>05</b>Web app</p>
           <h2 class="grande">Cada músico mixa o próprio fone</h2>
           <p class="lede">
             Numa banda, todo mundo quer ouvir algo diferente no retorno — e só
@@ -513,7 +662,7 @@
     <div class="wrap">
       <div class="projeto">
         <div data-anim="sobe">
-          <p class="rotulo"><b>05</b>Sistema</p>
+          <p class="rotulo"><b>06</b>Sistema</p>
           <h2 class="grande">Do cadastro do livro até a venda</h2>
           <p class="lede">
             Sistema interno com mais de 30 áreas, integrado a ERP, meios de
@@ -532,10 +681,92 @@
     </div>
   </section>
 
+  <!-- ============ CENA: audiovisual e acessibilidade ============ -->
+  <section class="cena" id="audiovisual">
+    <div class="wrap">
+      <p class="rotulo" data-anim="sobe"><b>07</b>Audiovisual &amp; acessibilidade</p>
+      <h2 class="grande" data-anim="titulo">Som e imagem que alcançam todo mundo</h2>
+      <p class="lede" data-anim="sobe">
+        Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora
+        e em projetos próprios. Três frentes se repetem no meu dia.
+      </p>
+
+      <div class="grade-cards" data-anim="cascata">
+        <article class="mini">
+          <h3>Libras e audiodescrição</h3>
+          <p>Conteúdo infantil da ELO que passa a alcançar quem não enxerga e quem não ouve, num volume que gravação humana não daria conta.</p>
+          <div class="tags"><span>Audiodescrição</span><span>Libras</span><span>IA</span></div>
+        </article>
+        <article class="mini">
+          <h3>Radionovela e sonorização de livros</h3>
+          <p>Livro que vira experiência sonora: vozes, ambiência e design de som costurados para a história acontecer no ouvido.</p>
+          <div class="tags"><span>Reaper</span><span>Sound design</span></div>
+        </article>
+        <article class="mini">
+          <h3>Transmissão e switching</h3>
+          <p>Operação ao vivo multi-câmera: corte, áudio e streaming acontecendo junto, sem segunda tentativa.</p>
+          <div class="tags"><span>vMix</span><span>ATEM</span><span>Ui24R</span></div>
+        </article>
+        <article class="mini">
+          <h3>Direção, edição &amp; sound design</h3>
+          <p>Peças autorais — AVIVA, REINO, Pelo Rei — da direção ao corte final e à trilha.</p>
+          <div class="tags"><span>Premiere</span><span>DaVinci</span></div>
+        </article>
+        <article class="mini">
+          <h3>Animação histórica com IA</h3>
+          <p>“Entre o Propósito”: narrativa histórica construída com apoio de IA na imagem e na voz.</p>
+          <div class="tags"><span>IA</span><span>After Effects</span></div>
+        </article>
+        <article class="mini">
+          <h3>Eventos e institucionais</h3>
+          <p>Aberturas de evento, vídeos de chamada, conferências, documentário e registro fotográfico.</p>
+          <div class="tags"><span>Motion</span><span>Edição</span></div>
+        </article>
+      </div>
+
+      <p class="nota" data-anim="sobe">
+        Acervo completo no
+        <a href="https://www.behance.net/mpaulin" target="_blank" rel="noopener">Behance</a> e no
+        <a href="https://www.instagram.com/mpaulinhu" target="_blank" rel="noopener">Instagram</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ CENA: IA aplicada ============ -->
+  <section class="cena" id="ia">
+    <div class="wrap">
+      <p class="rotulo" data-anim="sobe"><b>08</b>IA aplicada</p>
+      <h2 class="grande" data-anim="titulo">Ferramenta de produção, não novidade</h2>
+      <p class="lede" data-anim="sobe">
+        Uso inteligência artificial onde ela resolve trabalho real — no audiovisual
+        e no desenvolvimento. A saída da máquina é começo, não entrega: equalização,
+        ritmo e respiração ainda passam por mim.
+      </p>
+
+      <div class="grade-cards" data-anim="cascata">
+        <article class="mini">
+          <h3>Audiodescrição com IA</h3>
+          <p>Descrevo o que acontece na tela e gero narração com voz sintética — conteúdo infantil que passa a alcançar quem não enxerga.</p>
+          <div class="tags"><span>ElevenLabs</span><span>NaturalReader</span></div>
+        </article>
+        <article class="mini">
+          <h3>Narração e tratamento de voz</h3>
+          <p>Voz por IA para vídeos, livros e projetos digitais, sempre finalizada no Reaper.</p>
+          <div class="tags"><span>ElevenLabs</span><span>Reaper</span></div>
+        </article>
+        <article class="mini">
+          <h3>Roteiro e tratamento visual</h3>
+          <p>Revisão de roteiro e apoio no tratamento de imagem — acelera a parte repetitiva e me deixa tempo para o que exige decisão.</p>
+          <div class="tags"><span>Photoshop</span><span>ChatGPT</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ CENA 7: chamada final ============ -->
   <section class="cena fim" id="contato">
     <div class="wrap">
-      <p class="rotulo" data-anim="sobe" style="align-self:center"><b>06</b>Contato</p>
+      <p class="rotulo" data-anim="sobe" style="align-self:center"><b>09</b>Contato</p>
       <h2 class="grande" data-anim="titulo" style="max-width:20ch">Vamos construir algo juntos</h2>
       <p class="lede" data-anim="sobe">
         Estou aberto a boas conversas — projeto, vaga ou troca de ideia sobre
@@ -648,6 +879,40 @@
        o scroll nunca escreve direto no objeto, o que evita tranco. */
     var estado = { x: 2.1, y: 0, escala: 1, giro: 0 };
 
+    /* --- O objeto obedece ao ponteiro ---
+       `alvo` é para onde o mouse/dedo aponta; `atual` persegue esse alvo
+       um pouco a cada quadro. É a perseguição que faz o movimento
+       acompanhar o gesto: arrasta devagar, o objeto vem devagar; joga
+       rápido, ele corre atrás e desacelera sozinho no fim.
+       Sem isso o objeto grudaria no cursor e o movimento ficaria seco. */
+    var alvoGiroY = 0, alvoGiroX = 0;
+    var giroY = 0, giroX = 0;
+
+    function apontar(clientX, clientY) {
+      var nx = (clientX / window.innerWidth) * 2 - 1;   /* -1..1 */
+      var ny = (clientY / window.innerHeight) * 2 - 1;
+      /* o giro é generoso de propósito: o objeto é o protagonista da
+         cena e precisa responder de forma visível ao gesto */
+      alvoGiroY = nx * 1.15;
+      alvoGiroX = ny * 0.75;
+    }
+
+    window.addEventListener('mousemove', function (e) {
+      apontar(e.clientX, e.clientY);
+    }, { passive: true });
+
+    /* Toque: o dedo arrasta o objeto do mesmo jeito. `touchmove` sem
+       preventDefault para não sequestrar a rolagem da página. */
+    window.addEventListener('touchmove', function (e) {
+      if (!e.touches || !e.touches.length) return;
+      apontar(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    /* Ponteiro saiu da janela: volta ao repouso em vez de congelar torto */
+    document.addEventListener('mouseleave', function () {
+      alvoGiroY = 0; alvoGiroX = 0;
+    });
+
     var relogio = new THREE.Clock();
     var visivel = true;
 
@@ -657,10 +922,22 @@
 
       var t = relogio.getElapsedTime();
 
-      /* rotação própria, constante: o objeto tem vida mesmo parado */
-      grupo.rotation.y = t * 0.16 + estado.giro;
-      grupo.rotation.x = Math.sin(t * 0.12) * 0.22;
-      halo.rotation.y = -t * 0.06;
+      /* 0.055 = quanto do caminho até o alvo se percorre por quadro.
+         É este número que dá a sensação de "seguir o movimento": baixo
+         o bastante para ter inércia, alto o bastante para não parecer
+         que o objeto ignorou o gesto. */
+      giroY += (alvoGiroY - giroY) * 0.055;
+      giroX += (alvoGiroX - giroX) * 0.055;
+
+      /* deriva própria lenta (o objeto respira mesmo parado) + o que o
+         ponteiro pede + o giro acumulado que a narrativa define */
+      grupo.rotation.y = t * 0.09 + giroY + estado.giro;
+      grupo.rotation.x = Math.sin(t * 0.1) * 0.12 + giroX;
+
+      /* O halo responde menos e mais devagar: dois planos reagindo com
+         intensidades diferentes é o que dá volume à cena. */
+      halo.rotation.y = -t * 0.05 + giroY * 0.45;
+      halo.rotation.x = giroX * 0.3;
       halo.rotation.z = t * 0.03;
 
       /* posição/escala vêm da narrativa, perseguidas suavemente para a
@@ -765,11 +1042,14 @@
      protagonista (abertura e fecho), discreto onde há texto para ler —
      nas cenas de projeto ele passava por trás do parágrafo e atrapalhava. */
   var roteiro = [
-    { sel: '#abertura',  cfg: { x: 2.2,  y: 0.1,  escala: 1,    giro: 0   }, forca: 1 },
-    { sel: '#proposta',  cfg: { x: -2.5, y: 0.5,  escala: 0.7,  giro: 0.6 }, forca: 0.45 },
-    { sel: '#numeros',   cfg: { x: 2.6,  y: -0.4, escala: 0.62, giro: 1.2 }, forca: 0.45 },
-    { sel: '#trabalho',  cfg: { x: -3.1, y: 0.8,  escala: 0.45, giro: 1.8 }, forca: 0.3 },
-    { sel: '#contato',   cfg: { x: 0,    y: 0,    escala: 1.35, giro: 2.6 }, forca: 1 },
+    { sel: '#abertura',    cfg: { x: 2.2,  y: 0.1,  escala: 1,    giro: 0   }, forca: 1 },
+    { sel: '#proposta',    cfg: { x: -2.6, y: 0.5,  escala: 0.68, giro: 0.5 }, forca: 0.4 },
+    { sel: '#trajetoria',  cfg: { x: 2.8,  y: -0.3, escala: 0.55, giro: 1.0 }, forca: 0.32 },
+    { sel: '#ferramentas', cfg: { x: -2.9, y: 0.6,  escala: 0.5,  giro: 1.5 }, forca: 0.32 },
+    { sel: '#trabalho',    cfg: { x: -3.1, y: 0.8,  escala: 0.45, giro: 1.8 }, forca: 0.3 },
+    { sel: '#audiovisual', cfg: { x: 3.0,  y: -0.5, escala: 0.5,  giro: 2.1 }, forca: 0.3 },
+    { sel: '#ia',          cfg: { x: -3.0, y: 0.5,  escala: 0.58, giro: 2.4 }, forca: 0.34 },
+    { sel: '#contato',     cfg: { x: 0,    y: 0,    escala: 1.35, giro: 2.9 }, forca: 1 },
   ];
 
   var canvas3d = document.getElementById('cena3d');
