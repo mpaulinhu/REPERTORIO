@@ -1625,12 +1625,125 @@
 
   section.block { padding: 40px 0 96px; perspective: var(--persp); }
 
+  /* ================= Capítulos: identidade por seção =================
+     Um portfólio lido de ponta a ponta precisa de capítulos, não de um
+     corredor uniforme. Cada seção recebe (1) um fundo claro OU escuro,
+     alternando para dar respiração, e (2) uma textura ligada ao seu assunto.
+
+     As texturas são gradientes CSS repetidos — pintados uma vez pelo
+     compositor e depois só deslocados. É o mesmo princípio que tirou o
+     travamento do fundo da capa: mover textura pronta é barato, recalcular
+     pixel a cada quadro não é. */
+
+  /* Seção escura: sangria até a borda da tela.
+     O cálculo de margem/padding é o mesmo de `section.block.about`, incluindo
+     o `overflow-x: clip` — sem ele o 50vw conta a barra de rolagem, a seção
+     estoura alguns px de cada lado e o <html> rola na horizontal. */
+  section.block.chapter-dark {
+    position: relative;
+    isolation: isolate;
+    margin: 0 calc(50% - 50vw);
+    padding: 96px calc(50vw - 50%);
+    overflow-x: clip;
+    background: var(--chapter-ink, #0B0E11);
+    color: #F2F3F5;
+  }
+
+  /* Seção clara: sem sangria, o fundo do site aparece. A separação vem do
+     contraste com as escuras vizinhas, não de uma cor própria. */
+  section.block.chapter-light {
+    position: relative;
+    isolation: isolate;
+    padding: 96px 0;
+  }
+
+  /* A textura vive numa camada própria para poder se mover sem arrastar o
+     conteúdo junto, e some nas bordas para o capítulo não terminar em
+     linha reta. */
+  .chapter-tex {
+    position: absolute;
+    inset: -20% 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+    /* o JS desloca via --par; sem JS fica parado e continua correto */
+    transform: translate3d(0, var(--par, 0px), 0);
+    will-change: transform;
+  }
+
+  section.block.chapter-light .chapter-tex { opacity: 0.32; }
+
+  /* --- Ferramentas: grade de pontos, como papel milimetrado --- */
+  .chapter-tex.tex-grid {
+    background-image: radial-gradient(
+      circle at center,
+      color-mix(in srgb, var(--text) 26%, transparent) 1px,
+      transparent 1.6px
+    );
+    background-size: 26px 26px;
+  }
+
+  /* --- Desenvolvimento: trilhas de circuito, o mesmo vocabulário do shader
+         da capa (placa/diagrama), aqui em versão estática --- */
+  .chapter-tex.tex-circuit {
+    background-image:
+      linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1px),
+      linear-gradient(0deg,  color-mix(in srgb, var(--accent) 14%, transparent) 1px, transparent 1px);
+    background-size: 88px 88px, 88px 88px;
+  }
+
+  /* --- Audiovisual: linhas horizontais de densidade variável, leitura de
+         forma de onda / faders de mesa de som --- */
+  .chapter-tex.tex-wave {
+    background-image: repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--accent-2) 20%, transparent) 0px,
+      color-mix(in srgb, var(--accent-2) 20%, transparent) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  }
+
+  /* --- IA: malha diagonal cruzada, como grafo/constelação --- */
+  .chapter-tex.tex-mesh {
+    background-image:
+      repeating-linear-gradient(45deg,  color-mix(in srgb, var(--accent) 16%, transparent) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(-45deg, color-mix(in srgb, var(--accent-2) 14%, transparent) 0 1px, transparent 1px 34px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-tex { transform: none; }
+  }
+
+  /* Telas pequenas: a textura fina vira ruído e disputa com o texto. */
+  @media (max-width: 640px) {
+    .chapter-tex { opacity: 0.3; }
+    section.block.chapter-dark,
+    section.block.chapter-light { padding-block: 64px; }
+  }
+
   .section-head {
     text-align: left;
     margin-bottom: 56px;
     padding-top: 22px;
     border-top: 1px solid var(--rule);
   }
+
+  /* Nas seções escuras o filete e os textos precisam inverter, senão o
+     cabeçalho some no fundo. */
+  section.block.chapter-dark .section-head { border-top-color: rgba(242,243,245,0.22); }
+  section.block.chapter-dark .section-head h2 { color: #F5F7F8; }
+  section.block.chapter-dark .section-head p { color: #AEB6BD; }
+
+  /* Os cards têm fundo branco PRÓPRIO e não acompanham a seção escura — a
+     cor clara herdada deixava o título deles cinza sobre branco, quase
+     ilegível. Aqui a cor do tema é devolvida a quem vive dentro do card. */
+  section.block.chapter-dark .work-card { color: var(--text); }
+  section.block.chapter-dark .work-info h4 { color: var(--text); }
+  section.block.chapter-dark .work-info p.desc,
+  section.block.chapter-dark .work-info p.period { color: var(--text-dim); }
 
   /* Etiqueta escura, encolhida ao conteudo: o numero e a palavra vivem
      dentro de uma pilula solida em vez de correrem soltos sobre o fundo
@@ -2556,6 +2669,34 @@
     color: #AEB6BD;
   }
 
+  /* Mesma razão nos capítulos: o painel translúcido existe para separar a
+     letra do fundo VIVO, e estas seções agora têm fundo sólido. Mantido, ele
+     vira uma caixa cinza flutuando atrás do texto — ruído, não leitura.
+     O contraste aqui vem da cor do texto, definida junto com o capítulo. */
+  /* A regra do painel acima usa `.block:not(.about) ... p:not(.eyebrow)` —
+     dois `:not()` que contam como classe na especificidade. Vir depois no
+     arquivo não basta para vencê-la, então estes seletores repetem o mesmo
+     peso (`.block:not(.about)` + a classe do capítulo) em vez de recorrer a
+     `!important`, que só empurraria o problema para a próxima regra. */
+  .block.chapter-dark:not(.about) .section-head p:not(.eyebrow),
+  .block.chapter-light:not(.about) .section-head p:not(.eyebrow),
+  .block.chapter-dark:not(.about) .tl-item p,
+  .block.chapter-light:not(.about) .tl-item p,
+  :root[data-theme="dark"] .block.chapter-dark:not(.about) .section-head p,
+  :root[data-theme="dark"] .block.chapter-light:not(.about) .section-head p,
+  :root[data-theme="dark"] .block.chapter-dark:not(.about) .tl-item p,
+  :root[data-theme="dark"] .block.chapter-light:not(.about) .tl-item p {
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+  }
+
+  .block.chapter-dark:not(.about) .section-head p:not(.eyebrow),
+  :root[data-theme="dark"] .block.chapter-dark:not(.about) .section-head p { color: #AEB6BD; }
+  .block.chapter-light:not(.about) .section-head p:not(.eyebrow) { color: var(--text-dim); }
+
   /* ================= Frentes de atuacao (audiovisual) =================
      Substitui 3 cards que nao tinham conteudo por tras: eram descricao do
      que eu faco, nao pecas clicaveis. Agora sao um resumo com arte propria. */
@@ -3287,7 +3428,8 @@
     </div>
   </section>
 
-  <section class="block reveal" id="skills">
+  <section class="block reveal chapter-light" id="skills">
+    <div class="chapter-tex tex-grid" aria-hidden="true"></div>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow"><b>02</b>Inventário</p>
@@ -3322,7 +3464,8 @@
     </div>
   </section>
 
-  <section class="block reveal" id="desenvolvimento">
+  <section class="block reveal chapter-dark" id="desenvolvimento">
+    <div class="chapter-tex tex-circuit" aria-hidden="true"></div>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow"><b>03</b>Desenvolvimento</p>
@@ -3405,7 +3548,8 @@
     </div>
   </section>
 
-  <section class="block reveal" id="audiovisual">
+  <section class="block reveal chapter-light" id="audiovisual">
+    <div class="chapter-tex tex-wave" aria-hidden="true"></div>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow"><b>04</b>Audiovisual</p>
@@ -4166,7 +4310,8 @@
     </div>
   </section>
 
-  <section class="block reveal" id="ia">
+  <section class="block reveal chapter-dark" id="ia">
+    <div class="chapter-tex tex-mesh" aria-hidden="true"></div>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow"><b>05</b>IA aplicada</p>
@@ -5223,6 +5368,54 @@
        Renderiza em ~40% da resolucao real (o resultado e suave, ninguem
        percebe) e a 30fps, entao o custo de GPU fica baixo. Se WebGL nao
        estiver disponivel, a pagina simplesmente mantem o fundo solido. */
+
+    /* ---------- Parallax das texturas de capítulo ----------
+       Desloca a camada de textura devagar conforme a seção cruza a tela.
+
+       Só escreve `--par`, que alimenta um `translate3d` — o compositor move
+       uma camada já pintada, sem redesenhar a textura. É o oposto do que
+       travava a página antes (blur/shader recalculados a cada quadro).
+
+       Só as texturas visíveis são calculadas; o resto nem entra na conta. */
+    (function () {
+      var camadas = [].slice.call(document.querySelectorAll('.chapter-tex'));
+      if (!camadas.length) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var visiveis = camadas;
+      if (window.IntersectionObserver) {
+        visiveis = [];
+        var io = new IntersectionObserver(function (entradas) {
+          entradas.forEach(function (e) {
+            var i = visiveis.indexOf(e.target);
+            if (e.isIntersecting && i === -1) visiveis.push(e.target);
+            else if (!e.isIntersecting && i !== -1) visiveis.splice(i, 1);
+          });
+        }, { rootMargin: '10% 0px' });
+        camadas.forEach(function (c) { io.observe(c); });
+      }
+
+      var AMPLITUDE = 70;   /* px de curso total — leve de propósito */
+      var ticking = false;
+
+      function atualizar() {
+        ticking = false;
+        var alturaTela = window.innerHeight;
+        for (var i = 0; i < visiveis.length; i++) {
+          var el = visiveis[i];
+          var r = el.getBoundingClientRect();
+          /* -1 quando a seção está entrando por baixo, +1 ao sair por cima */
+          var progresso = (r.top + r.height / 2 - alturaTela / 2) / (alturaTela + r.height);
+          el.style.setProperty('--par', (progresso * AMPLITUDE).toFixed(1) + 'px');
+        }
+      }
+
+      window.addEventListener('scroll', function () {
+        if (!ticking) { ticking = true; requestAnimationFrame(atualizar); }
+      }, { passive: true });
+      window.addEventListener('resize', atualizar);
+      atualizar();
+    })();
 
     (function () {
       var canvas = document.getElementById('bgCanvas');
