@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Marcos Paulo — Áudio, imagem e código</title>
-<meta name="description" content="Especialista audiovisual e de acessibilidade na ELO Editora, em transição para desenvolvimento web.">
+<meta name="description" content="Especialista audiovisual e de acessibilidade e desenvolvedor web na ELO Editora.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -323,7 +323,14 @@
   .sub-rotulo {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--accent); margin: 34px 0 13px;
+    color: var(--accent);
+    /* A grade acima usa `perspective` + `translateZ` no hover: sem posição
+       própria no empilhamento, os cartões passavam por cima do rótulo
+       ("TECNOLOGIA" aparecia atravessado nos cards). */
+    position: relative;
+    z-index: 2;
+    display: block;
+    margin: 0 0 6px;
   }
   .grade-tags { display: flex; flex-wrap: wrap; gap: 9px; }
   .grade-tags span {
@@ -991,12 +998,34 @@
   /* ================= Ferramentas com logo =================
      Cada uma abre um painel com o logo, a cor da marca e o que eu faço
      com ela — mesmo comportamento do portfolio.html. */
+  /* Cada frente (audiovisual / tecnologia) é um bloco fechado: o rótulo e
+     a grade vivem juntos, então o rótulo não tem como cair dentro da grade
+     anterior — que era o que fazia "TECNOLOGIA" aparecer sobre um cartão. */
+  /* `flow-root` fecha o contexto de formatação do bloco: sem ele a margem
+     do rótulo colapsa com a do bloco e ele sobe para dentro da grade
+     anterior — "TECNOLOGIA" acabava desenhado sobre um cartão. */
+  .bloco-skills {
+    display: flow-root;
+    margin-top: 44px;
+  }
+  .bloco-skills:first-of-type { margin-top: 26px; }
+
+  /* `align-content: flex-start` é o que faz a grade medir TODAS as linhas.
+     Sem ele o flex-wrap distribuía as linhas dentro da altura de uma só, e
+     os cartões da segunda linha vazavam 80px para fora do container — indo
+     parar por cima do rótulo seguinte ("TECNOLOGIA" sobre o Stream Deck). */
   .skills-grade {
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
     gap: 14px;
     perspective: 900px;
+    position: relative;
+    z-index: 1;
+    margin-top: 14px;
   }
+  /* o cartão não pode esticar para preencher a linha */
+  .skills-grade > .skill-box { flex: 0 0 auto; align-self: flex-start; }
   .skill-box {
     width: 128px;
     min-height: 112px;
@@ -1453,14 +1482,22 @@
 
   /* Figura da equipe, dentro da trajetória */
   .tl-figure {
-    margin: 26px 0 0;
+    margin: 30px 0 0;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid var(--line);
     box-shadow: var(--sombra);
-    max-width: 420px;
+    max-width: 560px;
   }
-  .tl-figure img { width: 100%; height: auto; display: block; }
+  /* A foto é vertical (247x440) e esticava para 743px de altura na
+     coluna. Recortada em 3:2 ela acompanha o resto sem dominar. */
+  .tl-figure img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
   .tl-figure figcaption {
     padding: 12px 16px;
     font-size: 0.82rem;
@@ -1471,14 +1508,30 @@
 
   /* Foto do robô: abre o capítulo de IA, à esquerda do conteúdo. */
   .retrato-ia {
-    margin: 0 0 40px;
-    max-width: 340px;
+    /* Sozinha na coluna esquerda ela deixava metade da tela vazia e
+       esticava a seção. Agora é uma faixa larga e baixa, que fecha o
+       bloco de abertura em vez de abrir um vão. */
+    margin: 0 0 44px;
+    max-width: 100%;
+    /* altura fixa em vez de aspect-ratio: a <picture> interna não respeita
+       a proporção do pai e a figura crescia até 2013px. */
+    height: clamp(260px, 38vh, 420px);
     border-radius: 18px;
     overflow: hidden;
     border: 1px solid var(--line);
     box-shadow: var(--sombra-alta);
   }
-  .retrato-ia img { width: 100%; height: auto; display: block; }
+  .retrato-ia img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 38%;   /* mantém você e o robô no enquadramento */
+    display: block;
+  }
+  .retrato-ia picture { display: block; height: 100%; width: 100%; }
+  @media (max-width: 720px) {
+    .retrato-ia { height: clamp(220px, 32vh, 300px); }
+  }
   .retrato-ia figure { margin: 0; }
 
 </style>
@@ -1520,9 +1573,9 @@
             <span><i>e <b class="destaque">código</b>.</i></span>
           </h1>
           <p class="lede" style="margin-top:28px" data-cena>
-            Especialista audiovisual e de acessibilidade na ELO Editora, em transição
-            para desenvolvimento web. Transito entre operar uma mesa de som ao vivo e
-            escrever código — as duas coisas com o mesmo cuidado técnico.
+            Especialista audiovisual e de acessibilidade e desenvolvedor web na ELO
+            Editora. Transito entre operar uma mesa de som ao vivo e escrever
+            código — as duas coisas com o mesmo cuidado técnico.
           </p>
           <div class="acoes" data-cena>
             <a href="#contato" class="btn principal">Vamos conversar</a>
@@ -1562,9 +1615,9 @@
         e produções colaborativas, incluindo audiodescrição e conteúdo assistido por IA.
       </p>
       <p class="corpo" data-cena>
-        Hoje curso Análise e Desenvolvimento de Sistemas e estou migrando para
+        Hoje curso Análise e Desenvolvimento de Sistemas e atuo também no
         desenvolvimento web, levando comigo o mesmo cuidado técnico e a mesma
-        exigência de qualidade que tinha operando áudio e vídeo ao vivo.
+        exigência de qualidade de quem opera áudio e vídeo ao vivo.
       </p>
 
       <div class="numeros" data-cascata>
@@ -1596,7 +1649,7 @@
               <source type="image/jpeg" srcset="images/equipe-v2-sm.jpg 1x, images/equipe-v2-md.jpg 2x">
               <img loading="lazy" decoding="async" src="images/equipe-v2-sm.jpg" alt="Equipe de tecnologia reunida no escritório" width="247" height="440" onerror="this.closest('.tl-figure').remove();">
             </picture>
-            <figcaption>Time de tecnologia da ELO Editora — onde a transição para desenvolvimento deixou de ser plano e virou prática diária.</figcaption>
+            <figcaption>Time de tecnologia da ELO Editora.</figcaption>
           </div></figure>
       </div>
     </div>
@@ -1606,6 +1659,7 @@
     <div class="wrap">
       <p class="rotulo" data-cena><b>03</b>Inventário</p>
       <h2 class="grande" data-titulo>Ferramentas</h2>
+      <div class="bloco-skills">
       <p class="sub-rotulo" data-cena>Produção audiovisual</p>
       <div class="skills-grade" data-cascata>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Premiere Pro" data-skill-mark="Pr" data-skill-color="#EA77FF" data-skill-icon="images/tools/premiere.svg" data-skill-desc="Edição de vídeo — corte, cor e finalização da maior parte do meu material audiovisual."><span class="mark">Pr</span><p>Premiere Pro</p></div>
@@ -1621,6 +1675,9 @@
         <div class="skill-box" tabindex="0" role="button" data-skill-name="ClickUp / Trello" data-skill-mark="Cu" data-skill-color="#7B68EE" data-skill-icon="images/tools/trello.svg" data-skill-desc="Organização de tarefas e acompanhamento de projeto no dia a dia."><span class="mark">Cu</span><p>ClickUp / Trello</p></div>
       </div>
 
+      </div>
+
+      <div class="bloco-skills">
       <p class="sub-rotulo" data-cena>Tecnologia</p>
       <div class="skills-grade" data-cascata>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Cloud Functions" data-skill-mark="Cf" data-skill-color="#4285F4" data-skill-icon="images/tools/googlecloud.svg" data-skill-desc="Backend serverless — funções que mantenho no pipeline editorial da ELO, do parecer com IA à revisão de prova."><span class="mark">Cf</span><p>Cloud Functions</p></div>
@@ -1632,16 +1689,17 @@
         <div class="skill-box" tabindex="0" role="button" data-skill-name="APIs REST" data-skill-mark="Ap" data-skill-color="#0EA5A5" data-skill-desc="Integração e consumo de APIs externas nos sistemas que desenvolvo e mantenho."><span class="mark">Ap</span><p>APIs REST</p></div>
         <div class="skill-box" tabindex="0" role="button" data-skill-name="Git / GitHub" data-skill-mark="Gh" data-skill-color="#F34F29" data-skill-icon="images/tools/git.svg" data-skill-desc="Controle de versão, branches e revisão de código no fluxo diário de desenvolvimento."><span class="mark">Gh</span><p>Git / GitHub</p></div>
       </div>
+      </div>
     </div>
   </section>
 
   <section class="cena invertida" id="desenvolvimento">
     <div class="wrap">
       <p class="rotulo" data-cena><b>04</b>Desenvolvimento</p>
-      <h2 class="grande" data-titulo>O que eu construí</h2>
+      <h2 class="grande" data-titulo>Projetos de desenvolvimento</h2>
       <p class="lede" data-cena>
-        Frente nova, em transição desde o audiovisual — cursando ADS, com contrato
-        de desenvolvedor web assinado agora.
+        Desenvolvimento web na ELO Editora, em equipe, enquanto curso Análise e
+        Desenvolvimento de Sistemas.
       </p>
 
       <article class="projeto" data-cena data-case="automacao-transmissao" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
@@ -1955,16 +2013,14 @@
       </p>
 
       <figure class="retrato-ia" data-cena>
-        <figure class="">
         <picture>
           <source type="image/webp"
                   srcset="images/robo-ia-v2-sm.webp 1x, images/robo-ia-v2-md.webp 2x">
           <source type="image/jpeg"
                   srcset="images/robo-ia-v2-sm.jpg 1x, images/robo-ia-v2-md.jpg 2x">
-          <img loading="lazy" decoding="async" src="images/robo-ia-v2-sm.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="338" height="600" onerror="this.closest('.').remove();">
+          <img loading="lazy" decoding="async" src="images/robo-ia-v2-sm.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="338" height="600" >
         </picture>
         <figcaption>Uso IA como ferramenta de produção — audiodescrição, narração e tratamento visual entram no fluxo real de trabalho, não como demonstração.</figcaption>
-      </figure>
       </figure>
       <div data-cascata>
 <div class="av-resumo reveal">

@@ -255,6 +255,10 @@
 
   /* Blocos de texto: sobem bastante, presos à rolagem. */
   gsap.utils.toArray('[data-cena]').forEach(function (el) {
+    /* Um rótulo entre duas grades tem pouca folga acima: com 70px de curso
+       ele atravessava a grade anterior durante a entrada ("TECNOLOGIA"
+       aparecia por cima dos cartões). Curso curto onde o espaço é curto. */
+    var apertado = el.classList.contains('sub-rotulo');
     gsap.from(el, {
       scrollTrigger: {
         trigger: el,
@@ -262,25 +266,36 @@
         end: 'top 60%',
         scrub: 0.8,
       },
-      y: 70,
+      y: apertado ? 18 : 70,
       opacity: 0,
       ease: 'power2.out',
     });
   });
 
-  /* Grupos: os filhos entram em cascata, também presos ao scroll. */
+  /* Grupos: os filhos entram em cascata, também presos ao scroll.
+
+     `end` usa 'bottom' do próprio grupo, não 'top': com 'top 55%' a
+     animação terminava enquanto o bloco ainda estava entrando, e o
+     `stagger` deixava os últimos cartões parados a 80px do lugar. Como
+     transform não conta na altura do container, eles desciam por cima do
+     rótulo seguinte — era isso que punha "TECNOLOGIA" sobre um cartão.
+
+     `invalidateOnRefresh` + `clearProps` garantem que o transform é
+     removido ao terminar, em vez de ficar cravado no estilo inline. */
   gsap.utils.toArray('[data-cascata]').forEach(function (el) {
     gsap.from(el.children, {
       scrollTrigger: {
         trigger: el,
         start: 'top 95%',
-        end: 'top 55%',
+        end: 'bottom 70%',
         scrub: 0.8,
+        invalidateOnRefresh: true,
       },
       y: 80,
       opacity: 0,
       stagger: 0.1,
       ease: 'power2.out',
+      clearProps: 'transform',
     });
   });
 
