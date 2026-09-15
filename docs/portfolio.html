@@ -348,7 +348,7 @@
   /* ---------- Ferramentas ---------- */
   .sub-rotulo {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-    font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
+    font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--accent);
     /* A grade acima usa `perspective` + `translateZ` no hover: sem posição
        própria no empilhamento, os cartões passavam por cima do rótulo
@@ -520,7 +520,9 @@
   .work-cover .badge {
     position: absolute;
     top: 12px; left: 12px;
-    font-size: 0.68rem;
+    /* 0.75rem = 12px: abaixo disso o rotulo fica dificil de ler no celular
+       (estava em 0.68rem, ~10,9px) */
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -566,9 +568,14 @@
   .work-info .stack-row .chip { margin: 0; }
 
   .work-links { display: flex; gap: 14px; }
+  /* `min-height: 44px` + padding vertical: o link tinha 20px de altura, bem
+     abaixo do alvo de toque confortavel no celular. O padding negativo na
+     horizontal mantem o alinhamento com o texto acima, sem deslocar o
+     layout. */
   .work-links a {
     font-size: 0.78rem; font-weight: 600; color: var(--accent);
     display: inline-flex; align-items: center; gap: 4px;
+    min-height: 44px;
   }
   .work-links a:hover { text-decoration: underline; }
 
@@ -667,11 +674,15 @@
   .nota { color: var(--text-dim); font-size: 0.92rem; margin: 26px 0 0; }
   /* Alvo de toque: 21px de altura é pequeno demais para o dedo. O padding
      vertical leva o link a ~34px sem mudar o texto de lugar. */
+  /* Estes links vivem DENTRO de um paragrafo. Forcar 44px de altura aqui
+     abriria buraco entre as linhas do texto, entao o alvo cresce so no
+     padding lateral — o suficiente para o dedo acertar sem desmontar a
+     entrelinha. */
   .nota a {
     color: var(--accent);
     border-bottom: 1px solid currentColor;
     display: inline-block;
-    padding: 6px 2px;
+    padding: 8px 6px;
   }
 
   /* ---------- Cards menores ---------- */
@@ -1591,7 +1602,8 @@
   }
   .av-txt .av-tag {
     font-family: var(--mono, ui-monospace, monospace);
-    font-size: 0.66rem;
+    /* 0.75rem = 12px, minimo confortavel de leitura (estava ~10,7px) */
+    font-size: 0.75rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--accent);
@@ -1706,7 +1718,7 @@
   }
   .av-txt .av-tag {
     font-family: ui-monospace, Menlo, monospace;
-    font-size: 0.67rem; letter-spacing: 0.14em; text-transform: uppercase;
+    font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--accent); margin: 0 0 8px;
   }
   /* --text-faint reprovava em 3.5-3.8:1 dentro do card nos dois temas. */
