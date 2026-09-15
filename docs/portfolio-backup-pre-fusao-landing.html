@@ -23,7 +23,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 
@@ -1257,25 +1256,6 @@
 
   @media (prefers-color-scheme: light) {
     html:not([data-theme="dark"]) .content-bg::after { opacity: 0.02; }
-  }
-
-  /* Globo 3D: mesmo z-index do .content-bg (0), pinta por cima dele sem
-     disputar com a cortina de abertura (z:1) nem com o conteúdo (z:2). A
-     opacidade por seção vem de --forca3d, escrita via ScrollTrigger (JS) —
-     forte na capa e no contato, discreta onde há texto para ler. Em telas
-     estreitas o objeto já não se desloca lateralmente (JS), então aqui só
-     reduz a presença geral para não competir com o texto num espaço curto. */
-  #cena3d {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: var(--forca3d, 0.85);
-    transition: opacity 0.6s ease;
-  }
-  .sem-webgl #cena3d { display: none; }
-  @media (max-width: 860px) {
-    #cena3d { opacity: calc(var(--forca3d, 1) * 0.35); }
   }
 
   .hero-grid {
@@ -3516,13 +3496,6 @@
      cima disto, dentro do próprio hero. -->
 <div class="content-bg" aria-hidden="true"></div>
 
-<!-- Globo 3D: atravessa a página inteira, dirigido pela rolagem (não pelo
-     mouse sozinho). Mesmo nível de z-index do .content-bg — pinta por cima
-     do gradiente estático sem disputar com a cortina de abertura nem com o
-     conteúdo. Opacidade baixa nas seções de leitura via --forca3d (ver JS),
-     forte só na capa e no fechamento. -->
-<canvas id="cena3d" aria-hidden="true"></canvas>
-
 <main id="top">
 
   <section class="hero" id="sobre">
@@ -4827,7 +4800,6 @@
 
       root.setAttribute('data-theme', next);
       try { localStorage.setItem('portfolio-theme', next); } catch (e) {}
-      if (window.__cena3d && window.__cena3d.repintar) window.__cena3d.repintar();
     });
 
     /* Fullscreen menu */
@@ -5408,202 +5380,6 @@
         setTimeout(destravar, 8000);
       };
 
-      if (window.gsap && window.ScrollTrigger) boot();
-      else window.addEventListener('load', boot);
-    })();
-
-    /* ---------- Globo 3D: atravessa a narrativa, dirigido pela rolagem ----------
-       Migrado da landing.html (versão paralela). Malha de pontos e linhas que
-       muda de posição/escala/rotação em função direta de scrollY — descer
-       avança o trajeto, subir retrocede pelo mesmo caminho — e que também
-       obedece ao ponteiro (mouse/touch) por cima disso, com sua própria
-       inércia. Mesmo gate de hardware fraco que já desliga o glow ambiente
-       (`low-power`, calculado no <head> antes do primeiro paint) mais o
-       guard de prefers-reduced-motion — geometria simples (icosaedro), não
-       é o shader fullscreen caro que o fundo vivo já foi e deixou de ser. */
-    (function () {
-      var canvas = document.getElementById('cena3d');
-      var reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var fraco = document.documentElement.classList.contains('low-power');
-      if (!canvas || reduzido || fraco) {
-        document.body.classList.add('sem-webgl');
-        return;
-      }
-
-      /* Este <script> roda inline (não é `defer`), mas o Three.js É `defer`
-         — nesse ponto do parsing `window.THREE` ainda pode não existir.
-         Mesmo padrão de espera que o motor GSAP já usa logo acima. */
-      function boot() {
-        if (!window.THREE) {
-          document.body.classList.add('sem-webgl');
-          return;
-        }
-        iniciarGlobo();
-      }
-      if (window.THREE) boot();
-      else window.addEventListener('load', boot);
-
-      function iniciarGlobo() {
-      var renderer;
-      try {
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-      } catch (e) {
-        document.body.classList.add('sem-webgl');
-        return;
-      }
-
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
-      var cena = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.z = 5.2;
-
-      var grupo = new THREE.Group();
-      cena.add(grupo);
-
-      var geo = new THREE.IcosahedronGeometry(1.7, 1);
-      var matLinhas = new THREE.LineBasicMaterial({ transparent: true });
-      var matPontos = new THREE.PointsMaterial({ size: 0.055, transparent: true });
-      var matHalo = new THREE.LineBasicMaterial({ transparent: true });
-
-      grupo.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo), matLinhas));
-      grupo.add(new THREE.Points(geo, matPontos));
-
-      var halo = new THREE.LineSegments(
-        new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.9, 1)),
-        matHalo
-      );
-      cena.add(halo);
-
-      /* As cores saem do tema (data-theme/light/dark — o mesmo atributo que
-         o resto do site usa, não o data-tema/claro/escuro da landing). No
-         claro o traço precisa ser mais forte para não sumir no fundo claro. */
-      function repintar() {
-        var escuro = document.documentElement.getAttribute('data-theme') === 'dark';
-        matLinhas.color.set(escuro ? 0x2FE0C8 : 0x0A7767);
-        matLinhas.opacity = escuro ? 0.30 : 0.34;
-        matPontos.color.set(escuro ? 0x5B9BFF : 0x2563EB);
-        matPontos.opacity = escuro ? 0.85 : 0.6;
-        matHalo.color.set(escuro ? 0x5B9BFF : 0x2563EB);
-        matHalo.opacity = escuro ? 0.10 : 0.13;
-      }
-      repintar();
-
-      /* --- obediência ao ponteiro --- */
-      var alvoY = 0, alvoX = 0, gY = 0, gX = 0;
-      var estreito = window.matchMedia('(max-width: 860px)');
-
-      function apontar(cx, cy) {
-        alvoY = ((cx / window.innerWidth) * 2 - 1) * 1.15;
-        alvoX = ((cy / window.innerHeight) * 2 - 1) * 0.75;
-      }
-
-      window.addEventListener('mousemove', function (e) { apontar(e.clientX, e.clientY); }, { passive: true });
-      window.addEventListener('touchmove', function (e) {
-        if (e.touches && e.touches.length) apontar(e.touches[0].clientX, e.touches[0].clientY);
-      }, { passive: true });
-      document.addEventListener('mouseleave', function () { alvoY = 0; alvoX = 0; });
-
-      /* --- A ROLAGEM é quem conduz o objeto ---
-         `alvoRolagem` é 0 no topo da página e 1 no fim. O objeto deriva essa
-         posição diretamente: descer o avança, subir RETROCEDE pelo mesmo
-         caminho. `posRolagem` persegue o alvo devagar (0.045/quadro), então
-         o movimento acompanha o gesto em vez de colar nele. */
-      var alvoRolagem = 0;
-      var posRolagem = 0;
-
-      function lerRolagem() {
-        var doc = document.documentElement;
-        var max = (doc.scrollHeight - window.innerHeight) || 1;
-        alvoRolagem = Math.min(1, Math.max(0, window.scrollY / max));
-      }
-      lerRolagem();
-      window.addEventListener('scroll', lerRolagem, { passive: true });
-      window.addEventListener('resize', lerRolagem);
-
-      var relogio = new THREE.Clock();
-      var visivel = !document.hidden;
-
-      function loop() {
-        requestAnimationFrame(loop);
-        if (!visivel) return;
-        var t = relogio.getElapsedTime();
-
-        gY += (alvoY - gY) * 0.055;
-        gX += (alvoX - gX) * 0.055;
-
-        posRolagem += (alvoRolagem - posRolagem) * 0.045;
-        var p = posRolagem;
-
-        var largura = estreito.matches ? 0 : 3.1;
-        var x = Math.sin(p * Math.PI * 2.1) * largura;
-        var y = Math.cos(p * Math.PI * 1.7) * 0.75;
-        var escala = 0.95 - Math.sin(p * Math.PI) * 0.55;
-
-        grupo.position.x += (x - grupo.position.x) * 0.08;
-        grupo.position.y += (y - grupo.position.y) * 0.08;
-        var e = grupo.scale.x + (escala - grupo.scale.x) * 0.08;
-        grupo.scale.set(e, e, e);
-        halo.position.copy(grupo.position);
-
-        grupo.rotation.y = p * 5.2 + gY + t * 0.03;
-        grupo.rotation.x = p * 1.6 + gX;
-        halo.rotation.y = -p * 2.6 + gY * 0.45 - t * 0.02;
-        halo.rotation.x = gX * 0.3;
-        halo.rotation.z = p * 0.9;
-
-        renderer.render(cena, camera);
-      }
-      loop();
-
-      /* Pausa reforçada: aba oculta para o loop (já cobria o essencial),
-         mais a checagem inicial de document.hidden acima — o canvas cobre a
-         tela inteira por definição, então não há "saiu da viewport" aqui
-         como existe para o #bgCanvas contido no hero. */
-      document.addEventListener('visibilitychange', function () { visivel = !document.hidden; });
-
-      window.addEventListener('resize', function () {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-
-      window.__cena3d = { repintar: repintar };
-      } /* fim de iniciarGlobo */
-    })();
-
-    /* ---------- Presença do globo por seção ----------
-       A POSIÇÃO do objeto vem da rolagem (bloco acima); aqui só se ajusta o
-       quanto ele aparece: forte na capa e no fechamento, discreto onde há
-       texto e imagem para ler. "Sobre mim" e "Trajetória" não têm `id` no
-       portfolio.html — usam seletor de classe/estrutura em vez de #id. */
-    (function () {
-      var canvas3d = document.getElementById('cena3d');
-      if (!canvas3d) return;
-      var presenca = [
-        { sel: '.hero#sobre',              forca: 0.85 },
-        { sel: '.block.about',             forca: 0.4 },
-        { sel: '#skills',                  forca: 0.32 },
-        { sel: '#desenvolvimento',         forca: 0.22 },
-        { sel: '#audiovisual',             forca: 0.18 },
-        { sel: '#ia',                      forca: 0.3 },
-        { sel: '.block.reveal:has(.timeline)', forca: 0.32 },
-        { sel: '#contatos',                forca: 0.85 },
-      ];
-
-      function boot() {
-        if (!window.gsap || !window.ScrollTrigger) return;
-        presenca.forEach(function (passo) {
-          var el = document.querySelector(passo.sel);
-          if (!el) return;
-          function aplicar() { canvas3d.style.setProperty('--forca3d', passo.forca); }
-          window.ScrollTrigger.create({
-            trigger: el, start: 'top 60%', end: 'bottom 40%',
-            onEnter: aplicar, onEnterBack: aplicar,
-          });
-        });
-      }
       if (window.gsap && window.ScrollTrigger) boot();
       else window.addEventListener('load', boot);
     })();
