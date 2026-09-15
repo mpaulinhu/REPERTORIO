@@ -368,8 +368,14 @@
     margin: 0; border-radius: 18px; overflow: hidden;
     border: 1px solid var(--line); background: var(--card);
     box-shadow: var(--sombra-alta);
+    /* As 3 imagens de projeto são 4:3. Sem isso o container nasce com 2px
+       de altura (a img é `loading="lazy"`) e "estoura" pra ~260px quando
+       a imagem termina de baixar — no celular, empurra tudo abaixo bem
+       na hora em que o dedo está rolando por aqui, sentido como a tela
+       "deslizando sozinha" (bug relatado perto de Desenvolvimento). */
+    aspect-ratio: 4 / 3;
   }
-  .projeto-arte img { width: 100%; height: auto; }
+  .projeto-arte img { width: 100%; height: 100%; object-fit: cover; }
 
   /* ---------- Galeria audiovisual ---------- */
   .galeria {
