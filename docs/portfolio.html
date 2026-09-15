@@ -1008,8 +1008,15 @@
      agora vem do hero, dos cards e da cena 3D, que nao escondem nada. */
   .reveal { opacity: 1; transform: none; }
 
+  /* `overflow: visible` (nao hidden): a mascara que esconde a palavra antes
+     de subir vive no proprio .word, nao aqui. No h2 o hidden achatava a
+     inclinacao 3D presa a rolagem, porque qualquer coisa fora do plano era
+     recortada. A perspectiva fica aqui para todas as palavras girarem no
+     mesmo ponto de fuga, em vez de cada uma na sua. */
   .section-head h2 {
-    overflow: hidden;
+    overflow: visible;
+    perspective: 900px;
+    perspective-origin: 20% 50%;
   }
 
   /* cada palavra e a mascara; o <i> dentro dela e o que sobe (GSAP) */
@@ -1020,6 +1027,8 @@
     /* folga p/ descendentes (g, ç) nao serem cortados pela mascara */
     padding-bottom: 0.1em;
     margin-bottom: -0.1em;
+    transform-origin: 50% 100%;
+    will-change: transform;
   }
 
   .section-head h2 .word > i { display: inline-block; font-style: normal; }
@@ -1265,26 +1274,24 @@
      forte na capa e no contato, discreta onde há texto para ler. Em telas
      estreitas o objeto já não se desloca lateralmente (JS), então aqui só
      reduz a presença geral para não competir com o texto num espaço curto. */
-  /* z-index 3, acima de `main` (z:2) — não abaixo, como pareceria natural.
-     Motivo: o #bgCanvas do hero (fundo vivo, opaco por necessidade) vive
-     DENTRO do main, então herda o contexto de empilhamento dele; com o
-     globo em z:0 ou z:1 o shader o cobria por completo justamente na
-     primeira tela, e ele só aparecia nas frestas entre as seções.
-     Não atropela a leitura porque é `pointer-events: none` e as seções
-     pintam fundo próprio (levemente translúcido) por baixo do texto. */
+  /* Fica ATRÁS de tudo: z:0, o mesmo nível do .content-bg, abaixo da
+     cortina (z:1) e do conteúdo (z:2). O fundo vivo da capa (#bgCanvas)
+     vive dentro do main e cobriria o globo na primeira tela — quem resolve
+     isso é a máscara do .bg-stage (ver regra dele), não pôr o globo na
+     frente do conteúdo. */
   #cena3d {
     position: fixed;
     inset: 0;
-    z-index: 3;
+    z-index: 0;
     pointer-events: none;
-    opacity: var(--forca3d, 0.3);
+    opacity: var(--forca3d, 0.55);
     transition: opacity 0.6s ease;
   }
   .sem-webgl #cena3d { display: none; }
-  /* No celular o globo é mais discreto: a tela é curta e o texto ocupa
-     quase toda ela, então o mesmo peso do desktop atravessaria a leitura. */
+  /* No celular o globo é um pouco mais discreto: a tela é curta e o texto
+     ocupa quase toda ela. */
   @media (max-width: 860px) {
-    #cena3d { opacity: calc(var(--forca3d, 1) * 0.45); }
+    #cena3d { opacity: calc(var(--forca3d, 1) * 0.75); }
   }
 
   .hero-grid {
@@ -1766,13 +1773,16 @@
      O cálculo de margem/padding é o mesmo de `section.block.about`, incluindo
      o `overflow-x: clip` — sem ele o 50vw conta a barra de rolagem, a seção
      estoura alguns px de cada lado e o <html> rola na horizontal. */
+  /* Levemente translúcida para o globo 3D (que fica atrás de tudo)
+     atravessar a página em vez de sumir atrás de cada capítulo. 93% de
+     cobertura mantém o contraste do texto intacto. */
   section.block.chapter-dark {
     position: relative;
     isolation: isolate;
     margin: 0 calc(50% - 50vw);
     padding: 96px calc(50vw - 50%);
     overflow-x: clip;
-    background: var(--chapter-ink, #0B0E11);
+    background: color-mix(in srgb, var(--chapter-ink, #0B0E11) 93%, transparent);
     color: #F2F3F5;
   }
 
@@ -2314,7 +2324,10 @@
     margin: 0 calc(50% - 50vw);
     padding: 72px calc(50vw - 50%) 84px;
     overflow-x: clip;
-    background: linear-gradient(180deg, #0C1013 0%, #0A0E11 100%);
+    /* Levemente translúcida pelo mesmo motivo da .chapter-dark: deixar o
+       globo (atrás de tudo) atravessar sem perder o contraste que motivou
+       a faixa. */
+    background: linear-gradient(180deg, rgba(12,16,19,0.93) 0%, rgba(10,14,17,0.93) 100%);
     color: #F2F3F5;
   }
   /* a faixa e escura nos dois temas, entao o conteudo tem cor fixa aqui */
@@ -2766,9 +2779,12 @@
        base do <html> e abaixo do conteudo, que usa z-index 2. */
     z-index: 0;
     pointer-events: none;
-    /* sem fade-in: este canvas pinta a cor de base da pagina, entao comecar
-       transparente deixaria o site branco no primeiro segundo */
-    opacity: 1;
+    /* Sem fade-in (comecar em 0 deixaria a capa branca no primeiro
+       segundo). Ligeiramente translucido de proposito: o <html> ja pinta a
+       cor de base (regra `html { background: var(--bg) }`), entao o fundo
+       nunca fica branco, e assim o globo 3D — que fica ATRAS de tudo — nao
+       e apagado por completo justamente na primeira tela. */
+    opacity: 0.82;
   }
 
   /* no tema escuro a massa some um pouco mais no fundo */
@@ -5220,6 +5236,34 @@
               scrollTrigger: trigger, y: 20, opacity: 0, duration: 0.6, delay: 0.28, ease: EASE
             });
           }
+
+          /* 2b. Profundidade PRESA A ROLAGEM: depois que o titulo entrou
+                 (acima, uma vez so), as palavras continuam ligadas ao
+                 scroll — inclinam e recuam ao sair de cena, e desfazem o
+                 movimento ao subir a pagina de volta. E este o "3D" da
+                 pagina: vem do gesto de rolar, nao do cursor.
+
+                 Fica no <span class="word">, nao no <i> de dentro: o <i> e
+                 quem sobe na mascara da entrada acima, e escrever transform
+                 nos dois brigaria. A regra de ouro do arquivo continua
+                 valendo — isto anima opacidade ate 0.25, nunca ate 0, entao
+                 nenhum conteudo some de forma permanente se algo travar. */
+          var palavras = head.querySelectorAll('h2 .word');
+          if (!palavras.length) return;
+          gsap.fromTo(palavras,
+            { rotateX: 0, z: 0, opacity: 1 },
+            {
+              scrollTrigger: {
+                trigger: head,
+                start: 'top 32%',
+                end: 'bottom top',
+                scrub: 0.6,
+                invalidateOnRefresh: true,
+              },
+              rotateX: -38, z: -140, opacity: 0.25, stagger: 0.04,
+              ease: 'none',
+            }
+          );
         });
 
         /* 3. Cards entram escalonados conforme a linha aparece */
@@ -5514,20 +5558,10 @@
       }
       repintar();
 
-      /* --- obediência ao ponteiro --- */
-      var alvoY = 0, alvoX = 0, gY = 0, gX = 0;
+      /* Quem conduz o objeto é SÓ a rolagem — não o ponteiro. A versão da
+         landing também perseguia o mouse, e aqui isso lia como um enfeite
+         inquieto se mexendo sozinho por cima da página. */
       var estreito = window.matchMedia('(max-width: 860px)');
-
-      function apontar(cx, cy) {
-        alvoY = ((cx / window.innerWidth) * 2 - 1) * 1.15;
-        alvoX = ((cy / window.innerHeight) * 2 - 1) * 0.75;
-      }
-
-      window.addEventListener('mousemove', function (e) { apontar(e.clientX, e.clientY); }, { passive: true });
-      window.addEventListener('touchmove', function (e) {
-        if (e.touches && e.touches.length) apontar(e.touches[0].clientX, e.touches[0].clientY);
-      }, { passive: true });
-      document.addEventListener('mouseleave', function () { alvoY = 0; alvoX = 0; });
 
       /* --- A ROLAGEM é quem conduz o objeto ---
          `alvoRolagem` é 0 no topo da página e 1 no fim. O objeto deriva essa
@@ -5553,9 +5587,6 @@
         requestAnimationFrame(loop);
         if (!visivel) return;
         var t = relogio.getElapsedTime();
-
-        gY += (alvoY - gY) * 0.055;
-        gX += (alvoX - gX) * 0.055;
 
         posRolagem += (alvoRolagem - posRolagem) * 0.045;
         var p = posRolagem;
@@ -5583,10 +5614,11 @@
         grupo.scale.set(e, e, e);
         halo.position.copy(grupo.position);
 
-        grupo.rotation.y = p * 5.2 + gY + t * 0.03;
-        grupo.rotation.x = p * 1.6 + gX;
-        halo.rotation.y = -p * 2.6 + gY * 0.45 - t * 0.02;
-        halo.rotation.x = gX * 0.3;
+        /* Rotação também é função da rolagem, com uma deriva mínima (t) só
+           para o objeto não congelar quando a página está parada. */
+        grupo.rotation.y = p * 5.2 + t * 0.03;
+        grupo.rotation.x = p * 1.6;
+        halo.rotation.y = -p * 2.6 - t * 0.02;
         halo.rotation.z = p * 0.9;
 
         renderer.render(cena, camera);
@@ -5623,15 +5655,18 @@
          se ver a malha atravessando a página, fraco o bastante para o texto
          nunca disputar atenção com ela. Mais presença onde há respiro (capa,
          fechamento) e menos onde a leitura é densa (grades de cartões). */
+      /* Valores mais altos do que pareceria: o globo fica ATRÁS de tudo, e
+         cada seção ainda pinta o próprio fundo (levemente translúcido) por
+         cima dele — o que chega ao olho é bem menos que estes números. */
       var presenca = [
-        { sel: '.hero#sobre',              forca: 0.3 },
-        { sel: '.block.about',             forca: 0.2 },
-        { sel: '#skills',                  forca: 0.22 },
-        { sel: '#desenvolvimento',         forca: 0.15 },
-        { sel: '#audiovisual',             forca: 0.12 },
-        { sel: '#ia',                      forca: 0.18 },
-        { sel: '.block.reveal:has(.timeline)', forca: 0.22 },
-        { sel: '#contatos',                forca: 0.38 },
+        { sel: '.hero#sobre',              forca: 0.8 },
+        { sel: '.block.about',             forca: 0.5 },
+        { sel: '#skills',                  forca: 0.65 },
+        { sel: '#desenvolvimento',         forca: 0.5 },
+        { sel: '#audiovisual',             forca: 0.45 },
+        { sel: '#ia',                      forca: 0.5 },
+        { sel: '.block.reveal:has(.timeline)', forca: 0.65 },
+        { sel: '#contatos',                forca: 0.8 },
       ];
 
       function boot() {
@@ -7046,117 +7081,23 @@
       });
     });
 
-    /* ---------- Capa como cena 3D: camadas seguem o mouse ----------
-       Escreve só `--mx`/`--my` no .hero; todo o resto é CSS (cada camada
-       multiplica pelo seu peso). Um listener move a cena inteira.
+    /* ---------- Camadas seguindo o mouse: REMOVIDO ----------
+       Havia aqui um motor que escrevia `--mx`/`--my` no .hero e em cada
+       secao-capitulo, e o CSS movia as camadas conforme o ponteiro. Foi
+       removido a pedido: conteudo mexendo sozinho atras do cursor lia como
+       enfeite inquieto, nao como profundidade.
 
-       O valor é suavizado com interpolação simples: o alvo salta com o
-       ponteiro, o valor aplicado persegue esse alvo. É isso que dá o peso
-       de objeto físico — sem a suavização a cena gruda no cursor e o
-       movimento fica seco.
+       O CSS de `.cena-3d` continua no lugar e e inofensivo — sem ninguem
+       escrevendo as variaveis, `--mx`/`--my` valem 0 e o transform resulta
+       em identidade, como ja acontecia em toque e em prefers-reduced-motion.
+       A profundidade agora vem da entrada por rolagem e do globo ao fundo. */
 
-       NÃO toca no transform do .hero: ele é pinado pelo ScrollTrigger e
-       mexer ali por fora faz o conteúdo tremer (ver o aviso no motor de
-       scroll). Só as camadas internas se movem. */
-
-    (function () {
-      if (isCoarse) return;   /* toque: sem ponteiro, sem cena */
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-      /* Toda cena usa o mesmo motor: a capa e cada seção-capítulo. */
-      var cenas = [].slice.call(
-        document.querySelectorAll('.hero, section.block.chapter-dark, section.block.chapter-light')
-      ).map(function (el) {
-        return { el: el, alvoX: 0, alvoY: 0, x: 0, y: 0 };
-      });
-      if (!cenas.length) return;
-
-      var rodando = false;
-
-      function quadro() {
-        var vivo = false;
-
-        for (var i = 0; i < cenas.length; i++) {
-          var c = cenas[i];
-          /* 0.08 = quão rápido persegue o alvo. Mais baixo, mais preguiçoso.
-             É essa perseguição que dá peso de objeto físico: sem ela a cena
-             gruda no cursor e o movimento fica seco. */
-          c.x += (c.alvoX - c.x) * 0.08;
-          c.y += (c.alvoY - c.y) * 0.08;
-
-          c.el.style.setProperty('--mx', c.x.toFixed(4));
-          c.el.style.setProperty('--my', c.y.toFixed(4));
-
-          if (Math.abs(c.alvoX - c.x) > 0.001 || Math.abs(c.alvoY - c.y) > 0.001) vivo = true;
-        }
-
-        /* Para o loop quando todas alcançaram o alvo — sem isso o rAF rodaria
-           para sempre depois do primeiro movimento do mouse. */
-        if (vivo) requestAnimationFrame(quadro); else rodando = false;
-      }
-
-      function acordar() {
-        if (!rodando) { rodando = true; requestAnimationFrame(quadro); }
-      }
-
-      window.addEventListener('mousemove', function (e) {
-        var alturaTela = window.innerHeight;
-
-        for (var i = 0; i < cenas.length; i++) {
-          var c = cenas[i];
-          var r = c.el.getBoundingClientRect();
-          var visivel = r.bottom > 0 && r.top < alturaTela;
-
-          if (!visivel) {
-            /* fora de vista volta ao repouso, para não reaparecer torta */
-            c.alvoX = 0; c.alvoY = 0;
-            continue;
-          }
-
-          /* Posição do ponteiro DENTRO da seção (-1..1), não da janela: cada
-             cena reage ao mouse em relação a si mesma, então o efeito
-             acontece onde a pessoa está olhando. */
-          c.alvoX = ((e.clientX - r.left) / r.width) * 2 - 1;
-          c.alvoY = ((e.clientY - r.top) / r.height) * 2 - 1;
-          /* uma seção alta dá valores enormes fora da faixa; limita em -1..1 */
-          c.alvoX = Math.max(-1, Math.min(1, c.alvoX));
-          c.alvoY = Math.max(-1, Math.min(1, c.alvoY));
-        }
-        acordar();
-      }, { passive: true });
-
-      /* Ponteiro saiu da janela: as cenas voltam ao repouso em vez de
-         congelar tortas no último ponto conhecido. */
-      document.addEventListener('mouseleave', function () {
-        for (var i = 0; i < cenas.length; i++) { cenas[i].alvoX = 0; cenas[i].alvoY = 0; }
-        acordar();
-      });
-
-      /* Rolar muda quais seções estão em cena; sem isto uma seção que entra
-         só reage depois do próximo movimento do mouse. */
-      window.addEventListener('scroll', function () {
-        var alturaTela = window.innerHeight;
-        for (var i = 0; i < cenas.length; i++) {
-          var c = cenas[i];
-          var r = c.el.getBoundingClientRect();
-          if (!(r.bottom > 0 && r.top < alturaTela)) { c.alvoX = 0; c.alvoY = 0; }
-        }
-        acordar();
-      }, { passive: true });
-    })();
-
-    /* ---------- Hero scene tilt follows mouse ---------- */
-
-    var heroScene = document.getElementById('heroScene');
-    var sceneStage = document.getElementById('sceneStage');
-    if (heroScene && !isCoarse) {
-      document.addEventListener('mousemove', function (e) {
-        var vw = window.innerWidth, vh = window.innerHeight;
-        var px = (e.clientX / vw) - 0.5;
-        var py = (e.clientY / vh) - 0.5;
-        sceneStage.style.transform = 'rotateX(' + (14 - py * 18) + 'deg) rotateY(' + (-22 + px * 26) + 'deg)';
-      });
-    }
+    /* ---------- Cena da camera: tilt por mouse REMOVIDO ----------
+       Girava com o ponteiro em QUALQUER ponto da pagina (o listener era no
+       document, nao na propria cena), entao a peca ficava se mexendo
+       sozinha enquanto a pessoa lia outra coisa. Mesma decisao do motor de
+       camadas acima: a profundidade vem da rolagem, nao do cursor.
+       A cena mantem a inclinacao fixa definida no CSS. */
 
     /* O parallax manual do hero foi removido: agora o hero e pinado pelo
        ScrollTrigger enquanto o losango abre, e mexer no transform por fora
