@@ -309,8 +309,35 @@
        Medido: 3 filhos -> 350px de curso; 19 filhos -> 150px. Alongar o
        `end` conforme a quantidade reequilibra isso. */
     var n = el.children.length;
-    var fim = n > 12 ? 'top 5%' : (n > 6 ? 'top 20%' : 'top 35%');
-    gsap.from(el.children, {
+    var pct = n > 12 ? 0.05 : (n > 6 ? 0.2 : 0.35);
+
+    /* O ULTIMO bloco da pagina nunca alcanca esse ponto final. A cascata e
+       `scrub` (presa a rolagem), e ela so termina quando o TOPO do bloco sobe
+       ate `pct` da tela — mas no fim da pagina a rolagem ACABA antes disso.
+       Medido nos icones de contato: mesmo no fim absoluto, faltavam 369px
+       (390x844) e 406px (1440x900) de rolagem. Resultado: a animacao
+       congelava no meio — icones a 42% de opacidade e 46px deslocados para
+       baixo, parecendo "bugados" e sugerindo que havia mais pagina abaixo.
+
+       Entao o fim do curso e o MENOR entre o ponto desejado e o quanto de
+       rolagem ainda existe de verdade. Funcao (nao string) porque
+       `invalidateOnRefresh` a reavalia a cada resize, quando a altura da
+       pagina muda. */
+    var fim = function () {
+      var doc = document.documentElement;
+      var restante = doc.scrollHeight - window.innerHeight - el.getBoundingClientRect().top - window.scrollY;
+      var desejado = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * pct;
+      var inicio = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.98;
+      var curso = Math.max(0, desejado - inicio);
+      /* folga de 8px: encostar no limite exato deixa o scrub sem o ultimo
+         quadro em alguns navegadores */
+      return '+=' + Math.max(1, Math.min(curso, Math.max(0, restante - 8)));
+    };
+
+    gsap.fromTo(el.children, {
+      y: 80,
+      opacity: 0,
+    }, {
       scrollTrigger: {
         trigger: el,
         start: 'top 98%',
@@ -321,8 +348,11 @@
         scrub: 0.8,
         invalidateOnRefresh: true,
       },
-      y: 80,
-      opacity: 0,
+      /* estado final ESCRITO, nao inferido: com `from` o GSAP le o estilo
+         corrente como destino, e num bloco que nunca completa o curso isso
+         deixava o valor final indefinido. */
+      y: 0,
+      opacity: 1,
       stagger: 0.1,
       ease: 'power2.out',
       clearProps: 'transform',
