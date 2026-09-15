@@ -147,7 +147,18 @@
      seção e o da próxima — o "espaço vazio". 96px é respiro; acima disso
      vira buraco. */
   .cena { padding: clamp(52px, 7vh, 96px) 0; position: relative; }
-  .cena.cheia { min-height: 100svh; display: flex; align-items: center; }
+  /* A barra do topo e `fixed` (z:60) e a capa centraliza o conteudo em
+     100svh sem saber que ela existe: medido, a barra cobria a assinatura em
+     14px no celular e 18px no desktop — na tela sobrava so o fim do nome
+     ("SANTOS"). O padding-top reserva a altura da barra (73-77px) mais
+     folga, empurrando o conteudo para baixo dela. O valor sai do `clamp`
+     do `.cena` (52-96px) somado a barra: no celular a barra e menor e a
+     tela mais curta, entao 82px bastam e o "role" continua dentro da tela;
+     acima de 900px de largura a barra cresce para 77px. */
+  .cena.cheia {
+    min-height: 100svh; display: flex; align-items: center;
+    padding-top: 82px;
+  }
 
   /* ---------- Barra fixa ---------- */
   .barra {
@@ -280,7 +291,20 @@
        capa, que e clara e muda enquanto a pessoa le */
     color: var(--text-dim);
   }
-  .assinatura i { width: 40px; height: 1px; background: var(--line); display: block; }
+  .assinatura i { width: 40px; height: 1px; background: var(--line); display: block; flex: none; }
+
+  /* Folga para telas estreitas: o nome inteiro ("Marcos Paulo T. G. dos
+     Santos") pede 242px e abaixo de ~360px nao ha tanto. Sem `wrap` o flex
+     de linha unica espremia o span e a ultima palavra caia numa linha
+     invisivel. Deixando quebrar, o nome aparece inteiro em duas linhas; o
+     traco decorativo sai, porque separador de linha unica nao faz sentido
+     quando o conteudo empilha.
+     (O corte que aparecia em TODAS as larguras tinha outra causa — a barra
+     fixa por cima; ver o padding-top de `.cena.cheia`.) */
+  @media (max-width: 560px) {
+    .assinatura { flex-wrap: wrap; gap: 4px 10px; }
+    .assinatura i { display: none; }
+  }
 
   /* Abaixo de 900px o grid vira uma coluna e a figura recebia a largura
      inteira: a foto esticava para ~1200px de altura, muito maior que a
@@ -1939,7 +1963,7 @@
             <source type="image/webp" srcset="images/retrato-recorte-sm.webp 1x, images/retrato-recorte-md.webp 2x">
             <img src="images/retrato-recorte-sm.png" alt="Marcos Paulo, de camiseta preta e óculos, segurando um tablet" width="520" height="765" fetchpriority="high">
           </picture>
-          <figcaption><i class="ponto-vivo"></i>Marcos Paulo</figcaption>
+          <figcaption><i class="ponto-vivo"></i>Audiovisual e Developer</figcaption>
         </figure>
       </div>
     </div>
