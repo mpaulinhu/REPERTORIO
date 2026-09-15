@@ -400,13 +400,34 @@
   .numeros span { font-size: 0.87rem; color: var(--text-dim); line-height: 1.45; display: block; }
 
   /* ---------- Trajetória ---------- */
-  .linha-tempo { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line); }
+  /* A borda virou um elemento proprio (.tl-traco): `border-left` nao tem
+     como ser animado "de cima para baixo" — so cor e espessura, nunca a
+     extensao. Com um <i> absoluto da para usar transform-origin + scaleY,
+     que roda na GPU sem forcar relayout a cada quadro. */
+  .linha-tempo { list-style: none; margin: 0; padding: 0; position: relative; }
+  .tl-traco {
+    position: absolute; left: 0; top: 0;
+    display: block; /* mesmo motivo do .tl-ponto: <i> nasce inline */
+    /* para 28px antes do fim: o ultimo <li> carrega padding-bottom: 28px e
+       o traco terminaria num trecho vazio, o que fica visivel justamente
+       porque o desenho chama atencao para a ponta da linha */
+    height: calc(100% - 28px);
+    width: 1px; background: var(--line);
+    transform-origin: top center;
+    pointer-events: none;
+  }
   .linha-tempo li {
     display: grid; grid-template-columns: 78px 1fr; gap: 18px;
     padding: 0 0 28px 24px; position: relative;
   }
-  .linha-tempo li::before {
-    content: ''; position: absolute; left: -5px; top: 7px;
+  /* A bolinha saiu de `::before` e virou <i class="tl-ponto">: o GSAP nao
+     anima pseudo-elemento sem passar por variavel CSS, e e no overshoot
+     dela (back.out) que mora a graca do efeito. */
+  .tl-ponto {
+    position: absolute; left: -5px; top: 7px;
+    /* `display: block` e obrigatorio: <i> nasce inline, e em inline o
+       border-radius nao arredonda a caixa — a bolinha saia como uma cunha */
+    display: block;
     width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
   }
   .linha-tempo .quando { font-family: var(--display); font-size: 0.9rem; font-weight: 600; color: var(--accent); }
@@ -443,6 +464,27 @@
   .dobra-trajetoria[open] > summary .dobra-seta { transform: rotate(180deg); }
   /* a lista encosta no botao sem esse respiro */
   .dobra-trajetoria[open] > summary { margin-bottom: 30px; }
+
+  /* O painel que o JS anima em altura. `overflow: hidden` e o que faz a
+     altura recortar o conteudo em vez de deixa-lo vazar por cima da secao
+     seguinte. Sem JS — ou com ele quebrado — isto e uma div comum e o
+     <details> nativo continua abrindo e fechando: nada aqui esconde
+     conteudo de forma permanente. */
+  /* O `overflow: hidden` e necessario para a altura recortar o conteudo em
+     vez de deixa-lo vazar por cima da secao seguinte — mas ele tambem
+     cortava os 5px da bolinha que ficam para FORA da lista (left: -5px),
+     deixando so a metade direita de cada marco. A folga lateral devolve
+     esse espaco e o negative margin a compensa, para o texto nao andar. */
+  .dobra-painel {
+    overflow: hidden;
+    padding-left: 8px;
+    margin-left: -8px;
+  }
+
+  /* Enquanto a altura anima, o Chrome tenta compensar a mudanca de altura
+     movendo a rolagem (scroll anchoring) e a secao treme. */
+  .dobra-trajetoria.animando { overflow-anchor: none; }
+
   @media (prefers-reduced-motion: reduce) { .dobra-seta { transition: none; } }
 
   /* ---------- Ferramentas ---------- */
@@ -1480,10 +1522,56 @@
     padding: 34px 30px 30px;
     text-align: center;
     box-shadow: var(--sombra-alta);
-    transform: translateY(14px) scale(0.97);
-    transition: transform 0.32s cubic-bezier(.2,.8,.2,1);
+    /* Entrada mais decidida que a anterior (14px / 0.97, que quase nao se
+       via). O overshoot vem da curva, nao de um keyframe: esta cubic-bezier
+       passa de 1 e volta, entao a caixa "assenta" no lugar. */
+    transform: translateY(26px) scale(0.94);
+    transition: transform 0.42s cubic-bezier(0.34, 1.4, 0.44, 1);
   }
   .modal-backdrop.open .modal-box { transform: none; }
+
+  /* As partes entram em sequencia depois da caixa, para o olho ler a ordem
+     (moldura -> titulo -> video -> versoes) em vez de tudo de uma vez.
+     So no modal de VIDEO: o painel de ferramenta e pequeno e nao precisa. */
+  #modalBackdrop .modal-head,
+  #modalBackdrop .modal-frame,
+  #modalBackdrop .modal-video-list {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.34s ease, transform 0.34s cubic-bezier(.2,.8,.2,1);
+  }
+  #modalBackdrop.open .modal-head { opacity: 1; transform: none; transition-delay: 0.1s; }
+  #modalBackdrop.open .modal-frame { opacity: 1; transform: none; transition-delay: 0.17s; }
+  #modalBackdrop.open .modal-video-list { opacity: 1; transform: none; transition-delay: 0.24s; }
+
+  /* Fechar e intencao, nao descoberta: sai rapido e sem escalonamento — o
+     atraso que da graca na entrada vira espera irritante na saida. */
+  #modalBackdrop:not(.open) .modal-head,
+  #modalBackdrop:not(.open) .modal-frame,
+  #modalBackdrop:not(.open) .modal-video-list {
+    transition-duration: 0.12s;
+    transition-delay: 0s;
+  }
+
+  /* O card clicado responde ao clique — a acao tem origem visivel, sem
+     precisar de clone nem de medir posicao (que e onde a versao com FLIP
+     acumulava risco: iframe, rolagem, card fora da tela). */
+  .work-cover.abrindo { animation: pulsoCapa 0.4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes pulsoCapa {
+    0% { transform: scale(1); }
+    45% { transform: scale(0.965); }
+    100% { transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-box { transition: none; transform: none; }
+    #modalBackdrop .modal-head,
+    #modalBackdrop .modal-frame,
+    #modalBackdrop .modal-video-list {
+      opacity: 1; transform: none; transition: none;
+    }
+    .work-cover.abrindo { animation: none; }
+  }
   .modal-close {
     position: absolute;
     top: 12px; right: 12px;
@@ -2039,12 +2127,13 @@
           <span class="dobra-txt" data-quando="fechado">Ver trajetória</span><span class="dobra-txt" data-quando="aberto">Ocultar trajetória</span>
           <svg class="dobra-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </summary>
-      <ol class="linha-tempo">
-        <li><span class="quando">2026</span><div><h3>Desenvolvedor web na ELO Editora</h3><p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p></div></li>
-        <li><span class="quando">2025</span><div><h3>Início do Tecnólogo em ADS</h3><p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p></div></li>
-        <li><span class="quando">2025</span><div><h3>Audiovisual &amp; Accessibility Specialist na ELO Editora</h3><p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p></div></li>
-        <li><span class="quando">2023</span><div><h3>Início como técnico e operador de som freelance</h3><p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p></div></li>
-        <li><span class="quando">2022</span><div><h3>Técnico em Administração — Etec Itaquera II</h3><p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p></div></li>
+      <div class="dobra-painel">
+      <ol class="linha-tempo"><i class="tl-traco" aria-hidden="true"></i>
+        <li><i class="tl-ponto" aria-hidden="true"></i><span class="quando">2026</span><div><h3>Desenvolvedor web na ELO Editora</h3><p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p></div></li>
+        <li><i class="tl-ponto" aria-hidden="true"></i><span class="quando">2025</span><div><h3>Início do Tecnólogo em ADS</h3><p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p></div></li>
+        <li><i class="tl-ponto" aria-hidden="true"></i><span class="quando">2025</span><div><h3>Audiovisual &amp; Accessibility Specialist na ELO Editora</h3><p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p></div></li>
+        <li><i class="tl-ponto" aria-hidden="true"></i><span class="quando">2023</span><div><h3>Início como técnico e operador de som freelance</h3><p>Sistemas de som em igrejas e podcasts. No mesmo ano, entrada no DaVinci Resolve e edição de vídeo.</p></div></li>
+        <li><i class="tl-ponto" aria-hidden="true"></i><span class="quando">2022</span><div><h3>Técnico em Administração — Etec Itaquera II</h3><p>Base em organização, processos e gestão — de onde parti para o audiovisual e a tecnologia.</p></div></li>
       </ol>
 
       <!-- Sem `data-cena` no pai: a animação de entrada deixava a figura em
@@ -2064,6 +2153,7 @@
         </picture>
         <figcaption>Time de tecnologia da ELO Editora.</figcaption>
       </figure>
+      </div>
       </details>
     </div>
   </section>

@@ -1446,6 +1446,20 @@
         quadro.textContent = 'Este trabalho não tem vídeo associado — veja os links abaixo.';
       }
 
+      /* Pulso na capa clicada: liga a acao ao lugar de onde ela partiu.
+         A classe e removida ao fim da animacao para poder disparar de novo
+         no proximo clique (animation nao reinicia se a classe ficar). */
+      var capaClicada = card.querySelector('.work-cover');
+      if (capaClicada) {
+        capaClicada.classList.remove('abrindo');
+        void capaClicada.offsetWidth; /* forca o reinicio da animacao */
+        capaClicada.classList.add('abrindo');
+        capaClicada.addEventListener('animationend', function limpa() {
+          capaClicada.classList.remove('abrindo');
+          capaClicada.removeEventListener('animationend', limpa);
+        });
+      }
+
       backdrop.classList.add('open');
       document.body.classList.add('modal-open');
       fechar.focus();
@@ -1466,6 +1480,138 @@
     fechar.addEventListener('click', fecharModal);
     backdrop.addEventListener('click', function (e) { if (e.target === backdrop) fecharModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharModal(); });
+  })();
+
+  /* ---------------------------------------------------------------
+     Trajetória: "linha viva" — o traço se desenha e os marcos acendem
+     no rastro dele.
+
+     Por que interceptar o clique em vez de deixar o <details> abrir
+     sozinho: <details> não anima nada. Ao abrir, o conteúdo passa de
+     não-renderizado para renderizado no mesmo quadro, e não existe
+     estado anterior para o navegador interpolar — transição de CSS
+     simplesmente NÃO DISPARA (medido: zero eventos de transitionrun no
+     Chrome). No Firefox e no Safari dispara, o que é pior: seria um
+     efeito que funciona só para parte das pessoas. Ao fechar, o
+     conteúdo sumiria no primeiro quadro e não haveria o que animar.
+     Então o open é ligado na hora (para poder medir) e desligado só
+     quando a animação de recolher termina.
+
+     Sem GSAP, sem JS, ou com `prefers-reduced-motion`: nada disto roda
+     e o <details> nativo abre e fecha normalmente. Nenhum caminho aqui
+     esconde conteúdo de forma permanente — a regra de ouro do arquivo.
+     --------------------------------------------------------------- */
+  (function trajetoria() {
+    var det = document.querySelector('.dobra-trajetoria');
+    if (!det) return;
+    var resumo = det.querySelector('summary');
+    var painel = det.querySelector('.dobra-painel');
+    if (!resumo || !painel || suave || !window.gsap) return;
+
+    var traco = det.querySelector('.tl-traco');
+    var pontos = det.querySelectorAll('.tl-ponto');
+    var itens = det.querySelectorAll('.linha-tempo li');
+    var figura = det.querySelector('.tl-figure');
+    var linha = null;
+    var animando = false;
+
+    /* O corpo de cada item, sem a bolinha: ela tem coreografia própria
+       (o pop), enquanto ano e texto entram deslizando. */
+    function corpoDe(li) {
+      return li.querySelectorAll(':scope > .quando, :scope > div');
+    }
+
+    function limpar() {
+      gsap.set([traco, pontos, figura], { clearProps: 'all' });
+      itens.forEach(function (li) { gsap.set(corpoDe(li), { clearProps: 'all' }); });
+      gsap.set(painel, { clearProps: 'height' });
+    }
+
+    /* A cascata é ancorada na POSIÇÃO VERTICAL real de cada item, não
+       num incremento fixo: com incremento fixo o traço passava na
+       frente dos primeiros e empatava com os últimos — o oposto de
+       "arrastar" os marcos atrás de si. Aqui cada marco acende quando o
+       traço de fato chega nele. */
+    function tempoDe(li, alturaTotal, duracaoTraco) {
+      if (!alturaTotal) return 0;
+      var topo = li.offsetTop + 7; /* +7 = o `top` da bolinha */
+      return Math.max(0, Math.min(1, topo / alturaTotal)) * duracaoTraco;
+    }
+
+    function montarTimeline() {
+      var alvo = painel.scrollHeight;
+      var lista = det.querySelector('.linha-tempo');
+      var altLista = lista ? lista.scrollHeight : 0;
+      var DUR = 0.55; /* o traço percorre a lista inteira neste tempo */
+
+      var tl = gsap.timeline({
+        onComplete: function () {
+          animando = false;
+          det.classList.remove('animando');
+          /* a altura volta a ser automática: presa num número, a lista
+             quebraria ao girar o celular ou mudar o tamanho da fonte */
+          gsap.set(painel, { height: 'auto' });
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
+        },
+      });
+
+      tl.fromTo(painel, { height: 0 }, { height: alvo, duration: 0.5, ease: 'power3.out' }, 0);
+      /* linear, e não ease-in-out: um traço que acelera no meio
+         dessincroniza de marcos ancorados na posição */
+      tl.fromTo(traco, { scaleY: 0 }, { scaleY: 1, duration: DUR, ease: 'none' }, 0.02);
+
+      itens.forEach(function (li, i) {
+        var t = tempoDe(li, altLista, DUR);
+        /* o primeiro entra praticamente junto do clique: 120ms de espaço
+           reservado e vazio leem como travamento, não como cascata */
+        if (i === 0) t = Math.min(t, 0.03);
+        /* o overshoot fica confinado à bolinha de 9px — nela lê como
+           vida; no texto leria como salto */
+        tl.fromTo(pontos[i], { scale: 0 }, { scale: 1, duration: 0.42, ease: 'back.out(2.6)' }, t + 0.02);
+        tl.fromTo(corpoDe(li), { x: -14, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }, t + 0.06);
+      });
+
+      if (figura) {
+        /* entra junto do último marco, não depois: sozinha no fim ela
+           criava um segundo "fim" solto na sequência */
+        tl.fromTo(figura, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: 'power2.out' }, DUR * 0.92);
+      }
+      return tl;
+    }
+
+    resumo.addEventListener('click', function (e) {
+      e.preventDefault(); /* quem controla o `open` daqui em diante é este handler */
+
+      if (animando && linha) {
+        /* clique no meio da animação: inverte a partir de onde está, em
+           vez de empilhar timelines (que causaria salto) */
+        linha.reversed() ? linha.play() : linha.reverse();
+        return;
+      }
+
+      animando = true;
+      det.classList.add('animando');
+
+      if (!det.open) {
+        det.open = true; /* precisa estar aberto para o painel ter altura mensurável */
+        if (linha) linha.kill();
+        limpar();
+        linha = montarTimeline();
+      } else {
+        if (!linha) { det.open = false; animando = false; det.classList.remove('animando'); return; }
+        /* fechar é intenção, não descoberta: mais rápido que abrir */
+        linha.timeScale(1.7);
+        linha.eventCallback('onReverseComplete', function () {
+          det.open = false;
+          animando = false;
+          det.classList.remove('animando');
+          linha.timeScale(1);
+          limpar();
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
+        });
+        linha.reverse();
+      }
+    });
   })();
 
   /* ---------- Painel da ferramenta (logo + cor + descrição) ---------- */
