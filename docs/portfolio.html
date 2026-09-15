@@ -1774,7 +1774,12 @@
        esticava a seção. Agora é uma faixa larga e baixa, que fecha o
        bloco de abertura em vez de abrir um vão. */
     margin: 0 0 44px;
-    max-width: 100%;
+    /* 820px, nao 100%: o arquivo original tem 1126px de largura e a faixa
+       ocupava 1134px — ou seja, era exibida em resolucao 0,99x, no limite
+       exato, e qualquer tela maior ja a esticava. Nao existe versao maior
+       do arquivo, entao a saida e nao deixar o slot passar do que a foto
+       aguenta. Em 820px sobra ~1,37x de resolucao e ela fica nitida. */
+    max-width: 820px;
     /* altura fixa em vez de aspect-ratio: a <picture> interna não respeita
        a proporção do pai e a figura crescia até 2013px. */
     height: clamp(260px, 38vh, 420px);
@@ -2700,15 +2705,15 @@
       <figure class="retrato-ia" data-cena>
         <!-- `w` + `sizes`, nao `1x/2x`: com descritor de DENSIDADE o
              navegador escolhe pela tela (numa tela 1x ele pegava sempre a
-             -sm de 338px) e ignora que o slot aqui tem ~1130px de largura.
+             -sm de 338px) e ignora a largura real do slot.
              Resultado: a foto era esticada 3,4x e saia borrada. Com `w` ele
              escolhe pela largura real de exibicao. -->
         <picture>
           <source type="image/webp"
-                  sizes="(max-width: 860px) 92vw, 1130px"
+                  sizes="(max-width: 860px) 92vw, 820px"
                   srcset="images/robo-ia-v2-sm.webp 338w, images/robo-ia-v2-md.webp 676w">
           <source type="image/jpeg"
-                  sizes="(max-width: 860px) 92vw, 1130px"
+                  sizes="(max-width: 860px) 92vw, 820px"
                   srcset="images/robo-ia-v2-sm.jpg 338w, images/robo-ia-v2-md.jpg 676w, images/robo-ia-v2.jpg 1126w">
           <img loading="lazy" decoding="async" src="images/robo-ia-v2.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="1126" height="2000" >
         </picture>
