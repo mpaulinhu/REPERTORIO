@@ -44,7 +44,10 @@
     --card: #FFFFFF;
     --text: #0C1316;
     --text-dim: #4D565C;
-    --text-faint: #7C858C;
+    /* #7C858C dava 3,46:1 sobre o fundo claro — reprovado para texto
+       pequeno (min 4,5). Varios pontos do site ja contornavam isso trocando
+       para --text-dim caso a caso; corrigido aqui na raiz. */
+    --text-faint: #5F686F;
     --accent: #0A7767;
     --accent-ink: #EAFBF6;
     --accent-2: #2563EB;
@@ -1570,6 +1573,23 @@
   .cena.invertida .mini h3 { color: var(--text); }
   .cena.invertida .galeria-item p,
   .cena.invertida .mini p { color: var(--text-dim); }
+  /* O numero do rotulo (01..07) tem o mesmo problema do selo abaixo: usa
+     --accent, que no tema claro e verde ESCURO (#0A7767) para contrastar com
+     o fundo branco. Dentro da secao invertida ele caia sobre fundo escuro:
+     3,42:1, abaixo do minimo de 4,5. Aqui vale o verde claro do tema escuro,
+     que e o que a propria secao ja usa para os outros textos: 10,71:1. */
+  .cena.invertida .rotulo b { color: #2FE0C8; }
+
+  /* O selo "em obra" vive numa secao INVERTIDA — fundo escuro nos DOIS
+     temas. No tema claro ele herdava o ambar escuro (#6B4400), pensado para
+     fundo branco, e caia sobre o fundo escuro da secao: medido nos pixels
+     reais, 1,63:1 (o minimo e 4,5) — marrom sobre marrom, ilegivel. Aqui
+     vale sempre a versao clara do ambar, como no tema escuro: 8,59:1. */
+  .cena.invertida .em-obra {
+    color: #FFC65C;
+    background: rgba(255, 198, 92, 0.13);
+    border-color: rgba(255, 198, 92, 0.32);
+  }
 
   :root, [data-tema="claro"] {
     --fundo-invertido: #0E1317;
