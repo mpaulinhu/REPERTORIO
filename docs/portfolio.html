@@ -63,6 +63,13 @@
     --accent-wash: color-mix(in srgb, var(--accent) 12%, transparent);
     --depth-1: color-mix(in srgb, var(--text) 12%, transparent);
     --depth-2: color-mix(in srgb, var(--text) 6%, transparent);
+
+    /* Selo "em construção" — âmbar, que lê como aviso sem soar erro.
+       #8A5A00 sobre o fundo translúcido dava 2,58:1, reprovado; este tom
+       mais escuro passa dos 4,5:1 exigidos para texto pequeno. */
+    --obra-txt: #6B4400;
+    --obra-bg: rgba(245, 166, 35, 0.16);
+    --obra-linha: rgba(107, 68, 0, 0.34);
     color-scheme: light;
   }
 
@@ -71,14 +78,25 @@
     --bg-2: #0E1114;
     --card: #13161B;
     --text: #F3F5F7;
-    --text-dim: #99A1AA;
-    --text-faint: #666E77;
+    /* Clareadas: #99A1AA dava ~6,9:1 — passa no minimo da WCAG AA (4,5),
+       mas e a cor de QUASE TODO o texto secundario do site (paragrafos,
+       legendas, descricoes, chips). No conjunto, sobre o fundo #08090B,
+       a pagina inteira lia como apagada. #B8C0C8 sobe para ~10:1 sem
+       virar branco puro, mantendo a hierarquia com os titulos. */
+    --text-dim: #B8C0C8;
+    --text-faint: #8A929B;
     --accent: #2FE0C8;
     --accent-ink: #041210;
     --accent-2: #5B9BFF;
     --line: rgba(255,255,255,0.12);
     --sombra: 0 1px 2px rgba(0,0,0,0.4), 0 8px 26px rgba(0,0,0,0.3);
     --sombra-alta: 0 2px 8px rgba(0,0,0,0.45), 0 22px 48px rgba(0,0,0,0.4);
+
+    /* No escuro o âmbar precisa clarear bastante: o tom de 8A5A00 do tema
+       claro fica em ~2:1 sobre este fundo, ilegível. */
+    --obra-txt: #FFC65C;
+    --obra-bg: rgba(255, 198, 92, 0.13);
+    --obra-linha: rgba(255, 198, 92, 0.32);
     color-scheme: dark;
   }
 
@@ -178,6 +196,24 @@
   }
   .rotulo b { color: var(--accent); font-family: var(--display); }
   .rotulo::before { content: ''; width: 26px; height: 1px; background: var(--accent); }
+
+  /* Selo de trabalho em andamento. Fica no rótulo do projeto, ao lado do
+     ano, e não impede abrir o case — quem clicar vê o que já existe. */
+  .em-obra {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    /* 0.75rem = 12px, o mesmo piso de legibilidade dos outros rótulos */
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--obra-txt);
+    background: var(--obra-bg);
+    border: 1px solid var(--obra-linha);
+    white-space: nowrap;
+  }
+  .em-obra::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; flex: none;
+  }
 
   /* O <i> das linhas do titulo e so um envolucro para a animacao de
      entrada, nunca enfase: sem isto o navegador aplica italico sintetico
@@ -2011,7 +2047,7 @@
       </article>
       <article class="projeto" data-cena data-case="elo-ecosystem" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
-          <p class="rotulo"><b>03</b>2026 — atual</p>
+          <p class="rotulo"><b>03</b>2026 — atual<span class="em-obra">Em construção</span></p>
           <h3 class="titulo-projeto">Sistema ELO Ecosystem</h3>
           <p class="corpo">Sistema interno com 30+ áreas — do cadastro do livro à venda, integrado a ERP, meios de pagamento e ferramentas de projeto. Em equipe com Dalila Rodrigues e Vander Loto.</p>
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
@@ -2023,7 +2059,7 @@
 
       <article class="projeto invertido" data-cena data-case="sthe" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
-          <p class="rotulo"><b>04</b>2026</p>
+          <p class="rotulo"><b>04</b>2026<span class="em-obra">Em construção</span></p>
           <h3 class="titulo-projeto">STHE — controle de pagamentos</h3>
           <p class="corpo">Sistema de organização interna para uma equipe de salão: cadastro de pessoas, lançamento mensal de pagamentos, horas extras, agenda e relatórios de folha. Em React e TypeScript, com testes na lógica de cálculo.</p>
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
@@ -2035,7 +2071,7 @@
 
       <article class="projeto" data-cena data-case="coredja" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
-          <p class="rotulo"><b>05</b>2026</p>
+          <p class="rotulo"><b>05</b>2026<span class="em-obra">Em construção</span></p>
           <h3 class="titulo-projeto">Coredja — comunicação interna</h3>
           <p class="corpo">Plataforma que conecta as áreas de uma igreja ao audiovisual: cada setor envia recados pelo celular e o operador recebe num painel que atualiza sozinho. Next.js e TypeScript, com integração opcional ao Holyrics para projetar avisos no telão.</p>
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
@@ -2047,7 +2083,7 @@
 
       <article class="projeto invertido" data-cena data-case="site-bolos" role="button" tabindex="0" aria-label="Abrir o projeto em tela cheia">
         <div class="projeto-texto">
-          <p class="rotulo"><b>06</b>2026</p>
+          <p class="rotulo"><b>06</b>2026<span class="em-obra">Em construção</span></p>
           <h3 class="titulo-projeto">Cida Tavares — bolos e pães</h3>
           <p class="corpo">Site de página única para uma confeitaria artesanal, com cardápio filtrável por categoria e pedido direto pelo WhatsApp. HTML, CSS e JavaScript puros — sem build, sem dependência e sem banco de dados.</p>
           <p class="abrir-case">Ver case<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></p>
