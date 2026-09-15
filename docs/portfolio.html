@@ -1933,6 +1933,22 @@
   section.block.chapter-dark .section-head h2 { color: #F5F7F8; }
   section.block.chapter-dark .section-head p { color: #AEB6BD; }
 
+  /* Uma seção `chapter-dark` é escura NOS DOIS TEMAS, mas as cores de texto
+     secundário (--text-faint/--text-dim) seguem o tema: no tema CLARO elas
+     ficam escuras e caem para ~2,9:1 sobre este fundo — reprovado em WCAG
+     AA (mínimo 4,5:1), que foi o que se viu na legenda da foto do robô.
+     Estas regras fixam o tom claro para tudo que vive direto sobre o fundo
+     da seção, independente do tema. Não pegam quem está dentro de um card
+     de fundo próprio: esses já são tratados na regra .work-card acima. */
+  section.block.chapter-dark > .wrap figcaption,
+  section.block.chapter-dark .section-figure figcaption,
+  section.block.chapter-dark .av-txt .quando,
+  section.block.chapter-dark .quando,
+  section.block.chapter-dark .tl-date,
+  section.block.chapter-dark .av-pilar figcaption {
+    color: #AEB6BD;
+  }
+
   /* Os cards têm fundo branco PRÓPRIO e não acompanham a seção escura — a
      cor clara herdada deixava o título deles cinza sobre branco, quase
      ilegível. Aqui a cor do tema é devolvida a quem vive dentro do card. */
@@ -2220,8 +2236,10 @@
     margin-top: -1px;
   }
 
+  /* --text-dim, não --text-faint: a data ficava em 2,73:1 sobre o card
+     (WCAG AA pede 4,5:1 para texto pequeno). */
   .work-info .period {
-    font-size: 0.72rem; font-weight: 600; color: var(--text-faint);
+    font-size: 0.72rem; font-weight: 600; color: var(--text-dim);
     letter-spacing: 0.03em; font-variant-numeric: tabular-nums; margin: 0 0 6px;
   }
 
@@ -2985,7 +3003,9 @@
     padding-top: 12px;
     border-top: 1px solid var(--border);
     font-size: 0.76rem;
-    color: var(--text-faint);
+    /* --text-faint dava 2,73:1 aqui (reprovado em WCAG AA, que pede 4,5:1
+       para texto pequeno). --text-dim passa sem mudar a hierarquia visual. */
+    color: var(--text-dim);
   }
 
   /* divisor entre o resumo e a grade de trabalhos publicados */
@@ -2998,7 +3018,9 @@
     font-size: 0.7rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--text-faint);
+    /* --text-dim: em --text-faint o rótulo ficava em 3,11:1, abaixo do
+       mínimo de 4,5:1 para texto pequeno. */
+    color: var(--text-dim);
   }
   .av-divisor::before, .av-divisor::after {
     content: '';
@@ -5180,6 +5202,37 @@
 
         var EASE = 'power3.out';
 
+        /* As animacoes de entrada sao presas a rolagem (scrub): subir desfaz
+           o movimento e descer refaz, em vez de acontecerem uma vez so.
+
+           A excecao e quem esta perto do FIM da pagina: la nao sobra rolagem
+           para o scrub percorrer o curso ate o fim, e a animacao congela no
+           meio — com o conteudo em opacidade ~0 e sem como terminar. Para
+           esses o gatilho dispara uma vez e pronto.
+
+           `scrubOuUmaVez` centraliza essa decisao: recebe a configuracao de
+           scrub desejada e devolve ela, ou um `once`, conforme a posicao do
+           elemento na pagina. */
+        /* Perto do FIM da pagina nao sobra rolagem para o scrub percorrer o
+           curso ate o fim: a animacao congela no meio e o conteudo fica
+           invisivel para sempre (foi o que aconteceu com "07 Contato").
+           Em vez de tratar isso como caso especial, o `end` desses blocos
+           e encurtado para caber no que resta de pagina — assim eles
+           terminam de entrar e continuam reversiveis, como os demais. */
+        var scrubOuUmaVez = function (el, cfg) {
+          var doc = document.documentElement;
+          var topo = el.getBoundingClientRect().top + window.scrollY;
+          var sobra = (doc.scrollHeight - window.innerHeight) - topo;
+          var apertado = sobra < window.innerHeight * 0.75;
+          return {
+            trigger: el,
+            start: apertado ? 'top 98%' : cfg.start,
+            end: apertado ? 'top 70%' : cfg.end,
+            scrub: cfg.scrub || 0.7,
+            invalidateOnRefresh: true,
+          };
+        };
+
         /* 1. Titulo do hero: cada linha sobe de tras da mascara (.hl).
               So dispara quando a intro sai — senao a animacao roda escondida
               atras do overlay e o texto aparece ja parado (ou travado). */
@@ -5217,24 +5270,39 @@
               Tweens independentes (nao timeline): uma timeline mantem o
               controle das propriedades e impede a rede de seguranca de
               destravar o elemento se algo der errado. */
+        /* A entrada e PRESA A ROLAGEM (scrub), nao disparada uma vez: subir
+           a pagina desfaz o movimento e descer refaz, como na landing. O
+           `end` fecha bem depois do `start` para a animacao ter curso real
+           enquanto o bloco entra. */
         gsap.utils.toArray('.section-head').forEach(function (head) {
-          var trigger = { trigger: head, start: 'top 84%', once: true };
+          /* `fromTo`, nao `from`: o estado final fica ESCRITO no tween. Com
+             `from` o GSAP infere o destino do estilo corrente no momento da
+             criacao — e um cabecalho que nasce abaixo do alcance da rolagem
+             (o de Contatos, que nunca chega ao topo da tela) acabava com o
+             destino gravado errado e ficava em opacidade 0 para sempre.
+
+             Uma config NOVA por tween tambem importa: o GSAP consome e muta
+             o objeto de `scrollTrigger` ao criar o gatilho, entao reaproveitar
+             a mesma referencia nos tres corrompia os dois ultimos. */
+          var cfgHead = { start: 'top 92%', end: 'top 45%' };
           var eyebrow = head.querySelector('.eyebrow');
           var texto = head.querySelector('p');
 
           if (eyebrow) {
-            gsap.from(eyebrow, {
-              scrollTrigger: trigger, y: 18, opacity: 0, duration: 0.5, ease: EASE
-            });
+            gsap.fromTo(eyebrow,
+              { y: 18, opacity: 0 },
+              { scrollTrigger: scrubOuUmaVez(head, cfgHead), y: 0, opacity: 1, ease: EASE }
+            );
           }
-          gsap.from(head.querySelectorAll('h2 .word > i'), {
-            scrollTrigger: trigger, yPercent: 106, duration: 0.75, stagger: 0.055,
-            delay: 0.08, ease: 'power4.out'
-          });
+          gsap.fromTo(head.querySelectorAll('h2 .word > i'),
+            { yPercent: 106 },
+            { scrollTrigger: scrubOuUmaVez(head, cfgHead), yPercent: 0, stagger: 0.055, ease: 'power4.out' }
+          );
           if (texto) {
-            gsap.from(texto, {
-              scrollTrigger: trigger, y: 20, opacity: 0, duration: 0.6, delay: 0.28, ease: EASE
-            });
+            gsap.fromTo(texto,
+              { y: 20, opacity: 0 },
+              { scrollTrigger: scrubOuUmaVez(head, cfgHead), y: 0, opacity: 1, ease: EASE }
+            );
           }
 
           /* 2b. Profundidade PRESA A ROLAGEM: depois que o titulo entrou
@@ -5250,6 +5318,11 @@
                  nenhum conteudo some de forma permanente se algo travar. */
           var palavras = head.querySelectorAll('h2 .word');
           if (!palavras.length) return;
+          /* Perto do fim da pagina nao ha rolagem para percorrer o curso: o
+             titulo ficaria tombado para tras e sem chance de voltar. */
+          var topoHead = head.getBoundingClientRect().top + window.scrollY;
+          var sobraHead = (document.documentElement.scrollHeight - window.innerHeight) - topoHead;
+          if (sobraHead < window.innerHeight * 0.75) return;
           gsap.fromTo(palavras,
             { rotateX: 0, z: 0, opacity: 1 },
             {
@@ -5266,45 +5339,60 @@
           );
         });
 
-        /* 3. Cards entram escalonados conforme a linha aparece */
+        /* 3. Cards entram escalonados, presos a rolagem.
+              `end` no 'bottom' do proprio grid, nao no 'top': com o stagger,
+              fechar no topo deixava os ultimos cartoes parados no meio do
+              curso, com transform cravado no estilo inline — e transform nao
+              conta na altura do container, entao eles vazavam por cima do
+              rotulo seguinte. `clearProps` remove o transform ao terminar. */
         gsap.utils.toArray('.cards-grid').forEach(function (grid) {
+          var t = scrubOuUmaVez(grid, { start: 'top 90%', end: 'bottom 72%' });
           gsap.from(grid.children, {
-            scrollTrigger: { trigger: grid, start: 'top 82%', once: true },
-            y: 46, opacity: 0, duration: 0.7, stagger: 0.08, ease: EASE
+            scrollTrigger: t,
+            y: 46, opacity: 0, stagger: 0.08, ease: EASE, clearProps: 'transform'
           });
         });
 
-        /* 4. Skills: cada ferramenta pipoca em sequencia */
+        /* 4. Skills: cada ferramenta pipoca em sequencia, presa a rolagem */
         gsap.utils.toArray('.skills-cards').forEach(function (wrap) {
+          var t = scrubOuUmaVez(wrap, { start: 'top 90%', end: 'bottom 72%' });
           gsap.from(wrap.children, {
-            scrollTrigger: { trigger: wrap, start: 'top 84%', once: true },
-            y: 26, opacity: 0, scale: 0.94, duration: 0.5, stagger: 0.035, ease: 'back.out(1.6)'
+            scrollTrigger: t,
+            y: 26, opacity: 0, scale: 0.94, stagger: 0.035, ease: EASE,
+            clearProps: 'transform'
           });
         });
 
-        /* 5. Fotos das secoes: imagem revela por mascara + legenda depois */
+        /* 5. Fotos das secoes: imagem revela por mascara + legenda, presas
+              a rolagem. `clipPath` fica FORA do scrub (duracao propria,
+              once): interpolar clip-path quadro a quadro no scroll custa
+              caro e e o tipo de coisa que engasga em maquina fraca. */
         gsap.utils.toArray('.section-figure').forEach(function (fig) {
-          var trigger = { trigger: fig, start: 'top 82%', once: true };
           var img = fig.querySelector('img');
           var cap = fig.querySelector('figcaption');
           if (img) {
             gsap.from(img, {
-              scrollTrigger: trigger, clipPath: 'inset(100% 0 0 0)', scale: 1.14,
+              scrollTrigger: { trigger: fig, start: 'top 82%', once: true },
+              clipPath: 'inset(100% 0 0 0)', scale: 1.14,
               duration: 1.1, ease: 'power4.out'
             });
           }
           if (cap) {
+            var tc = scrubOuUmaVez(fig, { start: 'top 88%', end: 'top 50%' });
             gsap.from(cap, {
-              scrollTrigger: trigger, x: -18, opacity: 0, duration: 0.6, delay: 0.35, ease: EASE
+              scrollTrigger: tc,
+              x: -18, opacity: 0, ease: EASE
             });
           }
         });
 
-        /* 7. Texto do "sobre" e itens da timeline entram por bloco */
+        /* 7. Texto do "sobre" e itens da timeline: entram e saem com a
+              rolagem, um a um. */
         gsap.utils.toArray('.about-text p, .tl-item').forEach(function (el) {
+          var t = scrubOuUmaVez(el, { start: 'top 94%', end: 'top 62%' });
           gsap.from(el, {
-            scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-            y: 26, opacity: 0, duration: 0.7, ease: EASE
+            scrollTrigger: t,
+            y: 26, opacity: 0, ease: EASE
           });
         });
 
@@ -5428,6 +5516,14 @@
                animacao de entrada dele. */
             var jaDeveriaAparecer = r.top < vh * 0.95;
             if (!jaDeveriaAparecer) return;
+
+            /* Com as entradas presas a rolagem (scrub), um elemento no TOPO
+               da tela pode estar legitimamente no comeco do seu curso —
+               invisivel agora, visivel daqui a alguns pixels de scroll.
+               Destravar ali brigaria com o scrub (ele reescreve no quadro
+               seguinte) e faria o conteudo piscar. Quem ainda esta na faixa
+               de entrada e poupado; o resto continua protegido. */
+            if (r.top > vh * 0.40) return;
             var cs = getComputedStyle(el);
             var invisivel = parseFloat(cs.opacity) < 0.06;
             var cortado = cs.clipPath && cs.clipPath.indexOf('100%') !== -1;
