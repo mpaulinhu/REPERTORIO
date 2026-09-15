@@ -5374,15 +5374,18 @@
              scrub o proprio GSAP interpola, e deixar as duas brigando faz o
              movimento arrastar */
           cenaCam.style.transition = 'none';
+          /* Termina RETA (0/0), nao em 4deg/-4deg: parar perto do zero sem
+             chegar nele e o que fazia a peca ficar permanentemente torta na
+             tela, como se estivesse desalinhada em vez de posicionada. */
           gsap.fromTo(cenaCam,
-            { rotateX: 24, rotateY: -40 },
+            { rotateX: 18, rotateY: -30 },
             {
               scrollTrigger: {
                 trigger: cenaCam.closest('.section-head') || cenaCam,
-                start: 'top 95%', end: 'bottom 30%',
+                start: 'top 95%', end: 'center 55%',
                 scrub: 0.8, invalidateOnRefresh: true,
               },
-              rotateX: 4, rotateY: -4, ease: 'none',
+              rotateX: 0, rotateY: 0, ease: 'none',
             }
           );
         }
