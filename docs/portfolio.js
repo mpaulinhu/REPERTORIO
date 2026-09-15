@@ -548,6 +548,106 @@
             }
           ]
         },
+        'sthe': {
+          who: 'STHE · controle de pagamentos',
+          cenas: [
+            {
+              img: 'images/projetos/sthe-01-pagamentos.png',
+              capa: true,
+              alt: 'Tela de pagamentos da equipe, com totais do mês e lista de pessoas',
+              titulo: 'Quem recebe o quê, e o que já saiu do caixa',
+              texto: 'Sistema de organização interna para uma equipe de salão. A tela principal responde as perguntas do mês numa olhada: quanto falta pagar, quanto está em atraso, qual o próximo vencimento e quanto já saiu. A lista separa por situação e permite marcar vários pagamentos de uma vez.',
+              chips: ['React', 'TypeScript', 'Vite', 'Vitest'],
+              links: [
+                { label: 'Ver repositório', href: 'https://github.com/mpaulinhu/sthe', tipo: 'primary' }
+              ]
+            },
+            {
+              img: 'images/projetos/sthe-02-relatorios.png',
+              step: 'Relatórios',
+              titulo: 'Quanto custa a equipe, mês a mês',
+              texto: 'Folha do mês, custo médio por pessoa e a evolução ao longo do tempo, com o peso de cada função no total. A tela existe para a pergunta que aparece depois do dia a dia resolvido: para onde o dinheiro está indo, e como isso muda de um mês para o outro.',
+              chips: ['Folha por função', 'Histórico mensal', 'Recibos assinados']
+            },
+            {
+              img: 'images/projetos/sthe-03-equipe.png',
+              step: 'Cadastro',
+              titulo: 'Cadastra uma vez, lança todo mês',
+              texto: 'Cada pessoa é cadastrada uma única vez — função, forma de pagamento, valor de referência e dia de vencimento. Depois, mês a mês, é só escolher quem entra e lançar os valores. A lógica de cálculo tem testes automatizados, porque erro em conta de pagamento não é aceitável.',
+              chips: ['Fixo, freela ou diarista', 'Vale no meio do mês', 'Backup local']
+            },
+            {
+              img: 'images/projetos/sthe-04-mobile.png',
+              phone: true,
+              alt: 'STHE no celular, com a tela de pagamentos adaptada',
+              step: 'No celular',
+              titulo: 'Consulta fora do balcão',
+              texto: 'A interface acompanha a tela pequena porque a consulta real acontece fora da mesa. Os dados ficam no próprio aparelho, com exportação de backup — sem depender de servidor no ar para uma operação que precisa funcionar sempre.',
+              chips: ['Responsivo', 'Dados locais']
+            }
+          ]
+        },
+        'coredja': {
+          who: 'Coredja · comunicação interna',
+          cenas: [
+            {
+              img: 'images/projetos/coredja-01-entrada.png',
+              capa: true,
+              alt: 'Tela de entrada do Coredja',
+              titulo: 'Recado que chega sem gritar do outro lado do salão',
+              texto: 'Durante um culto, a Cantina e o Kids precisam falar com o audiovisual — e a única via costumava ser alguém atravessar o salão. O Coredja liga essas áreas: cada setor manda o recado pelo celular e o operador recebe num painel que atualiza sozinho, sem precisar recarregar nada.',
+              chips: ['Next.js', 'TypeScript', 'Firestore', 'SQLite'],
+              links: [
+                { label: 'Ver repositório', href: 'https://github.com/mpaulinhu/coredja', tipo: 'primary' },
+                { label: 'Abrir o site', href: 'https://coredja.vercel.app', tipo: 'ghost' }
+              ]
+            },
+            {
+              step: 'Arquitetura',
+              titulo: 'O mesmo sistema, dois armazenamentos',
+              texto: 'Uma variável de configuração troca a base inteira entre SQLite (arquivo local, funciona sem internet, para rodar no PC da igreja) e Firestore (nuvem, tempo real entre aparelhos). Nenhuma tela muda — a decisão de onde os dados moram fica isolada de quem os exibe.',
+              chips: ['SQLite', 'Firestore', 'Configuração por ambiente']
+            },
+            {
+              step: 'Integração',
+              titulo: 'Do recado ao telão',
+              texto: 'Publicar um aviso no Coredja também pode mandar o texto para o telão, via API do Holyrics. A chamada sai do servidor, nunca do navegador, para o token não chegar ao cliente. Publicado na internet, uma ponte instalada no PC do audiovisual executa o comando na rede local — o servidor hospedado não alcança um endereço privado.',
+              chips: ['API do Holyrics', 'Web Push', 'PWA']
+            }
+          ]
+        },
+        'site-bolos': {
+          who: 'Cida Tavares · bolos e pães',
+          cenas: [
+            {
+              img: 'images/projetos/bolos-01-capa.png',
+              capa: true,
+              alt: 'Página inicial do site Cida Tavares',
+              titulo: 'Uma página, um pedido no WhatsApp',
+              texto: 'Site de página única para uma confeitaria artesanal. O objetivo é direto: mostrar o que tem hoje e levar a pessoa ao WhatsApp com o pedido já escrito. Sem carrinho, sem cadastro, sem etapa a mais entre a vontade do bolo e a mensagem enviada.',
+              chips: ['HTML', 'CSS', 'JavaScript'],
+              links: [
+                { label: 'Ver repositório', href: 'https://github.com/mpaulinhu/site-bolos-paes', tipo: 'primary' }
+              ]
+            },
+            {
+              img: 'images/projetos/bolos-02-cardapio.png',
+              step: 'Cardápio',
+              titulo: 'Filtra por categoria, pede em um toque',
+              texto: 'Bolos, pães, doces e salgados separados por filtro, cada item com descrição, preço e botão próprio de pedido. Trocar um produto ou um valor é editar uma linha do arquivo — a pessoa que cuida do site não precisa de painel, build nem banco de dados.',
+              chips: ['Sem build', 'Sem dependências', 'Fácil de editar']
+            },
+            {
+              img: 'images/projetos/bolos-03-mobile.png',
+              phone: true,
+              alt: 'Site Cida Tavares no celular',
+              step: 'No celular',
+              titulo: 'Feito para onde o cliente está',
+              texto: 'A maior parte do tráfego de um negócio assim chega pelo celular, vindo de rede social. O layout nasce pensado para essa tela, com o botão de pedido sempre à mão enquanto se rola o cardápio.',
+              chips: ['Mobile-first', 'WhatsApp']
+            }
+          ]
+        },
         'automacao-transmissao': {
           who: 'Automação de transmissão · multi-PC',
           cenas: [
@@ -626,27 +726,35 @@
           var shot = document.createElement('div');
           shot.className = 'case-shot' + (cena.phone ? ' is-phone' : '');
 
-          var blur = document.createElement('img');
-          blur.className = 'blur';
-          blur.src = cena.img;
-          blur.alt = '';
-          blur.setAttribute('aria-hidden', 'true');
-          blur.loading = i === 0 ? 'eager' : 'lazy';
-          blur.decoding = 'async';
-          shot.appendChild(blur);
+          /* Nem toda cena tem print — algumas existem so pelo texto (decisao
+             de arquitetura, integracao). Sem esta guarda o <img> nascia com
+             src="undefined" e o navegador pedia um arquivo inexistente,
+             gerando 404 no console. */
+          if (cena.img) {
+            var blur = document.createElement('img');
+            blur.className = 'blur';
+            blur.src = cena.img;
+            blur.alt = '';
+            blur.setAttribute('aria-hidden', 'true');
+            blur.loading = i === 0 ? 'eager' : 'lazy';
+            blur.decoding = 'async';
+            shot.appendChild(blur);
 
-          var plate = document.createElement('div');
-          plate.className = 'plate';
-          var plate3d = document.createElement('div');
-          plate3d.className = 'plate-3d';
-          var img = document.createElement('img');
-          img.src = cena.img;
-          img.alt = cena.alt || '';
-          img.loading = i === 0 ? 'eager' : 'lazy';
-          img.decoding = 'async';
-          plate3d.appendChild(img);
-          plate.appendChild(plate3d);
-          shot.appendChild(plate);
+            var plate = document.createElement('div');
+            plate.className = 'plate';
+            var plate3d = document.createElement('div');
+            plate3d.className = 'plate-3d';
+            var img = document.createElement('img');
+            img.src = cena.img;
+            img.alt = cena.alt || '';
+            img.loading = i === 0 ? 'eager' : 'lazy';
+            img.decoding = 'async';
+            plate3d.appendChild(img);
+            plate.appendChild(plate3d);
+            shot.appendChild(plate);
+          } else {
+            shot.classList.add('sem-print');
+          }
 
           stage.appendChild(shot);
           shots.push(shot);
