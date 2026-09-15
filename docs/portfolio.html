@@ -414,6 +414,37 @@
   .linha-tempo p { margin: 0; color: var(--text-dim); font-size: 0.92rem; line-height: 1.6; }
   @media (max-width: 620px) { .linha-tempo li { grid-template-columns: 1fr; gap: 5px; padding-left: 18px; } }
 
+  /* Trajetoria recolhivel — fechada por padrao. */
+  .dobra-trajetoria > summary {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 11px 20px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--text); cursor: pointer;
+    font-family: var(--display); font-size: 0.92rem; font-weight: 600;
+    list-style: none; /* tira o triangulo padrao (Firefox) */
+    transition: border-color 0.2s ease, background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* o triangulo do Safari/Chrome so sai por aqui */
+  .dobra-trajetoria > summary::-webkit-details-marker { display: none; }
+  .dobra-trajetoria > summary:hover { border-color: var(--accent); }
+  /* foco visivel para quem navega por teclado (o summary e focavel) */
+  .dobra-trajetoria > summary:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px;
+  }
+  /* Troca o rotulo ao abrir mantendo os DOIS textos reais no DOM e
+     escondendo o que nao vale — `content: attr()` em ::after nao entra no
+     nome acessivel de forma confiavel, e `font-size: 0` deixava o leitor de
+     tela anunciando "Ver trajetoria" com o bloco ja aberto (medido). */
+  .dobra-trajetoria > summary .dobra-txt[data-quando="aberto"] { display: none; }
+  .dobra-trajetoria[open] > summary .dobra-txt[data-quando="aberto"] { display: inline; }
+  .dobra-trajetoria[open] > summary .dobra-txt[data-quando="fechado"] { display: none; }
+  .dobra-seta { width: 17px; height: 17px; flex: none; transition: transform 0.25s ease; }
+  .dobra-trajetoria[open] > summary .dobra-seta { transform: rotate(180deg); }
+  /* a lista encosta no botao sem esse respiro */
+  .dobra-trajetoria[open] > summary { margin-bottom: 30px; }
+  @media (prefers-reduced-motion: reduce) { .dobra-seta { transition: none; } }
+
   /* ---------- Ferramentas ---------- */
   .sub-rotulo {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -1999,7 +2030,16 @@
     <div class="wrap">
       <p class="rotulo" data-cena><b>02</b>Trajetória</p>
       <h2 class="grande" data-titulo>Como cheguei até aqui</h2>
-      <ol class="linha-tempo" data-cascata>
+      <!-- `<details>` em vez de um botao com JS: ja vem com teclado, foco e
+           leitor de tela corretos de graca, e funciona mesmo se o script
+           falhar. Fechado por padrao — a trajetoria e contexto, nao o
+           assunto principal da pagina. -->
+      <details class="dobra-trajetoria">
+        <summary>
+          <span class="dobra-txt" data-quando="fechado">Ver trajetória</span><span class="dobra-txt" data-quando="aberto">Ocultar trajetória</span>
+          <svg class="dobra-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+      <ol class="linha-tempo">
         <li><span class="quando">2026</span><div><h3>Desenvolvedor web na ELO Editora</h3><p>Contrato assinado após um mês de teste na área — mantendo a atuação em audiovisual e acessibilidade.</p></div></li>
         <li><span class="quando">2025</span><div><h3>Início do Tecnólogo em ADS</h3><p>Análise e Desenvolvimento de Sistemas, no Centro Universitário Internacional UNINTER — enquanto atuo na ELO Editora.</p></div></li>
         <li><span class="quando">2025</span><div><h3>Audiovisual &amp; Accessibility Specialist na ELO Editora</h3><p>Produção e edição de vídeo, operação ao vivo em eventos, Libras, audiodescrição com IA e sonorização de livros.</p></div></li>
@@ -2024,6 +2064,7 @@
         </picture>
         <figcaption>Time de tecnologia da ELO Editora.</figcaption>
       </figure>
+      </details>
     </div>
   </section>
 

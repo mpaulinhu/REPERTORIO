@@ -409,12 +409,31 @@
     });
   });
 
-  /* Retrato da abertura: entra e depois desliza devagar ao rolar. */
+  /* Retrato da abertura: entra, desliza devagar ao rolar e se dissolve.
+     O parallax (yPercent) e o esmaecimento sao tweens SEPARADOS de
+     proposito: o deslize acompanha a capa inteira, enquanto o sumico so
+     comeca depois que a pessoa ja passou de metade dela — assim a foto
+     nao apaga enquanto ainda e o assunto da tela.
+     `fromTo` com estado final escrito, e nao `from`: num tween preso a
+     rolagem que pode nao completar o curso, o `from` infere o destino do
+     estilo corrente e a foto pode ficar meio transparente para sempre. */
   gsap.utils.toArray('[data-retrato]').forEach(function (el) {
     gsap.from(el, { y: 50, opacity: 0, duration: 1.1, ease: 'power3.out', delay: 0.15 });
     gsap.to(el, {
       scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: 0.6 },
       yPercent: -14,
+      ease: 'none',
+    });
+    gsap.fromTo(el, { opacity: 1 }, {
+      scrollTrigger: {
+        trigger: el,
+        /* comeca na metade da capa e termina quando a foto sai por cima */
+        start: 'center 45%',
+        end: 'bottom 12%',
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+      },
+      opacity: 0,
       ease: 'none',
     });
   });
