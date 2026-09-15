@@ -1753,7 +1753,11 @@
     height: auto;
     aspect-ratio: 3 / 2;
     object-fit: cover;
-    object-position: center 30%;
+    /* 45%, nao 30%: as pessoas estao na metade de baixo da foto original,
+       entao ancorar o corte perto do topo enchia o quadro de teto e grade
+       com o grupo espremido embaixo. Comparei 30/45/55/62/70 — a partir de
+       55% o corte ja come a cabeca de quem esta na fila de tras. */
+    object-position: center 45%;
     display: block;
   }
   .tl-figure figcaption {
