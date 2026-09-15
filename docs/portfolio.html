@@ -1008,15 +1008,8 @@
      agora vem do hero, dos cards e da cena 3D, que nao escondem nada. */
   .reveal { opacity: 1; transform: none; }
 
-  /* `overflow: visible` (nao hidden): a mascara que esconde a palavra antes
-     de subir vive no proprio .word, nao aqui. No h2 o hidden achatava a
-     inclinacao 3D presa a rolagem, porque qualquer coisa fora do plano era
-     recortada. A perspectiva fica aqui para todas as palavras girarem no
-     mesmo ponto de fuga, em vez de cada uma na sua. */
   .section-head h2 {
-    overflow: visible;
-    perspective: 900px;
-    perspective-origin: 20% 50%;
+    overflow: hidden;
   }
 
   /* cada palavra e a mascara; o <i> dentro dela e o que sobe (GSAP) */
@@ -1027,8 +1020,6 @@
     /* folga p/ descendentes (g, ç) nao serem cortados pela mascara */
     padding-bottom: 0.1em;
     margin-bottom: -0.1em;
-    transform-origin: 50% 100%;
-    will-change: transform;
   }
 
   .section-head h2 .word > i { display: inline-block; font-style: normal; }
@@ -5305,38 +5296,12 @@
             );
           }
 
-          /* 2b. Profundidade PRESA A ROLAGEM: depois que o titulo entrou
-                 (acima, uma vez so), as palavras continuam ligadas ao
-                 scroll — inclinam e recuam ao sair de cena, e desfazem o
-                 movimento ao subir a pagina de volta. E este o "3D" da
-                 pagina: vem do gesto de rolar, nao do cursor.
-
-                 Fica no <span class="word">, nao no <i> de dentro: o <i> e
-                 quem sobe na mascara da entrada acima, e escrever transform
-                 nos dois brigaria. A regra de ouro do arquivo continua
-                 valendo — isto anima opacidade ate 0.25, nunca ate 0, entao
-                 nenhum conteudo some de forma permanente se algo travar. */
-          var palavras = head.querySelectorAll('h2 .word');
-          if (!palavras.length) return;
-          /* Perto do fim da pagina nao ha rolagem para percorrer o curso: o
-             titulo ficaria tombado para tras e sem chance de voltar. */
-          var topoHead = head.getBoundingClientRect().top + window.scrollY;
-          var sobraHead = (document.documentElement.scrollHeight - window.innerHeight) - topoHead;
-          if (sobraHead < window.innerHeight * 0.75) return;
-          gsap.fromTo(palavras,
-            { rotateX: 0, z: 0, opacity: 1 },
-            {
-              scrollTrigger: {
-                trigger: head,
-                start: 'top 32%',
-                end: 'bottom top',
-                scrub: 0.6,
-                invalidateOnRefresh: true,
-              },
-              rotateX: -38, z: -140, opacity: 0.25, stagger: 0.04,
-              ease: 'none',
-            }
-          );
+          /* NAO ha giro 3D "de saida" aqui. Ja houve: as palavras inclinavam
+             e desbotavam a partir de `top 32%`, o que na pratica deixava o
+             titulo cinza e tombado durante TODA a leitura da secao (medido:
+             opacidade ~0,71 com o cabecalho a 120px do topo). Lia como
+             defeito, nao como efeito. A profundidade da pagina vem da
+             ENTRADA presa a rolagem, logo acima, e do globo ao fundo. */
         });
 
         /* 3. Cards entram escalonados, presos a rolagem.
@@ -5395,6 +5360,32 @@
             y: 26, opacity: 0, ease: EASE
           });
         });
+
+        /* 7b. Cena da camera (cabecalho do Audiovisual): gira conforme a
+               rolagem. Antes ela seguia o ponteiro — foi removido, porque
+               girava enquanto a pessoa lia outra coisa. Presa ao scroll ela
+               se mexe pelo mesmo gesto que move o resto da pagina, e desfaz
+               o movimento ao subir. O CSS ja define a pose de repouso
+               (rotateX 14deg / rotateY -22deg); aqui so se percorre um arco
+               em volta dela. */
+        var cenaCam = document.getElementById('sceneStage');
+        if (cenaCam) {
+          /* a transicao do CSS existia para suavizar saltos do mouse; com o
+             scrub o proprio GSAP interpola, e deixar as duas brigando faz o
+             movimento arrastar */
+          cenaCam.style.transition = 'none';
+          gsap.fromTo(cenaCam,
+            { rotateX: 24, rotateY: -40 },
+            {
+              scrollTrigger: {
+                trigger: cenaCam.closest('.section-head') || cenaCam,
+                start: 'top 95%', end: 'bottom 30%',
+                scrub: 0.8, invalidateOnRefresh: true,
+              },
+              rotateX: 4, rotateY: -4, ease: 'none',
+            }
+          );
+        }
 
         /* 8b. LUZ DO HERO: a mancha radial e um efeito de ENTRADA, restrito a
                primeira tela. Ela nasce como um ponto no centro e cresce ate
