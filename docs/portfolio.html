@@ -224,15 +224,21 @@
   h1.mega {
     font-family: var(--mega); font-weight: 400;
     font-size: clamp(2.9rem, 9.5vw, 7.6rem);
-    /* folga vertical: a Anton tem acentos altos e o overflow das linhas
-       (usado na entrada) cortava o Á e o Ó */
-    line-height: 1.02;
+    /* folga vertical: a Anton poe o til e o circunflexo ACIMA do topo da
+       caixa de linha. Com 1.02 a caixa media 95px para 105px de texto real
+       (medido em 390px), e o ~ do ÃO era decapitado — "AUTOMACAO". Como este
+       e o maior texto da pagina, o acento do Á ainda raspava o topo em 1.14.
+       1.16 e o teto: acima disso a capa (100svh) passa de 900px em 1440x900 e
+       empurra o "role" para fora da tela. */
+    line-height: 1.16;
     text-transform: uppercase; margin: 0;
   }
   h2.grande {
     font-family: var(--mega); font-weight: 400;
     font-size: clamp(2.1rem, 6.4vw, 4.6rem);
-    line-height: 1.04; text-transform: uppercase;
+    /* mesmo motivo do h1.mega: sem essa folga o til de INTELIGENCIA/PRODUCAO
+       some. Media 35px de caixa para 42px de texto. */
+    line-height: 1.16; text-transform: uppercase;
     margin: 0 0 22px; max-width: 18ch;
   }
   .corpo { color: var(--text-dim); font-size: 1.02rem; line-height: 1.7; margin: 0 0 18px; max-width: 58ch; }
@@ -418,7 +424,9 @@
   .titulo-projeto {
     font-family: var(--mega); font-weight: 400;
     font-size: clamp(1.8rem, 4.4vw, 3.1rem);
-    line-height: 1.05; text-transform: uppercase; margin: 0 0 16px;
+    /* espaco para o til de AUTOMACAO/TRANSMISSAO/COMUNICACAO, que com 1.05
+       ficava fora da caixa e era cortado na tela. */
+    line-height: 1.18; text-transform: uppercase; margin: 0 0 16px;
   }
   .projeto-arte {
     margin: 0; border-radius: 18px; overflow: hidden;
