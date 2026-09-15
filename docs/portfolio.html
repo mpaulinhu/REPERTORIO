@@ -1265,17 +1265,26 @@
      forte na capa e no contato, discreta onde há texto para ler. Em telas
      estreitas o objeto já não se desloca lateralmente (JS), então aqui só
      reduz a presença geral para não competir com o texto num espaço curto. */
+  /* z-index 3, acima de `main` (z:2) — não abaixo, como pareceria natural.
+     Motivo: o #bgCanvas do hero (fundo vivo, opaco por necessidade) vive
+     DENTRO do main, então herda o contexto de empilhamento dele; com o
+     globo em z:0 ou z:1 o shader o cobria por completo justamente na
+     primeira tela, e ele só aparecia nas frestas entre as seções.
+     Não atropela a leitura porque é `pointer-events: none` e as seções
+     pintam fundo próprio (levemente translúcido) por baixo do texto. */
   #cena3d {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    z-index: 3;
     pointer-events: none;
-    opacity: var(--forca3d, 0.85);
+    opacity: var(--forca3d, 0.3);
     transition: opacity 0.6s ease;
   }
   .sem-webgl #cena3d { display: none; }
+  /* No celular o globo é mais discreto: a tela é curta e o texto ocupa
+     quase toda ela, então o mesmo peso do desktop atravessaria a leitura. */
   @media (max-width: 860px) {
-    #cena3d { opacity: calc(var(--forca3d, 1) * 0.35); }
+    #cena3d { opacity: calc(var(--forca3d, 1) * 0.45); }
   }
 
   .hero-grid {
@@ -5459,36 +5468,49 @@
 
       var cena = new THREE.Scene();
       var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.z = 5.2;
+      /* Numa tela estreita é a LARGURA que limita o enquadramento: com a
+         mesma distância do desktop o globo estoura a tela e as arestas
+         viram uma teia por cima do texto. Afastar a câmera devolve a
+         silhueta inteira de esfera no celular. */
+      function ajustarCamera() {
+        camera.position.z = window.innerWidth <= 860 ? 7.4 : 5.2;
+      }
+      ajustarCamera();
 
       var grupo = new THREE.Group();
       cena.add(grupo);
 
-      var geo = new THREE.IcosahedronGeometry(1.7, 1);
+      /* Detalhe 2 (não 1): a malha de nível 1 tinha poucas arestas e, do
+         tamanho que o globo ocupa aqui, lia como "uns riscos soltos" em vez
+         de uma esfera. */
+      var geo = new THREE.IcosahedronGeometry(1.85, 2);
       var matLinhas = new THREE.LineBasicMaterial({ transparent: true });
-      var matPontos = new THREE.PointsMaterial({ size: 0.055, transparent: true });
+      var matPontos = new THREE.PointsMaterial({ size: 0.05, transparent: true });
       var matHalo = new THREE.LineBasicMaterial({ transparent: true });
 
       grupo.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo), matLinhas));
       grupo.add(new THREE.Points(geo, matPontos));
 
+      /* Halo mais próximo do corpo: a 2.9 ele saía de quadro e só as arestas
+         externas apareciam, o que fazia o conjunto perder a forma de globo. */
       var halo = new THREE.LineSegments(
-        new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.9, 1)),
+        new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(2.45, 1)),
         matHalo
       );
       cena.add(halo);
 
       /* As cores saem do tema (data-theme/light/dark — o mesmo atributo que
-         o resto do site usa, não o data-tema/claro/escuro da landing). No
-         claro o traço precisa ser mais forte para não sumir no fundo claro. */
+         o resto do site usa, não o data-tema/claro/escuro da landing).
+         Os valores herdados da landing eram fracos demais AQUI: o fundo da
+         capa deste site é claro e texturizado, e a 0.34 o traço sumia. */
       function repintar() {
         var escuro = document.documentElement.getAttribute('data-theme') === 'dark';
         matLinhas.color.set(escuro ? 0x2FE0C8 : 0x0A7767);
-        matLinhas.opacity = escuro ? 0.30 : 0.34;
-        matPontos.color.set(escuro ? 0x5B9BFF : 0x2563EB);
-        matPontos.opacity = escuro ? 0.85 : 0.6;
+        matLinhas.opacity = escuro ? 0.55 : 0.62;
+        matPontos.color.set(escuro ? 0x5B9BFF : 0x1D4ED8);
+        matPontos.opacity = escuro ? 0.95 : 0.85;
         matHalo.color.set(escuro ? 0x5B9BFF : 0x2563EB);
-        matHalo.opacity = escuro ? 0.10 : 0.13;
+        matHalo.opacity = escuro ? 0.22 : 0.28;
       }
       repintar();
 
@@ -5538,10 +5560,22 @@
         posRolagem += (alvoRolagem - posRolagem) * 0.045;
         var p = posRolagem;
 
-        var largura = estreito.matches ? 0 : 3.1;
+        /* O trajeto herdado da landing levava o globo a x=±3.1 e o encolhia
+           até 0.40 no meio da página (0.95 - sin(p·π)·0.55). Com a câmera em
+           z=5.2 isso o punha meio fora de quadro e pequeno demais: o que
+           sobrava na tela eram arestas soltas, não um globo. Amplitude menor
+           e escala que nunca cai abaixo de 0.8 mantêm a forma legível de
+           ponta a ponta, sem deixar de atravessar a tela. */
+        var largura = estreito.matches ? 0.9 : 2.1;
         var x = Math.sin(p * Math.PI * 2.1) * largura;
-        var y = Math.cos(p * Math.PI * 1.7) * 0.75;
-        var escala = 0.95 - Math.sin(p * Math.PI) * 0.55;
+        /* Deslocamento inicial só no desktop: lá o centro da tela é ocupado
+           pelo título grande e pelo retrato lado a lado, e o globo sumia
+           atrás deles — descendo, ele ocupa a faixa livre abaixo do texto.
+           No celular a coluna é única e estreita: descer joga o globo para
+           fora da primeira dobra, então ali ele fica centrado. */
+        var desvioCapa = estreito.matches ? 0 : -0.5;
+        var y = Math.cos(p * Math.PI * 1.7) * 0.6 + (1 - Math.min(1, p * 3)) * desvioCapa;
+        var escala = 1.08 - Math.sin(p * Math.PI) * 0.28;
 
         grupo.position.x += (x - grupo.position.x) * 0.08;
         grupo.position.y += (y - grupo.position.y) * 0.08;
@@ -5567,6 +5601,7 @@
 
       window.addEventListener('resize', function () {
         camera.aspect = window.innerWidth / window.innerHeight;
+        ajustarCamera();
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
@@ -5583,15 +5618,20 @@
     (function () {
       var canvas3d = document.getElementById('cena3d');
       if (!canvas3d) return;
+      /* O globo passa POR CIMA do conteúdo (z:3 — ver comentário do #cena3d),
+         então estes valores são baixos de propósito: forte o bastante para
+         se ver a malha atravessando a página, fraco o bastante para o texto
+         nunca disputar atenção com ela. Mais presença onde há respiro (capa,
+         fechamento) e menos onde a leitura é densa (grades de cartões). */
       var presenca = [
-        { sel: '.hero#sobre',              forca: 0.85 },
-        { sel: '.block.about',             forca: 0.4 },
-        { sel: '#skills',                  forca: 0.32 },
-        { sel: '#desenvolvimento',         forca: 0.22 },
-        { sel: '#audiovisual',             forca: 0.18 },
-        { sel: '#ia',                      forca: 0.3 },
-        { sel: '.block.reveal:has(.timeline)', forca: 0.32 },
-        { sel: '#contatos',                forca: 0.85 },
+        { sel: '.hero#sobre',              forca: 0.3 },
+        { sel: '.block.about',             forca: 0.2 },
+        { sel: '#skills',                  forca: 0.22 },
+        { sel: '#desenvolvimento',         forca: 0.15 },
+        { sel: '#audiovisual',             forca: 0.12 },
+        { sel: '#ia',                      forca: 0.18 },
+        { sel: '.block.reveal:has(.timeline)', forca: 0.22 },
+        { sel: '#contatos',                forca: 0.38 },
       ];
 
       function boot() {
