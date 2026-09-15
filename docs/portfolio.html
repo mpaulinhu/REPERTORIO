@@ -1743,10 +1743,14 @@
     box-shadow: var(--sombra);
     max-width: 560px;
   }
-  /* A foto é vertical (247x440) e esticava para 743px de altura na
-     coluna. Recortada em 3:2 ela acompanha o resto sem dominar. */
+  /* A foto original é vertical (720x1280) e, solta, ocupava a tela inteira
+     mostrando teto vazio. Recortada em 3:2 ela acompanha o resto sem
+     dominar. O `height: auto` anula o atributo `height` do <img> (que existe
+     para reservar espaço e evitar salto de layout) — sem ele o atributo
+     vence o aspect-ratio e a altura volta a explodir. */
   .tl-figure img {
     width: 100%;
+    height: auto;
     aspect-ratio: 3 / 2;
     object-fit: cover;
     object-position: center 30%;
@@ -1900,9 +1904,14 @@
            As tags também estavam cruzadas (<figure><div> ... </div></figure>). -->
       <figure class="tl-figure" id="tlFotoEquipe">
         <picture>
-          <source type="image/webp" srcset="images/equipe-v2-sm.webp 1x, images/equipe-v2-md.webp 2x">
-          <source type="image/jpeg" srcset="images/equipe-v2-sm.jpg 1x, images/equipe-v2-md.jpg 2x">
-          <img loading="lazy" decoding="async" src="images/equipe-v2-sm.jpg" alt="Equipe de tecnologia da ELO Editora reunida no escritório" width="247" height="440">
+          <!-- mesma correcao da foto do robo: `w` + `sizes` em vez de
+               `1x/2x`, senao numa tela 1x o navegador fica preso na -sm de
+               247px e estica 2,3x para preencher o slot -->
+          <source type="image/webp" sizes="(max-width: 860px) 92vw, 560px"
+                  srcset="images/equipe-v2-sm.webp 247w, images/equipe-v2-md.webp 495w">
+          <source type="image/jpeg" sizes="(max-width: 860px) 92vw, 560px"
+                  srcset="images/equipe-v2-sm.jpg 247w, images/equipe-v2-md.jpg 495w, images/equipe-v2.jpg 720w">
+          <img loading="lazy" decoding="async" src="images/equipe-v2.jpg" alt="Equipe de tecnologia da ELO Editora reunida no escritório" width="720" height="1280">
         </picture>
         <figcaption>Time de tecnologia da ELO Editora.</figcaption>
       </figure>
@@ -2685,12 +2694,19 @@
       </p>
 
       <figure class="retrato-ia" data-cena>
+        <!-- `w` + `sizes`, nao `1x/2x`: com descritor de DENSIDADE o
+             navegador escolhe pela tela (numa tela 1x ele pegava sempre a
+             -sm de 338px) e ignora que o slot aqui tem ~1130px de largura.
+             Resultado: a foto era esticada 3,4x e saia borrada. Com `w` ele
+             escolhe pela largura real de exibicao. -->
         <picture>
           <source type="image/webp"
-                  srcset="images/robo-ia-v2-sm.webp 1x, images/robo-ia-v2-md.webp 2x">
+                  sizes="(max-width: 860px) 92vw, 1130px"
+                  srcset="images/robo-ia-v2-sm.webp 338w, images/robo-ia-v2-md.webp 676w">
           <source type="image/jpeg"
-                  srcset="images/robo-ia-v2-sm.jpg 1x, images/robo-ia-v2-md.jpg 2x">
-          <img loading="lazy" decoding="async" src="images/robo-ia-v2-sm.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="338" height="600" >
+                  sizes="(max-width: 860px) 92vw, 1130px"
+                  srcset="images/robo-ia-v2-sm.jpg 338w, images/robo-ia-v2-md.jpg 676w, images/robo-ia-v2.jpg 1126w">
+          <img loading="lazy" decoding="async" src="images/robo-ia-v2.jpg" alt="Marcos Paulo ao lado de um robô humanoide em ambiente de escritório" width="1126" height="2000" >
         </picture>
         <figcaption>Uso IA como ferramenta de produção — audiodescrição, narração e tratamento visual entram no fluxo real de trabalho, não como demonstração.</figcaption>
       </figure>
