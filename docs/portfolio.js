@@ -802,7 +802,22 @@
             plate.appendChild(plate3d);
             shot.appendChild(plate);
           } else {
+            /* Cena so-de-texto (decisao de arquitetura, integracao): sem
+               isto o .case-shot (tela cheia, position:absolute) ficava um
+               retangulo vazio. No celular, onde o layout reserva uma faixa
+               no topo especificamente para o print (`top:96px..34vh`, ver
+               CSS), esse vazio lia como bug — um buraco entre o titulo
+               anterior e o proximo. O icone + rotulo deixam claro que e
+               proposital, e nao imagem que falhou ao carregar. */
             shot.classList.add('sem-print');
+            var marca = document.createElement('div');
+            marca.className = 'sem-print-marca';
+            marca.setAttribute('aria-hidden', 'true');
+            /* o rotulo usa o `step` da propria cena (ex.: "Arquitetura",
+               "Integração") — texto generico ficaria errado numa cena e
+               certo na outra */
+            marca.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6a2 2 0 012-2h6l4 4v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path d="M12 4v4h4"/><path d="M8 14h8M8 17h5"/></svg><span>' + esc(cena.step || 'Sem captura de tela') + '</span>';
+            shot.appendChild(marca);
           }
 
           stage.appendChild(shot);
