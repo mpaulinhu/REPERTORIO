@@ -1640,7 +1640,20 @@
      continuar fugindo.
      --------------------------------------------------------------- */
   (function () {
-    var sceneEl = document.getElementById('cenaCameraFrente');
+    /* O listener vive no CONTAINER externo (#cenaCamera), nao no plano
+       frontal (#cenaCameraFrente) onde a bolinha mora. Motivo, medido:
+       o palco 3D (`.cena-camera-palco`) tem `transform-style: preserve-3d`
+       com `rotateX(14deg) rotateY(-22deg)` — isso desloca a area CLICAVEL
+       real do plano frontal para longe da sua caixa de layout. Mapeei
+       ponto a ponto com elementFromPoint: a faixa superior inteira e a
+       coluna esquerda do plano (justamente onde a bolinha nasce, em
+       top:16/left:16) NAO pertenciam a ele — o mouse ali caia no
+       container pai, e onPointerMove nunca disparava. Resultado: a
+       bolinha parecia "parar de fugir" perto de onde ela comeca.
+       #cenaCamera tem tamanho fixo (220x220) e NAO participa do
+       transform-style 3D, entao sua area de deteccao bate exatamente
+       com o layout, sem a distorcao da projecao. */
+    var sceneEl = document.getElementById('cenaCamera');
     var dotEl = document.getElementById('recPonto');
     if (!sceneEl || !dotEl || suave) return;
 
@@ -1697,33 +1710,25 @@
 
       if (dist < FLEE_DIST) {
         var strength = 1 - dist / FLEE_DIST;
-        var nx = dist > 0.01 ? dx / dist : (Math.random() - 0.5);
-        var ny = dist > 0.01 ? dy / dist : (Math.random() - 0.5);
         var push = strength * 16;
+        /* direcao real do vetor de fuga; se o ponteiro esta exatamente em
+           cima do alvo (dist ~0) nao ha direcao — sorteia uma, senao o
+           empurrao fica sempre nulo e a bolinha nao sai do lugar */
+        var nx = dist > 0.01 ? dx / dist : (Math.random() < 0.5 ? -1 : 1);
+        var ny = dist > 0.01 ? dy / dist : (Math.random() < 0.5 ? -1 : 1);
 
-        var wantX = target.x + nx * push;
-        var wantY = target.y + ny * push;
-        var clampedX = Math.max(minX, Math.min(maxX, wantX));
-        var clampedY = Math.max(minY, Math.min(maxY, wantY));
-
-        /* presa numa borda: sem deslocamento no vetor direto, escorrega
-           tangencialmente pro lado que mais aumenta a distancia — evita
-           travar grudada num canto */
-        if (Math.abs(wantX - clampedX) + Math.abs(wantY - clampedY) > 0.01 &&
-            Math.abs(clampedX - target.x) + Math.abs(clampedY - target.y) < 0.5) {
-          var tx = -ny, ty = nx;
-          var plusX = Math.max(minX, Math.min(maxX, target.x + tx * push));
-          var plusY = Math.max(minY, Math.min(maxY, target.y + ty * push));
-          var minusX = Math.max(minX, Math.min(maxX, target.x - tx * push));
-          var minusY = Math.max(minY, Math.min(maxY, target.y - ty * push));
-          var distPlus = Math.pow(plusX - pointer.x, 2) + Math.pow(plusY - pointer.y, 2);
-          var distMinus = Math.pow(minusX - pointer.x, 2) + Math.pow(minusY - pointer.y, 2);
-          if (distPlus >= distMinus) { clampedX = plusX; clampedY = plusY; }
-          else { clampedX = minusX; clampedY = minusY; }
-        }
-
-        target.x = clampedX;
-        target.y = clampedY;
+        /* Cada eixo e clampado e aplicado por conta propria — nao existe
+           mais "os dois eixos se anulam ao mesmo tempo": antes, quando o
+           empurrao em X batia no MARGIN (parede esquerda, onde a bolinha
+           ja comeca) e o "escorregao tangencial" so disparava se o
+           deslocamento TOTAL ficasse quase zero, o movimento em Y
+           mascarava esse travamento — a condicao nunca acionava e a
+           bolinha parava presa contra a parede mesmo com o mouse por
+           perto. Medido: mouse parado sobre a bolinha por mais de 1s,
+           posicao travada em (16.00, 33.03). Aplicando o clamp SEPARADO
+           por eixo, um eixo travado na borda nao impede o outro de fugir. */
+        target.x = Math.max(minX, Math.min(maxX, target.x + nx * push));
+        target.y = Math.max(minY, Math.min(maxY, target.y + ny * push));
       }
 
       /* interpola suavemente a posicao real em direcao ao alvo — elimina
@@ -1741,6 +1746,44 @@
     sceneEl.addEventListener('touchmove', onPointerMove, { passive: true });
     sceneEl.addEventListener('mouseleave', onPointerLeave);
     requestAnimationFrame(tick);
+  })();
+
+  /* ---------------------------------------------------------------
+     Cena da camera: inclinacao segue o mouse DENTRO do cartao.
+
+     Isto e DIFERENTE do tilt que o site ja tinha em outro lugar (o print
+     do case imersivo, que escuta mousemove no `overlay` inteiro — ou
+     seja, na JANELA toda). O proprio portfolio-antigo.html documenta por
+     que essa versao "pagina inteira" foi removida do cartao da camera:
+     "Girava com o ponteiro em QUALQUER ponto da pagina (o listener era
+     no document, nao na propria cena), entao a peca ficava se mexendo
+     sozinha enquanto a pessoa lia outra coisa." O pedido aqui e trazer
+     de volta o movimento, mas comportado — reagindo so' quando o mouse
+     esta de fato sobre o cartao, e voltando ao angulo fixo (14deg/-22deg,
+     ver `.cena-camera-palco`) quando o mouse sai.
+
+     Reaproveita `#cenaCamera` como area de deteccao (nao o plano
+     rotacionado): mesma correcao aplicada na bolinha REC logo acima —
+     ver o comentario la em cima sobre a area clicavel do plano 3D nao
+     bater com a caixa de layout perto das bordas. */
+  (function () {
+    var sceneEl = document.getElementById('cenaCamera');
+    var palcoEl = document.getElementById('cenaCameraPalco');
+    if (!sceneEl || !palcoEl || suave) return;
+
+    var BASE_X = 14, BASE_Y = -22; /* a mesma inclinacao fixa do CSS */
+    var RANGE_X = 8, RANGE_Y = 10; /* quanto o mouse pode desviar disso */
+
+    sceneEl.addEventListener('mousemove', function (e) {
+      var rect = sceneEl.getBoundingClientRect();
+      var px = ((e.clientX - rect.left) / rect.width) - 0.5;  /* -0.5..0.5 */
+      var py = ((e.clientY - rect.top) / rect.height) - 0.5;
+      palcoEl.style.transform =
+        'rotateX(' + (BASE_X - py * RANGE_X * 2) + 'deg) rotateY(' + (BASE_Y + px * RANGE_Y * 2) + 'deg)';
+    });
+    sceneEl.addEventListener('mouseleave', function () {
+      palcoEl.style.transform = ''; /* volta ao angulo fixo definido no CSS */
+    });
   })();
 
   /* ---------- Painel da ferramenta (logo + cor + descrição) ---------- */
