@@ -1629,6 +1629,120 @@
     });
   })();
 
+  /* ---------------------------------------------------------------
+     Bolinha REC foge do cursor — migrada do portfolio-antigo.html.
+     O ponto vermelho de "gravando" no cartao de camera (secao
+     Audiovisual) se afasta do mouse/dedo quando a pessoa chega perto.
+
+     Fisica com easing (nao movimento direto por mousemove, que chega em
+     rajadas irregulares) e "escorregao tangencial" quando presa num
+     canto — sem isso a bolinha travava grudada na quina em vez de
+     continuar fugindo.
+     --------------------------------------------------------------- */
+  (function () {
+    var sceneEl = document.getElementById('cenaCameraFrente');
+    var dotEl = document.getElementById('recPonto');
+    if (!sceneEl || !dotEl || suave) return;
+
+    var FLEE_DIST = 60; /* px — raio em que a bolinha comeca a fugir */
+    var MARGIN = 16;    /* px — respiro em relacao a borda do card */
+    var EASE = 0.14;    /* suavidade do movimento por frame (0-1) */
+
+    var pos = { x: 0, y: 0 };
+    var target = { x: 0, y: 0 };
+    var pointer = { x: -999, y: -999 };
+    var placed = false;
+
+    function place() {
+      dotEl.style.left = pos.x + 'px';
+      dotEl.style.top = pos.y + 'px';
+    }
+
+    function cornerStart() {
+      if (placed || !sceneEl.clientWidth) return;
+      pos.x = target.x = MARGIN;
+      pos.y = target.y = MARGIN;
+      place();
+      placed = true;
+    }
+
+    function onPointerMove(e) {
+      var rect = sceneEl.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      pointer.x = clientX - rect.left;
+      pointer.y = clientY - rect.top;
+    }
+
+    function onPointerLeave() {
+      pointer.x = -999;
+      pointer.y = -999;
+    }
+
+    function tick() {
+      requestAnimationFrame(tick);
+      if (!placed) return;
+
+      var w = sceneEl.clientWidth;
+      var h = sceneEl.clientHeight;
+      if (!w || !h) return;
+      var minX = MARGIN, maxX = Math.max(minX, w - 9 - MARGIN);
+      var minY = MARGIN, maxY = Math.max(minY, h - 9 - MARGIN);
+
+      var cx = target.x + 4.5;
+      var cy = target.y + 4.5;
+      var dx = cx - pointer.x;
+      var dy = cy - pointer.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < FLEE_DIST) {
+        var strength = 1 - dist / FLEE_DIST;
+        var nx = dist > 0.01 ? dx / dist : (Math.random() - 0.5);
+        var ny = dist > 0.01 ? dy / dist : (Math.random() - 0.5);
+        var push = strength * 16;
+
+        var wantX = target.x + nx * push;
+        var wantY = target.y + ny * push;
+        var clampedX = Math.max(minX, Math.min(maxX, wantX));
+        var clampedY = Math.max(minY, Math.min(maxY, wantY));
+
+        /* presa numa borda: sem deslocamento no vetor direto, escorrega
+           tangencialmente pro lado que mais aumenta a distancia — evita
+           travar grudada num canto */
+        if (Math.abs(wantX - clampedX) + Math.abs(wantY - clampedY) > 0.01 &&
+            Math.abs(clampedX - target.x) + Math.abs(clampedY - target.y) < 0.5) {
+          var tx = -ny, ty = nx;
+          var plusX = Math.max(minX, Math.min(maxX, target.x + tx * push));
+          var plusY = Math.max(minY, Math.min(maxY, target.y + ty * push));
+          var minusX = Math.max(minX, Math.min(maxX, target.x - tx * push));
+          var minusY = Math.max(minY, Math.min(maxY, target.y - ty * push));
+          var distPlus = Math.pow(plusX - pointer.x, 2) + Math.pow(plusY - pointer.y, 2);
+          var distMinus = Math.pow(minusX - pointer.x, 2) + Math.pow(minusY - pointer.y, 2);
+          if (distPlus >= distMinus) { clampedX = plusX; clampedY = plusY; }
+          else { clampedX = minusX; clampedY = minusY; }
+        }
+
+        target.x = clampedX;
+        target.y = clampedY;
+      }
+
+      /* interpola suavemente a posicao real em direcao ao alvo — elimina
+         os "degraus" de mover a bolinha direto por eventos de mousemove */
+      pos.x += (target.x - pos.x) * EASE;
+      pos.y += (target.y - pos.y) * EASE;
+      place();
+    }
+
+    cornerStart();
+    window.addEventListener('load', cornerStart);
+    setTimeout(cornerStart, 300);
+
+    sceneEl.addEventListener('mousemove', onPointerMove);
+    sceneEl.addEventListener('touchmove', onPointerMove, { passive: true });
+    sceneEl.addEventListener('mouseleave', onPointerLeave);
+    requestAnimationFrame(tick);
+  })();
+
   /* ---------- Painel da ferramenta (logo + cor + descrição) ---------- */
   (function () {
     var skillModalBackdrop = document.getElementById('skillModalBackdrop');

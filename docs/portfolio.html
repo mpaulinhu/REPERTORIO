@@ -487,6 +487,55 @@
 
   @media (prefers-reduced-motion: reduce) { .dobra-seta { transition: none; } }
 
+  /* ---------- Cena da camera (Audiovisual) ----------
+     Migrada do portfolio-antigo.html — cartao de 3 planos empilhados
+     (terminal, equalizador, camera) com inclinacao fixa. O ponto vermelho
+     de "gravando" foge do cursor/dedo dentro do cartao (JS mais abaixo). */
+  .head-com-cena {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 32px; align-items: center;
+  }
+  @media (max-width: 820px) { .head-com-cena { grid-template-columns: 1fr; } .head-com-cena .cena-camera { display: none; } }
+
+  .cena-camera {
+    width: 220px; height: 220px; flex-shrink: 0;
+    perspective: 1000px;
+  }
+  @media (max-width: 480px) { .cena-camera { width: 210px; height: 210px; } }
+
+  .cena-camera-palco {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(14deg) rotateY(-22deg);
+  }
+  .cena-plano {
+    position: absolute; inset: 0; border-radius: 20px;
+    border: 1px solid var(--line); background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+  }
+  .cena-plano.tras { transform: translateZ(-46px) scale(0.86); background: var(--depth-1); opacity: 0.9; }
+  .cena-plano.meio { transform: translateZ(-16px) scale(0.94); background: var(--bg-raised); opacity: 0.95; }
+  .cena-plano.frente { transform: translateZ(20px); }
+  .cena-plano > svg { width: 44%; height: 44%; color: var(--accent); opacity: 0.9; }
+
+  .cena-plano .rec-ponto {
+    position: absolute; top: 16px; left: 16px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #F04848;
+    animation: recPisca 1.6s ease-in-out infinite;
+    will-change: top, left;
+  }
+  @keyframes recPisca { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  .cena-plano .cena-molduras {
+    position: absolute; inset: 14px;
+    border: 1px dashed var(--line); border-radius: 12px;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .rec-ponto { animation: none; } }
+
   /* ---------- Ferramentas ---------- */
   .sub-rotulo {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -2320,12 +2369,32 @@
 
   <section class="cena" id="audiovisual">
     <div class="wrap">
-      <p class="rotulo" data-cena><b>05</b>Audiovisual &amp; acessibilidade</p>
-      <h2 class="grande" data-titulo>Som e imagem com acessibilidade</h2>
-      <p class="lede" data-cena>
-        Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora,
-        em eventos e em projetos próprios.
-      </p>
+      <div class="head-com-cena">
+        <div>
+          <p class="rotulo" data-cena><b>05</b>Audiovisual &amp; acessibilidade</p>
+          <h2 class="grande" data-titulo>Som e imagem com acessibilidade</h2>
+          <p class="lede" data-cena>
+            Sonorização, edição, transmissão ao vivo e acessibilidade — na ELO Editora,
+            em eventos e em projetos próprios.
+          </p>
+        </div>
+
+        <div class="cena-camera" id="cenaCamera" aria-hidden="true">
+          <div class="cena-camera-palco">
+            <div class="cena-plano tras">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 5h16v11H4z"/><path d="M8 20h8M12 16v4M7 8l3 2-3 2M13 12h4"/></svg>
+            </div>
+            <div class="cena-plano meio">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="2" width="4" height="18" rx="1"/></svg>
+            </div>
+            <div class="cena-plano frente" id="cenaCameraFrente">
+              <span class="rec-ponto" id="recPonto"></span>
+              <span class="cena-molduras"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="7" width="13" height="10" rx="1.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Grade de trabalhos audiovisuais migrada do portfolio.html: cada card
            abre o modal de vídeo (#modalBackdrop) com o embed do Behance/arquivo
